@@ -884,6 +884,67 @@ list-style: none;">
             console.log('[DEBUG] Document-level click handler caught click on edit icon!');
             console.log('[DEBUG] Click target:', target);
             console.log('[DEBUG] Click path:', e.composedPath());
+            
+            // Check if this is the main h1 edit icon (not other edit icons on the page)
+            const h1 = target.closest('h1');
+            if (h1 && h1.querySelector('i.fa-building')) {
+                console.log('[DEBUG] This is the main company name edit icon!');
+                console.log('[DEBUG] Triggering edit functionality...');
+                
+                // Prevent default and stop propagation
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                // Trigger the onclick handler if it exists
+                if (target.onclick) {
+                    console.log('[DEBUG] Calling target.onclick handler');
+                    target.onclick(e);
+                } else {
+                    console.log('[DEBUG] No onclick handler, creating edit form manually');
+                    // Manual edit trigger
+                    const currentName = h1.textContent.replace(target.textContent, '').trim().replace(/^\d+\s*/, '');
+                    const companyNumber = h1.querySelector('i:not(.fa-pen-to-square):not(.fa-building)')?.textContent || '';
+                    
+                    console.log('[DEBUG] Current company name:', currentName);
+                    
+                    // Create edit form
+                    const form = document.createElement('form');
+                    form.action = '{{ route("companies.update", $company->id) }}';
+                    form.method = 'POST';
+                    form.style.display = 'inline';
+                    
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                    form.innerHTML = `
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <input type="hidden" name="_method" value="PUT">
+                        <i class="fa-solid fa-building"></i>
+                        <input type="text" name="name" value="${currentName}" style="font-size:26px;">
+                        <button type="button" class="cancelEdit btn" style="margin-right: 5px;">Cancel</button>
+                        <button type="submit" class="saveEdit btn">Save</button>
+                    `;
+                    
+                    h1.innerHTML = '';
+                    h1.appendChild(form);
+                    
+                    // Hide h5 if it exists
+                    const h5 = document.querySelector('h5');
+                    if (h5) h5.style.display = 'none';
+                    
+                    // Focus the input
+                    const input = form.querySelector('input[name="name"]');
+                    if (input) input.focus();
+                    
+                    // Handle cancel
+                    form.querySelector('.cancelEdit')?.addEventListener('click', function() {
+                        window.location.reload();
+                    });
+                }
+                
+                return false;
+            } else {
+                console.log('[DEBUG] This is NOT the main h1 edit icon, ignoring');
+            }
         }
     }, true); // Use capture phase to catch early
     
@@ -1032,9 +1093,23 @@ list-style: none;">
                 console.log('[DEBUG] Edit icon pointerup event - FIRED');
             });
             
+            // Try multiple ways to detect hover
             icon.addEventListener('mouseenter', function(e) {
                 console.log('[DEBUG] Edit icon mouseenter event - FIRED');
                 console.log('[DEBUG] Mouseenter - icon is receiving mouse events!');
+            });
+            
+            // Also try mouseover (bubbles)
+            icon.addEventListener('mouseover', function(e) {
+                console.log('[DEBUG] Edit icon mouseover event - FIRED');
+            });
+            
+            // Add visual feedback to test if hover works
+            icon.addEventListener('mouseenter', function() {
+                icon.style.opacity = '0.7';
+            });
+            icon.addEventListener('mouseleave', function() {
+                icon.style.opacity = '1';
             });
             
             icon.addEventListener('mouseleave', function(e) {
