@@ -1989,7 +1989,6 @@
                 $('#editKycResponsibleUserId').val('');
                 $('#editKycResponsibleUserResults').hide();
             });
-        });
         }); // end $(document).ready
 
         // Initialize Company Editor Component
