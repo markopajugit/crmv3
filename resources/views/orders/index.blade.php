@@ -75,8 +75,8 @@
                 <td>{{ $order->number }}</td>
                 <td>{{ $order->company->name ?? $order->person->name . ' (Person)' }}</td>
                 <td>{{ $order->name }}</td>
-                <td @if($order->status == 'Active') style="color: darkgoldenrod" @elseif($order->status == 'Not Active') style="color: red" @elseif($order->status == 'Finished') style="color: green" @endif>{{ $order->status }}</td>
-                <td @if($order->payment_status == 'Partially Paid') style="color: darkgoldenrod" @elseif($order->payment_status == 'Not Paid') style="color: red" @elseif($order->payment_status == 'Paid') style="color: green" @endif>{{ $order->payment_status }}</td>
+                <td @if($order->status == 'Active') style="color: #ffd700; font-weight: bold;" @elseif($order->status == 'Not Active') style="color: #ffffff; font-weight: bold;" @elseif($order->status == 'Finished') style="color: #00ff88; font-weight: bold;" @endif>{{ $order->status }}</td>
+                <td @if($order->payment_status == 'Partially Paid') style="color: #ffd700; font-weight: bold;" @elseif($order->payment_status == 'Not Paid') style="color: #ffffff; font-weight: bold;" @elseif($order->payment_status == 'Paid') style="color: #00ff88; font-weight: bold;" @endif>{{ $order->payment_status }}</td>
                 <!--<td @if($order->awaiting_status == 'Waiting action from us') style="color: red" @elseif($order->awaiting_status == 'Waiting action from Client') style="color: green" @else style="color: darkgoldenrod" @endif>{{ $order->awaiting_status }}</td>-->
                 <td>{{ $servicesTotalCost }} EUR</td>
                 <td><i class="fa-solid fa-user-tie"></i>{{ $order->responsible_user->name }}</td>

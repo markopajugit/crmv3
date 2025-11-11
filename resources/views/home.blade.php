@@ -101,8 +101,8 @@
                             <tr>
                                 <td><strong><a href="/orders/{{ $order->id }}"><i class="fa-solid fa-file"></i>{{$order->number}} - {{$order->name}}</a></strong></td>
                                 <td>{{ $order->created_at->format('d.m.Y H:i') }}</td>
-                                <td @if($order->status == 'In Progress') style="color: darkgoldenrod" @elseif($order->status == 'Not Active') style="color: red" @elseif($order->status == 'Finished') style="color: green" @endif>{{ $order->status }}</td>
-                                <td @if($order->payment_status == 'Partially Paid') style="color: darkgoldenrod" @elseif($order->payment_status == 'Not Paid') style="color: red" @elseif($order->payment_status == 'Paid') style="color: green" @endif>{{ $order->payment_status }}</td>
+                                <td @if($order->status == 'In Progress') style="color: #ffd700; font-weight: bold;" @elseif($order->status == 'Not Active') style="color: #ffffff; font-weight: bold;" @elseif($order->status == 'Finished') style="color: #00ff88; font-weight: bold;" @endif>{{ $order->status }}</td>
+                                <td @if($order->payment_status == 'Partially Paid') style="color: #ffd700; font-weight: bold;" @elseif($order->payment_status == 'Not Paid') style="color: #ffffff; font-weight: bold;" @elseif($order->payment_status == 'Paid') style="color: #00ff88; font-weight: bold;" @endif>{{ $order->payment_status }}</td>
                                 <!--<td @if($order->awaiting_status == 'Waiting action from us') style="color: red" @elseif($order->awaiting_status == 'Waiting action from Client') style="color: green" @else style="color: darkgoldenrod" @endif>{{ $order->awaiting_status }}</td>-->
                                 <td>{{ $servicesTotalCost }}eur</td>
                                 <td> @if($order->company) <a href="/companies/{{ $order->company->id }}"><i class="fa-solid fa-building"></i>{{ $order->company->name }} </a>@elseif($order->person)  <a href="/persons/{{ $order->person->id }}"><i class="fa-solid fa-user"></i>{{ $order->person->name }}</a>@endif</td>
