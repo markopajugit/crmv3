@@ -897,6 +897,7 @@
         </div>
     </div>
 
+@push('scripts')
     <script type="text/javascript">
         // Helper function to generate country options HTML
         // Uses the same COUNTRIES array from CompanyEditor component
@@ -1490,6 +1491,16 @@
 
         };
 
+        // Ensure jQuery is loaded before executing jQuery-dependent code
+        (function() {
+            function initCompanyShowSecondary() {
+                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
+                    setTimeout(initCompanyShowSecondary, 50);
+                    return;
+                }
+
+                var $ = window.jQuery;
+
         $(document).on('click', '.deleteDocument', function(e){
             e.preventDefault();
 
@@ -1735,11 +1746,31 @@
             });
         });
 
+            } // end initCompanyShowSecondary
+
+            // Start initialization
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initCompanyShowSecondary);
+            } else {
+                initCompanyShowSecondary();
+            }
+        })();
+
 
     </script>
 
     <script>
         // KYC Functionality
+        // Ensure jQuery is loaded before executing jQuery-dependent code
+        (function() {
+            function initCompanyShowKYC() {
+                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
+                    setTimeout(initCompanyShowKYC, 50);
+                    return;
+                }
+
+                var $ = window.jQuery;
+
         $(document).ready(function () {
             // Initialize date pickers for KYC dates
             $("#kycStartDate, #kycEndDate, #editKycStartDate, #editKycEndDate").datepicker({
@@ -1959,6 +1990,7 @@
                 $('#editKycResponsibleUserResults').hide();
             });
         });
+        }); // end $(document).ready
 
         // Initialize Company Editor Component
         if (typeof CompanyEditor !== 'undefined') {
@@ -1967,6 +1999,17 @@
                 "{{ route('companies.update', $company->id) }}"
             );
         }
+
+            } // end initCompanyShowKYC
+
+            // Start initialization
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initCompanyShowKYC);
+            } else {
+                initCompanyShowKYC();
+            }
+        })();
     </script>
+@endpush
 
 @endsection
