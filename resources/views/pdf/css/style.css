@@ -1,0 +1,23 @@
+td.underline, th.underline {
+    text-decoration: underline;
+}
+
+
+td.bold, th.bold {
+    font-weight: bold;
+}
+
+
+td.bg {
+    background: lightgray;
+}
+
+
+.arveread th{
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.arveread {
+    border-bottom: 1px solid black;
+}
