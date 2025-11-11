@@ -1996,7 +1996,7 @@
         if (typeof CompanyEditor !== 'undefined') {
             const companyEditor = new CompanyEditor(
                 {{ $company->id ?? 0 }},
-                "{{ route('companies.update', $company->id) }}"
+                "{{ route('companies.update', $company->id ?? 0) }}"
             );
         }
 
