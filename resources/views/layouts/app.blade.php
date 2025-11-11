@@ -79,7 +79,7 @@
         </div>
     </div>
     <footer class="footer">
-        <div class="ms-auto">Hardcoded OÜ v1.5.4</div>
+        <div class="ms-auto">Hardcoded OÜ v3.0.0</div>
     </footer>
 </div>
 
