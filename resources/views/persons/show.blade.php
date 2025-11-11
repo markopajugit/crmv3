@@ -112,7 +112,7 @@
                             <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
                                 <i class="fa-solid fa-map-marker-alt" style="color: #DC2626; margin-right: 0.5rem;"></i> Address
                             </td>
-                            <td style="width: 50%; padding: 1rem 0; vertical-align: middle;">
+                            <td colspan="2" style="width: 50%; padding: 1rem 0; vertical-align: middle;">
                                 <table width="100%" style="table-layout: fixed;">
                                     <colgroup>
                                         <col style="width: auto;">
@@ -161,7 +161,7 @@
                             <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
                                 <i class="fa-solid fa-envelope" style="color: #DC2626; margin-right: 0.5rem;"></i> E-mail
                             </td>
-                            <td style="width: 50%; padding: 1rem 0; vertical-align: middle;">
+                            <td colspan="2" style="width: 50%; padding: 1rem 0; vertical-align: middle;">
                                 <table width="100%" style="table-layout: fixed;">
                                     <colgroup>
                                         <col style="width: auto;">
@@ -210,7 +210,7 @@
                             <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
                                 <i class="fa-solid fa-phone" style="color: #DC2626; margin-right: 0.5rem;"></i> Phone
                             </td>
-                            <td style="width: 50%; padding: 1rem 0; vertical-align: middle;">
+                            <td colspan="2" style="width: 50%; padding: 1rem 0; vertical-align: middle;">
                             <table width="100%" style="table-layout: fixed;">
                                 <colgroup>
                                     <col style="width: auto;">
@@ -259,7 +259,7 @@
                             <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
                                 <i class="fa-solid fa-globe" style="color: #DC2626; margin-right: 0.5rem;"></i> Tax Residencies
                             </td>
-                            <td style="width: 50%; padding: 1rem 0; vertical-align: middle;">
+                            <td colspan="2" style="width: 50%; padding: 1rem 0; vertical-align: middle;">
                                 <table width="100%" style="table-layout: fixed;">
                                     <colgroup>
                                         <col style="width: auto;">
@@ -542,7 +542,7 @@
                             <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
                                 <i class="fa-solid fa-exclamation-triangle" style="color: #DC2626; margin-right: 0.5rem;"></i> Risk
                             </td>
-                            <td style="width: 50%; padding: 1rem 0; vertical-align: middle;">
+                            <td colspan="2" style="width: 50%; padding: 1rem 0; vertical-align: middle;">
                                 <table width="100%" style="table-layout: fixed;">
                                     <colgroup>
                                         <col style="width: auto;">
@@ -1047,12 +1047,13 @@
                 </h3>
             </div>
             <div class="card-body" style="padding: 1.5rem;">
-                    <form id="dropzoneForm" class="dropzone" action="{{ route('dropzone.upload-virtual-document') }}">
-                        @csrf
-                    </form>
-                    <div align="center">
-                        <button type="button" class="btn btn-info" id="submit-all">Upload</button>
-                    </div>
+                <form id="dropzoneForm" class="dropzone" action="{{ route('dropzone.upload-virtual-document') }}">
+                    @csrf
+                </form>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="btn btn-primary" id="submit-all" style="background-color: #DC2626; border-color: #DC2626;">
+                        <i class="fa-solid fa-upload" style="margin-right: 0.5rem;"></i>Upload
+                    </button>
                 </div>
             </div>
         </div>

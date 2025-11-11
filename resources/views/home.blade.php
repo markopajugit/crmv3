@@ -213,6 +213,8 @@
 </div>
 
 <!-- Charts Row -->
+{{-- Disabled for now --}}
+{{--
 <div class="row mb-4">
     <div class="col-md-8 mb-3">
         <div class="card">
@@ -258,6 +260,7 @@
         </div>
     </div>
 </div>
+--}}
 
 <!-- Activity Section -->
 <div class="row mb-4">
@@ -576,6 +579,8 @@
 @endsection
 
 @push('scripts')
+{{-- Disabled for now --}}
+{{--
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -711,4 +716,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+--}}
 @endpush
