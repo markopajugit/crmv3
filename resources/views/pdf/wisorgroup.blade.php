@@ -10,7 +10,7 @@
 <body>
 <div class="invoice-header">
     <div class="invoice-header-left">
-        <img src="{{ asset('images/wisor-logo.jpg') }}" style="width:150px;" alt="logo">
+        <img src="{{ asset('images/logo.svg') }}" style="width:150px;" alt="logo">
     </div>
     <div class="invoice-header-right">
         <p class="invoice-title"><b>Advance payment invoice {{ $data['invoice']['number'] }}</b></p>

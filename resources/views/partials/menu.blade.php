@@ -1,7 +1,7 @@
 <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
     <div class="sidebar-brand d-none d-md-flex">
         <a class="navbar-brand" href="{{ url('/dashboard') }}">
-            <img src="{{ asset('images/wisor-logo.jpg') }}" alt="Logo" class="sidebar-logo">
+            <img src="{{ asset('images/logo.svg') }}" alt="Logo" class="sidebar-logo">
         </a>
     </div>
     <ul class="sidebar-nav" data-coreui="navigation" data-simplebar="init">

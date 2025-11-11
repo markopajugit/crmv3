@@ -80,7 +80,7 @@
 </div>
 
 <div class="logo" style="display: inline-block; width: 39%;">
-    <img src="{{ asset('images/logoInvoice.png') }}" style="width: 150px; height: 150px;">
+    <img src="{{ asset('images/logo.svg') }}" style="width: 150px; height: 150px;">
 </div>
 
 
