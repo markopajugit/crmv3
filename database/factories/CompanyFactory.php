@@ -29,7 +29,10 @@ class CompanyFactory extends Factory
             'registration_country' => $country,
             'registration_country_abbr' => substr($country, 0, 3),
             'email' => $this->faker->safeEmail() . '_' . uniqid(),
-            'address' => $this->faker->address(),
+            'address_street' => $this->faker->streetAddress(),
+            'address_city' => $this->faker->city(),
+            'address_zip' => $this->faker->postcode(),
+            'address_dropdown' => $this->faker->country(),
             'vat' => $this->faker->postcode(),
             'notes' => $this->faker->text(),
         ];
