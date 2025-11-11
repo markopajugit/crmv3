@@ -18,16 +18,15 @@
 <div class="wrapper d-flex flex-column min-vh-100 bg-light" style="padding-left: 16rem;">
     <header class="header header-sticky">
         <div class="container-fluid">
-
             <form action="/search/" class="header-search">
-                <input id="search" class="form-control mr-sm-2" style="width:45%; display: inline-block;" type="search" autocomplete="off" placeholder="Search" name="s" aria-label="Search" value="{{ request()->get('s') }}" data-autocomplete-route="{{ route('autocomplete') }}">
-                <div id="searchResults" style=" display:none;position: absolute;padding: 10px;list-style: none;"></div>
-                <select name="category" id="categoryName" style="width:30%; display: inline-block;" class="form-control">
+                <input id="search" class="form-control" type="search" autocomplete="off" placeholder="Search..." name="s" aria-label="Search" value="{{ request()->get('s') }}" data-autocomplete-route="{{ route('autocomplete') }}">
+                <div id="searchResults"></div>
+                <select name="category" id="categoryName" class="form-control">
                     <option value="all" @if(request()->get('category') == 'all') selected @endif>All</option>
                     <option value="companies" @if(request()->get('category') == 'companies') selected @endif>Companies</option>
                     <option value="persons" @if(request()->get('category') == 'persons') selected @endif>Persons</option>
                 </select>
-                <button class="btn" style="width: 20%;top: -2px;position: relative;" type="submit">Search</button>
+                <button class="btn btn-primary" type="submit">Search</button>
             </form>
 
             <ul class="navbar-nav ms-auto">
@@ -67,11 +66,11 @@
             </ul>
         </div>
     </header>
-    <div class="body flex-grow-1 px-3 p-2">
+    <div class="body flex-grow-1">
         <div class="container-fluid">
             @if ($message = Session::get('success'))
                 <div class="alert alert-success">
-                    <p>{{ $message }}</p>
+                    <p class="mb-0">{{ $message }}</p>
                 </div>
             @endif
 
@@ -80,7 +79,7 @@
         </div>
     </div>
     <footer class="footer">
-        <div class="ms-auto" style="font-size: 10px; color: #ced4da;">Hardcoded OÜ v1.5.4</div>
+        <div class="ms-auto">Hardcoded OÜ v1.5.4</div>
     </footer>
 </div>
 
