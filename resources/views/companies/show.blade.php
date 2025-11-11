@@ -916,14 +916,24 @@ list-style: none;">
                 console.log('[DEBUG] Icon in viewport?', rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth);
             }
             
+            // Try setting onclick directly as a fallback
+            icon.onclick = function(e) {
+                console.log('[DEBUG] Edit icon onclick handler - FIRED');
+                console.log('[DEBUG] Event:', e);
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            };
+            
             // Add multiple event listeners to catch the event
             // Use both capture and bubble phases
-            icon.addEventListener('click', function(e) {
+            const clickHandler = function(e) {
                 console.log('[DEBUG] Edit icon clicked directly (inline handler) - CLICK EVENT FIRED');
                 console.log('[DEBUG] Event target:', e.target);
                 console.log('[DEBUG] Event currentTarget:', e.currentTarget);
                 console.log('[DEBUG] Company ID:', {{ $company->id }});
                 console.log('[DEBUG] Event bubbles:', e.bubbles);
+                console.log('[DEBUG] Event defaultPrevented:', e.defaultPrevented);
                 
                 // Try to trigger the edit functionality manually if jQuery isn't available
                 if (typeof window.$ === 'undefined') {
@@ -937,30 +947,54 @@ list-style: none;">
                 }
                 
                 e.stopPropagation(); // Prevent other handlers
-            }, true); // Use capture phase
+            };
             
-            // Also add in bubble phase
-            icon.addEventListener('click', function(e) {
-                console.log('[DEBUG] Edit icon clicked (bubble phase) - CLICK EVENT FIRED');
-            }, false);
+            icon.addEventListener('click', clickHandler, true); // Capture phase
+            icon.addEventListener('click', clickHandler, false); // Bubble phase
             
-            icon.addEventListener('mousedown', function(e) {
+            const mousedownHandler = function(e) {
                 console.log('[DEBUG] Edit icon mousedown event - FIRED');
                 console.log('[DEBUG] Mousedown target:', e.target);
-            });
+                console.log('[DEBUG] Mousedown button:', e.button);
+                console.log('[DEBUG] Mousedown clientX:', e.clientX, 'clientY:', e.clientY);
+            };
             
-            icon.addEventListener('mouseup', function(e) {
+            icon.addEventListener('mousedown', mousedownHandler, true);
+            icon.addEventListener('mousedown', mousedownHandler, false);
+            
+            const mouseupHandler = function(e) {
                 console.log('[DEBUG] Edit icon mouseup event - FIRED');
                 console.log('[DEBUG] Mouseup target:', e.target);
+            };
+            
+            icon.addEventListener('mouseup', mouseupHandler, true);
+            icon.addEventListener('mouseup', mouseupHandler, false);
+            
+            icon.addEventListener('pointerdown', function(e) {
+                console.log('[DEBUG] Edit icon pointerdown event - FIRED');
+            });
+            
+            icon.addEventListener('pointerup', function(e) {
+                console.log('[DEBUG] Edit icon pointerup event - FIRED');
             });
             
             icon.addEventListener('mouseenter', function(e) {
-                console.log('[DEBUG] Edit icon mouseenter event');
+                console.log('[DEBUG] Edit icon mouseenter event - FIRED');
             });
             
             icon.addEventListener('mouseleave', function(e) {
-                console.log('[DEBUG] Edit icon mouseleave event');
+                console.log('[DEBUG] Edit icon mouseleave event - FIRED');
             });
+            
+            // Check if handlers are still attached after a delay
+            setTimeout(function() {
+                console.log('[DEBUG] Checking handlers after 2 seconds...');
+                const handlers = icon.onclick ? 'onclick exists' : 'no onclick';
+                console.log('[DEBUG] Icon onclick handler:', handlers);
+                console.log('[DEBUG] Icon element:', icon);
+                console.log('[DEBUG] Testing programmatic click...');
+                icon.click();
+            }, 2000);
             
             // Also try on the parent h1
             const h1 = icon.closest('h1');
