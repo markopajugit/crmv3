@@ -877,6 +877,16 @@ list-style: none;">
 <script>
     console.log('[DEBUG] Company show page script loaded - inline script');
     
+    // Add document-level click handler to catch ALL clicks
+    document.addEventListener('click', function(e) {
+        const target = e.target;
+        if (target && target.classList && target.classList.contains('fa-pen-to-square')) {
+            console.log('[DEBUG] Document-level click handler caught click on edit icon!');
+            console.log('[DEBUG] Click target:', target);
+            console.log('[DEBUG] Click path:', e.composedPath());
+        }
+    }, true); // Use capture phase to catch early
+    
     // Add direct click handler for edit icon (works immediately)
     document.addEventListener('DOMContentLoaded', function() {
         console.log('[DEBUG] DOMContentLoaded fired on company show page');
@@ -1024,11 +1034,35 @@ list-style: none;">
             
             icon.addEventListener('mouseenter', function(e) {
                 console.log('[DEBUG] Edit icon mouseenter event - FIRED');
+                console.log('[DEBUG] Mouseenter - icon is receiving mouse events!');
             });
             
             icon.addEventListener('mouseleave', function(e) {
                 console.log('[DEBUG] Edit icon mouseleave event - FIRED');
             });
+            
+            // Try using pointer events
+            icon.addEventListener('pointerenter', function(e) {
+                console.log('[DEBUG] Edit icon pointerenter event - FIRED');
+            });
+            
+            // Force pointer-events style
+            icon.style.pointerEvents = 'auto';
+            icon.style.cursor = 'pointer';
+            console.log('[DEBUG] Forced pointer-events: auto and cursor: pointer on icon');
+            
+            // Check parent elements for pointer-events blocking
+            let parent = icon.parentElement;
+            let level = 0;
+            while (parent && level < 5) {
+                const parentStyle = window.getComputedStyle(parent);
+                console.log('[DEBUG] Parent level', level, parent.tagName, 'pointer-events:', parentStyle.pointerEvents);
+                if (parentStyle.pointerEvents === 'none') {
+                    console.warn('[DEBUG] WARNING: Parent has pointer-events: none!');
+                }
+                parent = parent.parentElement;
+                level++;
+            }
             
             // Check if handlers are still attached after a delay
             setTimeout(function() {
