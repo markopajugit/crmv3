@@ -87,6 +87,7 @@ class CompanyEditor {
     }
 
     initializeComponents() {
+        console.log('CompanyEditor: Initializing components...');
         this.initCompanyNameEditor();
         this.initFieldEditors();
         this.initNotesEditor();
@@ -99,6 +100,7 @@ class CompanyEditor {
         this.initContactManagement();
         this.initDocumentManagement();
         this.initRelatedEntities();
+        console.log('CompanyEditor: All components initialized');
     }
 
     /**
@@ -185,6 +187,7 @@ class CompanyEditor {
     initDateFieldEditor(editSelector, rowSelector, fieldName, label, inputId, saveId) {
         // Use event delegation for edit button
         $('.panel-details').on('click', editSelector, (e) => {
+            console.log('Edit button clicked:', editSelector, 'for date field:', fieldName, e);
             e.preventDefault();
             e.stopPropagation();
             const $row = $(e.target).closest('tr');
@@ -228,6 +231,7 @@ class CompanyEditor {
     initTextFieldEditor(editSelector, rowSelector, fieldName, label, inputId, saveId) {
         // Use event delegation for edit button
         $('.panel-details').on('click', editSelector, (e) => {
+            console.log('Edit button clicked:', editSelector, 'for field:', fieldName, e);
             e.preventDefault();
             e.stopPropagation();
             const $row = $(e.target).closest('tr');
@@ -263,6 +267,7 @@ class CompanyEditor {
     initSelectFieldEditor(editSelector, rowSelector, fieldName, label, selectId, saveId, options) {
         // Use event delegation for edit button
         $('.panel-details').on('click', editSelector, (e) => {
+            console.log('Edit button clicked:', editSelector, 'for select field:', fieldName, e);
             e.preventDefault();
             e.stopPropagation();
             const $row = $(e.target).closest('tr');
@@ -467,6 +472,7 @@ class CompanyEditor {
         const self = this;
         // Use event delegation for edit button
         $('.panel-details').on('click', '.editKyc', function(e) {
+            console.log('Edit button clicked: editKyc', e);
             e.preventDefault();
             e.stopPropagation();
             const $row = $('#kycRow');
@@ -528,6 +534,7 @@ class CompanyEditor {
         
         // Activity code description editor - use event delegation
         $('.panel-details').on('click', '.editActivityCodeDescription', function(e) {
+            console.log('Edit button clicked: editActivityCodeDescription', e);
             e.preventDefault();
             e.stopPropagation();
             const $row = $('#activityCodeDescriptionRow');
