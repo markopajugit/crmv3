@@ -143,48 +143,11 @@ class CompanyController extends BaseController
             //Check if inserted company number is unique
             $companyCheck = Company::where('number', $request->number)->first();
             if ($companyCheck && $companyCheck->id != $company->id) {
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => ['number' => ['Company with that number already exists']]
-                    ], 422);
-                }
                 return Redirect::back()->withErrors('Company with that number already exists');
             }
         }
 
-        try {
-            $company->update($request->all());
-            $company->refresh();
-
-            // If AJAX request, return JSON response
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Company updated successfully',
-                    'data' => [
-                        'id' => $company->id,
-                        'name' => $company->name,
-                        'number' => $company->number,
-                        'registry_code' => $company->registry_code,
-                        'registration_date' => $company->registration_date,
-                        'registration_country' => $company->registration_country,
-                        'vat' => $company->vat,
-                        'notes' => $company->notes,
-                        'activity_code' => $company->activity_code,
-                        'activity_code_description' => $company->activity_code_description,
-                    ]
-                ]);
-            }
-        } catch (\Exception $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => ['general' => [$e->getMessage()]]
-                ], 422);
-            }
-            throw $e;
-        }
+        $company->update($request->all());
 
         $relatedCompaniesQuery = PersonCompany::where('company_id', $company->id)->whereNull('person_id')->get();
         $relatedCompanies = array();
@@ -412,50 +375,10 @@ class CompanyController extends BaseController
     }
 
     public function updateCompanyRisk(Request $request){
-        try {
-            $entityRisk = new EntityRisk();
-            $entityRisk->company_id = $request->company_id;
-            $entityRisk->risk_level = $request->risk_level;
-            $entityRisk->user_id = Auth::id();
-            $entityRisk->save();
-
-            $company = Company::find($request->company_id);
-            $currentRisk = $company->getCurrentRisk();
-
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Risk level updated successfully',
-                    'data' => [
-                        'risk_level' => $request->risk_level,
-                        'risk_level_text' => $this->getRiskLevelText($request->risk_level),
-                        'user_id' => Auth::id(),
-                        'user_name' => Auth::user()->name,
-                        'created_at' => $entityRisk->created_at->format('Y-m-d H:i:s'),
-                    ]
-                ]);
-            }
-        } catch (\Exception $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => ['general' => [$e->getMessage()]]
-                ], 422);
-            }
-            throw $e;
-        }
-    }
-
-    /**
-     * Get risk level text from numeric value
-     */
-    private function getRiskLevelText($level)
-    {
-        $levels = [
-            1 => 'Low',
-            2 => 'Medium',
-            3 => 'High'
-        ];
-        return $levels[$level] ?? 'Unknown';
+        $entityRisk = new EntityRisk();
+        $entityRisk->company_id = $request->company_id;
+        $entityRisk->risk_level = $request->risk_level;
+        $entityRisk->user_id = Auth::id();
+        $entityRisk->save();
     }
 }

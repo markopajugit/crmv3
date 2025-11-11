@@ -24,8 +24,7 @@ class CreateServicesTable extends Migration
 
             $table->foreign('service_category_id')
                 ->references('id')
-                ->on('service_category')
-                ->onDelete('set null');
+                ->on('service_category');
         });
     }
 

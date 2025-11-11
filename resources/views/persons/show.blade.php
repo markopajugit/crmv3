@@ -15,56 +15,38 @@
     text-align: center;
     top: 400px;">Uploading files...</div>
     <script>
-        // Wait for jQuery to be loaded
-        (function() {
-            function initPersonShowFirst() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initPersonShowFirst, 50);
-                    return;
-                }
+        $(document).ready(function () {
 
-                var $ = window.jQuery;
+            //Change Company name
+            var h1 = $('h1').html();
+            var dob = $('h5').html();
 
-                $(document).ready(function () {
+            $('h1').on('click', 'i', function () {
+                $('h5').empty();
+                $(this).parent().html(`
+                    <form action="{{ route('persons.update',$person->id) }}" method="POST">@csrf @method('PUT')
+                    <i class="fa-solid fa-building"></i>
+                    <input type="text" name="name" value="{{ $person->name }}" style="font-size:26px;"><br>
+                    <input type="text" id="date_of_birth" name="date_of_birth" value="{{ $person->date_of_birth }}" style="font-size:18px;">
+                    <button style="margin-right: 5px;" class="cancelEdit btn">Cancel</button>
+                    <button type="submit" class="saveEdit btn">Save</button></form>
+                `);
 
-                    //Change Company name
-                    var h1 = $('h1').html();
-                    var dob = $('h5').html();
-
-                    $('h1').on('click', 'i', function () {
-                        $('h5').empty();
-                        $(this).parent().html(`
-                            <form action="{{ route('persons.update',$person->id) }}" method="POST">@csrf @method('PUT')
-                            <i class="fa-solid fa-building"></i>
-                            <input type="text" name="name" value="{{ $person->name }}" style="font-size:26px;"><br>
-                            <input type="text" id="date_of_birth" name="date_of_birth" value="{{ $person->date_of_birth }}" style="font-size:18px;">
-                            <button style="margin-right: 5px;" class="cancelEdit btn">Cancel</button>
-                            <button type="submit" class="saveEdit btn">Save</button></form>
-                        `);
-
-                        $( "#date_of_birth" ).datepicker({
-                            changeMonth: true,
-                            changeYear: true,
-                            yearRange: "-100:+0",
-                            dateFormat: "dd.mm.yy",
-                            constrainInput: false
-                        });
-                    });
-
-                    $('h1').on('click', '.btn.cancelEdit', function () {
-                        $('h1').html(h1);
-                        $('h5').html(dob);
-                    });
-
+                $( "#date_of_birth" ).datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "-100:+0",
+                    dateFormat: "dd.mm.yy",
+                    constrainInput: false
                 });
-            }
+            });
 
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initPersonShowFirst);
-            } else {
-                initPersonShowFirst();
-            }
-        })();
+            $('h1').on('click', '.btn.cancelEdit', function () {
+                $('h1').html(h1);
+                $('h5').html(dob);
+            });
+
+        });
     </script>
     <style>
         table.formattedtable {
@@ -1164,15 +1146,6 @@ list-style: none;">
     </div>
 
     <script type="text/javascript">
-        // Wait for jQuery to be loaded
-        (function() {
-            function initPersonShowMain() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initPersonShowMain, 50);
-                    return;
-                }
-
-                var $ = window.jQuery;
 
         $( "#authorised_person_deadline" ).datepicker({
             changeMonth: true,
@@ -4298,29 +4271,11 @@ list-style: none;">
             }
         });
 
-            } // end initPersonShowMain
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initPersonShowMain);
-            } else {
-                initPersonShowMain();
-            }
-        })();
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/dropzone.js"></script>
 
     <script type="text/javascript">
-        // Wait for jQuery to be loaded
-        (function() {
-            function initPersonShowDropzone() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initPersonShowDropzone, 50);
-                    return;
-                }
-
-                var $ = window.jQuery;
 
         Dropzone.options.dropzoneForm = {
             autoProcessQueue : true,
@@ -4376,28 +4331,9 @@ list-style: none;">
             }
         });
 
-            } // end initPersonShowDropzone
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initPersonShowDropzone);
-            } else {
-                initPersonShowDropzone();
-            }
-        })();
     </script>
 
     <script>
-        // Wait for jQuery to be loaded
-        (function() {
-            function initPersonShowKYC() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initPersonShowKYC, 50);
-                    return;
-                }
-
-                var $ = window.jQuery;
-
         // KYC Functionality
         $(document).ready(function () {
             // Initialize date pickers for KYC dates
@@ -4618,15 +4554,5 @@ list-style: none;">
                 $('#editKycResponsibleUserResults').hide();
             });
         });
-
-            } // end initPersonShowKYC
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initPersonShowKYC);
-            } else {
-                initPersonShowKYC();
-            }
-        })();
     </script>
 @endsection

@@ -1,63 +1,7 @@
-// ============================================================================
-// Modern Color Palette (Inspired by Startup Wise Guys)
-// ============================================================================
-
-// Primary Colors - Red Theme
-$primary: #dc2626;
-$primary-dark: #b91c1c;
-$primary-light: #ef4444;
-
-// Background Colors - Red Theme
-$body-bg: #dc2626;
-$bg-secondary: #b91c1c;
-$bg-tertiary: #991b1b;
-
-// Text Colors - White on Red
-$text-primary: #ffffff;
-$text-secondary: #fef2f2;
-$text-muted: #fecaca;
-$text-light: #fee2e2;
-
-// Sidebar Colors - Darker Red
-$sidebar-bg: #991b1b;
-$sidebar-text: #ffffff;
-$sidebar-hover: #b91c1c;
-$sidebar-active: #dc2626;
-
-// Border Colors - White/Transparent for Red Theme
-$border-light: rgba(255, 255, 255, 0.2);
-$border-medium: rgba(255, 255, 255, 0.3);
-$border-dark: rgba(255, 255, 255, 0.4);
-
-// Status Colors
-$success: #10b981;
-$warning: #f59e0b;
-$danger: #ef4444;
-$info: #3b82f6;
-
-// Shadows
-$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+// Body
+$body-bg: #f8fafc;
 
 // Typography
-$font-family-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-$font-size-base: 1rem;
+$font-family-sans-serif: 'Nunito', sans-serif;
+$font-size-base: 0.9rem;
 $line-height-base: 1.6;
-$font-weight-normal: 400;
-$font-weight-medium: 500;
-$font-weight-semibold: 600;
-$font-weight-bold: 700;
-
-// Spacing
-$spacing-xs: 0.5rem;
-$spacing-sm: 1rem;
-$spacing-md: 1.5rem;
-$spacing-lg: 2rem;
-$spacing-xl: 3rem;
-
-// Border Radius
-$border-radius-sm: 0.375rem;
-$border-radius-md: 0.5rem;
-$border-radius-lg: 0.75rem;
-$border-radius-xl: 1rem;

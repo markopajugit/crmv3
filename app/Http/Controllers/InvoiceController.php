@@ -74,8 +74,7 @@ class InvoiceController extends Controller
 
 
         if($request->is_proforma){
-            $today = date('Ymd');
-            $count = Invoice::where('number', 'LIKE', $today . '%')->count();
+            $count = Invoice::whereRaw("number LIKE CONCAT(DATE_FORMAT(NOW(), '%Y%m%d'), '%')")->count();
 
             $nextInvoiceNo = '000';
             if($count > 0){

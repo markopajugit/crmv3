@@ -35,19 +35,19 @@ class Person extends Model
     }
 
     public function getContacts(){
-        return $this->morphMany(EntityContact::class, 'contactable');
+        return $this->hasMany(EntityContact::class);
     }
 
     public function getAddresses(){
-        return $this->morphMany(EntityAddress::class, 'addressable');
+        return $this->hasMany(EntityAddress::class);
     }
 
     public function getCurrentRisk(){
-        return $this->morphOne(EntityRisk::class, 'riskable')->latest();
+        return $this->hasOne(EntityRisk::class)->latest();
     }
 
     public function getRisksHistory(){
-        return $this->morphMany(EntityRisk::class, 'riskable');
+        return $this->hasMany(EntityRisk::class);
     }
 
     /**

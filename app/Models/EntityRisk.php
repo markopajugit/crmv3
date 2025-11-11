@@ -9,29 +9,39 @@ class EntityRisk extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'riskable_type',
-        'riskable_id',
+        'person_id',
+        'company_id',
         'risk_level',
-        'assessment',
-        'mitigation',
-        'assessed_by',
-        'assessment_date',
-        'review_date',
+        'user_id',
     ];
 
-    protected $dates = [
-        'assessment_date',
-        'review_date',
-    ];
-
-    public function riskable()
+    /**
+     * Get the person that owns the risk.
+     */
+    public function person()
     {
-        return $this->morphTo();
+        return $this->belongsTo(Person::class);
     }
 
-    public function assessor()
+    /**
+     * Get the company that owns the risk.
+     */
+    public function company()
     {
-        return $this->belongsTo(User::class, 'assessed_by');
+        return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Get the user who created the risk.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

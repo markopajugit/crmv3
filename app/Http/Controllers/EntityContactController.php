@@ -34,48 +34,61 @@ class EntityContactController extends Controller
         if($contactId == 0){
             if($request->entity == 'person'){
                 $person = Person::find($request->person_id);
+                if(!$person){
+                    return response()->json(['error' => 'Person not found'], 404);
+                }
                 if($request->type == 'phone'){
                     $person->phone = $request->value;
                     $person->phone_note = $request->note;
                 } elseif($request->type == 'taxResidency'){
                     $person->tax_residency = $request->value;
                 }
-                elseif($request->type='email'){
+                elseif($request->type == 'email'){
                     $person->email = $request->value;
                     $person->email_note = $request->note;
-                    $personCompanies = PersonCompany::where('person_id', $request->person_id)->where('selected_email', $request->old_email)->get();
-                    foreach($personCompanies as $personCompany){
-                        $personCompany->selected_email = $request->value;
-                        $personCompany->save();
+                    if($request->has('old_email')){
+                        $personCompanies = PersonCompany::where('person_id', $request->person_id)->where('selected_email', $request->old_email)->get();
+                        foreach($personCompanies as $personCompany){
+                            $personCompany->selected_email = $request->value;
+                            $personCompany->save();
+                        }
                     }
                 }
                 $person->save();
             } elseif($request->entity == 'company'){
                 $company = Company::find($request->company_id);
+                if(!$company){
+                    return response()->json(['error' => 'Company not found'], 404);
+                }
                 if($request->type == 'phone'){
                     $company->phone = $request->value;
                     $company->phone_note = $request->note;
                 } elseif($request->type == 'taxResidency'){
                     $company->tax_residency = $request->value;
-                } elseif($request->type='email'){
+                } elseif($request->type == 'email'){
                     $company->email = $request->value;
                     $company->email_note = $request->note;
                 }
                 $company->save();
             }
         } else {
-            if($request->type == 'email' && $request->entity == 'person'){
+            $entityContact = EntityContact::find($contactId);
+            if(!$entityContact){
+                return response()->json(['error' => 'Entity contact not found'], 404);
+            }
+            if($request->type == 'email' && $request->entity == 'person' && $request->has('person_id') && $request->has('old_email')){
                 $personCompanies = PersonCompany::where('person_id', $request->person_id)->where('selected_email', $request->old_email)->get();
                 foreach($personCompanies as $personCompany){
                     $personCompany->selected_email = $request->value;
                     $personCompany->save();
                 }
             }
-            $entityContact = EntityContact::find($contactId);
             $entityContact->value = $request->value;
             $entityContact->note = $request->note;
             $entityContact->save();
         }
+        
+        return response()->json(['success' => true], 200);
     }
 
     public function addNewEntityContact(Request $request, $entityId){

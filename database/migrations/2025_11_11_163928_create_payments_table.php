@@ -13,17 +13,12 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('order_id')->unsigned();
-            $table->text('type');
-            $table->decimal('sum', 10, 2);
+            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
+            $table->string('type')->nullable();
+            $table->decimal('sum', 10, 2)->nullable();
             $table->text('details')->nullable();
-            $table->timestamp('paid_date')->nullable();
+            $table->date('paid_date')->nullable();
             $table->timestamps();
-
-            $table->foreign('order_id')
-                ->references('id')
-                ->on('orders')
-                ->onDelete('cascade');
         });
     }
 

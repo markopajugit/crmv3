@@ -54,10 +54,7 @@ class HomeController extends BaseController
     }
 
     public function addMissingCompanies(){
-        $results = DB::table('company_person')
-            ->select('id', 'related_company')
-            ->whereNotNull('related_company')
-            ->get();
+        $results = DB::select(DB::raw('SELECT id,related_company FROM `company_person` WHERE related_company is not null'));
     }
 
     public function importData(){
@@ -550,19 +547,19 @@ class HomeController extends BaseController
     {
         /*$results = DB::select("SELECT services.name, services.cost, service_category.name as service_category FROM services
 inner join service_category on service_category.id = services.service_category_id");*/
-        $results = DB::select("select order_service.order_id, o.company_id from order_service inner join services s on s.id = order_service.service_id inner join orders o on order_service.order_id = o.id inner join payments p on p.order_id = o.id where order_service.service_id in (?,?,?) and (STR_TO_DATE( CASE WHEN p.paid_date LIKE '%.%' THEN STR_TO_DATE(p.paid_date, '%d.%m.%Y') ELSE STR_TO_DATE(p.paid_date, '%d-%m-%Y') END, '%Y-%m-%d' ) < ? AND STR_TO_DATE( CASE WHEN p.paid_date LIKE '%.%' THEN STR_TO_DATE(p.paid_date, '%d.%m.%Y') ELSE STR_TO_DATE(p.paid_date, '%d-%m-%Y') END, '%Y-%m-%d' ) > ? or o.paid_date <? and o.paid_date > ?) ORDER BY `order_id` DESC ", [19, 20, 21, '2024-06-01', '2023-05-31', '2024-06-01', '2023-05-31']);
+        $results = DB::select("select order_service.order_id, o.company_id from order_service inner join services s on s.id = order_service.service_id inner join orders o on order_service.order_id = o.id inner join payments p on p.order_id = o.id where order_service.service_id in (19,20,21) and (STR_TO_DATE( CASE WHEN p.paid_date LIKE '%.%' THEN STR_TO_DATE(p.paid_date, '%d.%m.%Y') ELSE STR_TO_DATE(p.paid_date, '%d-%m-%Y') END, '%Y-%m-%d' ) < '2024-06-01' AND STR_TO_DATE( CASE WHEN p.paid_date LIKE '%.%' THEN STR_TO_DATE(p.paid_date, '%d.%m.%Y') ELSE STR_TO_DATE(p.paid_date, '%d-%m-%Y') END, '%Y-%m-%d' ) > '2023-05-31' or o.paid_date <'2024-06-01' and o.paid_date > '2023-05-31') ORDER BY `order_id` DESC ");
 
         foreach($results as $key => $row){
             //Boardmemeber
-            $companyMainContact = DB::select("select person_id from company_person where company_id = ? and relation = ?", [$row->company_id, 'Board Member']);
+            $companyMainContact = DB::select("select person_id from company_person where company_id = ".$row->company_id." and relation = 'Board Member'");
             $results[$key]->board_member = '';
             if($companyMainContact){
                 foreach($companyMainContact as $boardmember){
                     $companyMainContactId = $boardmember->person_id;
 
                     if($companyMainContactId){
-                        $personQuery = "select * from persons where id = ?";
-                        $personInfo = DB::select($personQuery, [$companyMainContactId]);
+                        $personQuery = "select * from persons where id = ".$companyMainContactId;
+                        $personInfo = DB::select($personQuery);
                         $results[$key]->board_member .= "Name: ".$personInfo[0]->name."\n";
                         $results[$key]->board_member .= "Date of birth: ".$personInfo[0]->date_of_birth."\n";
                         $results[$key]->board_member .= "ID code: ".$personInfo[0]->id_code."\n";
@@ -570,7 +567,7 @@ inner join service_category on service_category.id = services.service_category_i
                         $results[$key]->board_member .= "Phone: ".$personInfo[0]->phone."\n";
                         $results[$key]->board_member .= "Address:".$personInfo[0]->address_street." ".$personInfo[0]->address_city."\n";
 
-                        $riskitase = DB::select("select risk_level from entity_risks where person_id = ?", [$companyMainContactId]);
+                        $riskitase = DB::select("select risk_level from entity_risks where person_id = ".$companyMainContactId);
                         if($riskitase){
                             $results[$key]->board_member .= "Risk: ".$riskitase[0]->risk_level."\n";
                         }
@@ -580,19 +577,15 @@ inner join service_category on service_category.id = services.service_category_i
             }
 
             //UBO
-            $companyMainContact = DB::table('company_person')
-                ->select('person_id', 'relation')
-                ->where('company_id', $row->company_id)
-                ->where('relation', 'LIKE', '%UBO%')
-                ->get();
+            $companyMainContact = DB::select("select person_id, relation from company_person where company_id = ".$row->company_id." and relation like '%UBO%'");
             $results[$key]->UBO = '';
             if($companyMainContact){
                 foreach($companyMainContact as $boardmember){
                     $companyMainContactId = $boardmember->person_id;
 
                     if($companyMainContactId){
-                        $personQuery = "select * from persons where id = ?";
-                        $personInfo = DB::select($personQuery, [$companyMainContactId]);
+                        $personQuery = "select * from persons where id = ".$companyMainContactId;
+                        $personInfo = DB::select($personQuery);
                         $results[$key]->UBO .= $personInfo[0]->name."\n";
                         $results[$key]->UBO .= $boardmember->relation."\n";
                         $results[$key]->UBO .= "Date of birth: ".$personInfo[0]->date_of_birth."\n";
@@ -601,7 +594,7 @@ inner join service_category on service_category.id = services.service_category_i
                         $results[$key]->UBO .= "Phone: ".$personInfo[0]->phone."\n";
                         $results[$key]->UBO .= "Address: ".$personInfo[0]->address_street." ".$personInfo[0]->address_city."\n";
 
-                        $riskitase = DB::select("select risk_level from entity_risks where person_id = ?", [$companyMainContactId]);
+                        $riskitase = DB::select("select risk_level from entity_risks where person_id = ".$companyMainContactId);
                         if($riskitase){
                             $results[$key]->UBO .= "Risk: ".$riskitase[0]->risk_level."\n";
                         }
@@ -615,7 +608,7 @@ inner join service_category on service_category.id = services.service_category_i
             $services = DB::select("SELECT s.cost, s.name
             FROM order_service os
             inner join services s on os.service_id = s.id
-            WHERE order_id = ?", [$row->order_id]);
+            WHERE order_id = ".$row->order_id);
 
             $results[$key]->services = '';
             if($services){

@@ -24,12 +24,7 @@ class DatabaseSeeder extends Seeder
             //OrderServiceSeeder::class,
             SettingsSeeder::class,
             //CompanyOrderSeeder::class,
-            //PersonOrderSeeder::class,
-            NoteSeeder::class,
-            PaymentSeeder::class,
-            EntityContactSeeder::class,
-            EntityAddressSeeder::class,
-            EntityRiskSeeder::class,
+            //PersonOrderSeeder::class
         ]);
         $this->command->info('Tables seeded!');
     }

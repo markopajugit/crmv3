@@ -1075,16 +1075,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/dropzone.js"></script>
 
     <script type="text/javascript">
-        // Wait for jQuery to be loaded
-        (function() {
-            function initOrderShowDropzone() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initOrderShowDropzone, 50);
-                    return;
-                }
-
-                var $ = window.jQuery;
-
         Dropzone.options.dropzoneForm = {
             autoProcessQueue : true,
 
@@ -1150,28 +1140,9 @@
                 });
             }
         });
-
-            } // end initOrderShowDropzone
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initOrderShowDropzone);
-            } else {
-                initOrderShowDropzone();
-            }
-        })();
     </script>
 
     <script type="text/javascript">
-        // Wait for jQuery to be loaded
-        (function() {
-            function initOrderShowMain() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initOrderShowMain, 50);
-                    return;
-                }
-
-                var $ = window.jQuery;
 
         $( document ).ready(function() {
 
@@ -2128,17 +2099,6 @@
             @endif
         });
 
-            }); // end $(document).ready
-
-            } // end initOrderShowMain
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initOrderShowMain);
-            } else {
-                initOrderShowMain();
-            }
-        })();
     </script>
 
 @endsection

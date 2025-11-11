@@ -78,10 +78,6 @@ class FileUploadController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         
-        // Sanitize inputs to prevent path traversal
-        $companyId = (int) $companyId;
-        $name = basename($name); // Remove any path components
-        
         $file = File::where(['name' => $name, 'company_id' => $companyId])->first();
         
         if (!$file) {
@@ -89,12 +85,6 @@ class FileUploadController extends Controller
         }
         
         $filePath = storage_path('/app/'.$file->path);
-        
-        // Additional security check - ensure file is within allowed directory
-        $allowedPath = storage_path('/app/public/files/');
-        if (!str_starts_with(realpath($filePath), realpath($allowedPath))) {
-            return response()->json(['error' => 'Access denied'], 403);
-        }
         
         if (!file_exists($filePath)) {
             return response()->json(['error' => 'File does not exist on disk'], 404);
@@ -109,10 +99,6 @@ class FileUploadController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         
-        // Sanitize inputs to prevent path traversal
-        $personId = (int) $personId;
-        $name = basename($name); // Remove any path components
-        
         $file = File::where(['name' => $name, 'person_id' => $personId])->first();
         
         if (!$file) {
@@ -120,12 +106,6 @@ class FileUploadController extends Controller
         }
         
         $filePath = storage_path('/app/'.$file->path);
-        
-        // Additional security check - ensure file is within allowed directory
-        $allowedPath = storage_path('/app/public/files/');
-        if (!str_starts_with(realpath($filePath), realpath($allowedPath))) {
-            return response()->json(['error' => 'Access denied'], 403);
-        }
         
         if (!file_exists($filePath)) {
             return response()->json(['error' => 'File does not exist on disk'], 404);
@@ -140,10 +120,6 @@ class FileUploadController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         
-        // Sanitize inputs to prevent path traversal
-        $orderId = (int) $orderId;
-        $name = basename($name); // Remove any path components
-        
         $file = File::where(['name' => $name, 'order_id' => $orderId])->first();
         
         if (!$file) {
@@ -151,12 +127,6 @@ class FileUploadController extends Controller
         }
         
         $filePath = storage_path('/app/'.$file->path);
-        
-        // Additional security check - ensure file is within allowed directory
-        $allowedPath = storage_path('/app/public/files/');
-        if (!str_starts_with(realpath($filePath), realpath($allowedPath))) {
-            return response()->json(['error' => 'Access denied'], 403);
-        }
         
         if (!file_exists($filePath)) {
             return response()->json(['error' => 'File does not exist on disk'], 404);
@@ -168,63 +138,19 @@ class FileUploadController extends Controller
     public function downloadUploadedCompanyFile($companyId, $name){
         $user = auth()->user();
         if(!$user){
-            return response()->json(['error' => 'Unauthorized'], 401);
+            die();
         }
-        
-        // Sanitize inputs to prevent path traversal
-        $companyId = (int) $companyId;
-        $name = basename($name); // Remove any path components
-        
         $file = File::where(['name' => $name, 'company_id' => $companyId])->first();
-        
-        if (!$file) {
-            return response()->json(['error' => 'File not found'], 404);
-        }
-        
-        $filePath = storage_path('/app/'.$file->path);
-        
-        // Additional security check - ensure file is within allowed directory
-        $allowedPath = storage_path('/app/public/files/');
-        if (!str_starts_with(realpath($filePath), realpath($allowedPath))) {
-            return response()->json(['error' => 'Access denied'], 403);
-        }
-        
-        if (!file_exists($filePath)) {
-            return response()->json(['error' => 'File does not exist on disk'], 404);
-        }
-        
-        return response()->download($filePath, $name);
+        return response()->download(storage_path('/app/'.$file->path), $name);
     }
 
     public function downloadUploadedPersonFile($personId, $name){
         $user = auth()->user();
         if(!$user){
-            return response()->json(['error' => 'Unauthorized'], 401);
+            die();
         }
-        
-        // Sanitize inputs to prevent path traversal
-        $personId = (int) $personId;
-        $name = basename($name); // Remove any path components
-        
         $file = File::where(['name' => $name, 'person_id' => $personId])->first();
-        
-        if (!$file) {
-            return response()->json(['error' => 'File not found'], 404);
-        }
-        
-        $filePath = storage_path('/app/'.$file->path);
-        
-        // Additional security check - ensure file is within allowed directory
-        $allowedPath = storage_path('/app/public/files/');
-        if (!str_starts_with(realpath($filePath), realpath($allowedPath))) {
-            return response()->json(['error' => 'Access denied'], 403);
-        }
-        
-        if (!file_exists($filePath)) {
-            return response()->json(['error' => 'File does not exist on disk'], 404);
-        }
-        
-        return response()->download($filePath, $name);
+        return response()->download(storage_path('/app/'.$file->path), $name);
     }
 
     public function downloadUploadedOrderFile($orderId, $name){
@@ -233,10 +159,6 @@ class FileUploadController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         
-        // Sanitize inputs to prevent path traversal
-        $orderId = (int) $orderId;
-        $name = basename($name); // Remove any path components
-        
         $file = File::where(['name' => $name, 'order_id' => $orderId])->first();
         
         if (!$file) {
@@ -244,12 +166,6 @@ class FileUploadController extends Controller
         }
         
         $filePath = storage_path('/app/'.$file->path);
-        
-        // Additional security check - ensure file is within allowed directory
-        $allowedPath = storage_path('/app/public/files/');
-        if (!str_starts_with(realpath($filePath), realpath($allowedPath))) {
-            return response()->json(['error' => 'Access denied'], 403);
-        }
         
         if (!file_exists($filePath)) {
             return response()->json(['error' => 'File does not exist on disk'], 404);
@@ -266,85 +182,39 @@ class FileUploadController extends Controller
         return response()->download($filePath, str_replace('.', '', $downloadName));
     }
 
-    // REMOVED: sendTestEmail() method for security reasons
-    // This method contained hardcoded email addresses and debug output
+    public function sendTestEmail(){
+        var_dump(mail("ouhardcoded@gmail.com","Test","Test mail from crm"));
+        echo "MAIL SENT";
+    }
 
     public function deleteUploadedCompanyFile($companyId, $name){
         $user = auth()->user();
         if(!$user){
-            return response()->json(['error' => 'Unauthorized'], 401);
+            die();
         }
-        
-        // Sanitize inputs to prevent path traversal
-        $companyId = (int) $companyId;
-        $name = basename($name); // Remove any path components
-        
         $file = File::where(['name' => $name, 'company_id' => $companyId])->first();
-        
-        if (!$file) {
-            return response()->json(['error' => 'File not found'], 404);
-        }
-        
-        try {
-            Storage::delete($file->path);
-            $file->delete();
-            return response()->json(['success' => 'File deleted successfully']);
-        } catch (\Exception $e) {
-            Log::error('File deletion error: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to delete file'], 500);
-        }
+        Storage::delete($file->path);
+        $file->delete();
     }
 
     public function deleteUploadedPersonFile($personId, $name){
         $user = auth()->user();
         if(!$user){
-            return response()->json(['error' => 'Unauthorized'], 401);
+            die();
         }
-        
-        // Sanitize inputs to prevent path traversal
-        $personId = (int) $personId;
-        $name = basename($name); // Remove any path components
-        
         $file = File::where(['name' => $name, 'person_id' => $personId])->first();
-        
-        if (!$file) {
-            return response()->json(['error' => 'File not found'], 404);
-        }
-        
-        try {
-            Storage::delete($file->path);
-            $file->delete();
-            return response()->json(['success' => 'File deleted successfully']);
-        } catch (\Exception $e) {
-            Log::error('File deletion error: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to delete file'], 500);
-        }
+        Storage::delete($file->path);
+        $file->delete();
     }
 
     public function deleteUploadedOrderFile($orderId, $name){
         $user = auth()->user();
         if(!$user){
-            return response()->json(['error' => 'Unauthorized'], 401);
+            die();
         }
-        
-        // Sanitize inputs to prevent path traversal
-        $orderId = (int) $orderId;
-        $name = basename($name); // Remove any path components
-        
         $file = File::where(['name' => $name, 'order_id' => $orderId])->first();
-        
-        if (!$file) {
-            return response()->json(['error' => 'File not found'], 404);
-        }
-        
-        try {
-            Storage::delete($file->path);
-            $file->delete();
-            return response()->json(['success' => 'File deleted successfully']);
-        } catch (\Exception $e) {
-            Log::error('File deletion error: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to delete file'], 500);
-        }
+        Storage::delete($file->path);
+        $file->delete();
     }
 
 

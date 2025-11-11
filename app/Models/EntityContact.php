@@ -9,17 +9,32 @@ class EntityContact extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'contactable_type',
-        'contactable_id',
-        'type',
+        'person_id',
+        'company_id',
         'value',
-        'notes',
-        'is_primary',
+        'type',
+        'note',
     ];
 
-    public function contactable()
+    /**
+     * Get the person that owns the contact.
+     */
+    public function person()
     {
-        return $this->morphTo();
+        return $this->belongsTo(Person::class);
+    }
+
+    /**
+     * Get the company that owns the contact.
+     */
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
     }
 }

@@ -246,7 +246,7 @@ class SearchController extends Controller
             ];
         }
 
-        $output = '<ul>';
+        $output = '';
         foreach($data as $class => $classData)
         {
             $icon = '';
@@ -259,23 +259,30 @@ class SearchController extends Controller
             }
             foreach($classData as $data){
                 if($class == 'persons'){
-                    $desc = '('.$data->date_of_birth.')';
+                    $desc = '';
+                    if($data->date_of_birth){
+                        $desc = ' ('.$data->date_of_birth.')';
+                    }
                     $output .= '
-               <li>'.$icon.'</i><a href="/'.$class.'/'.$data->id.'">'.$data->name.' '.$desc.'</a></li>
+               <li>'.$icon.'</i><a href="/'.$class.'/'.$data->id.'">'.$data->name.$desc.'</a></li>
                ';
                 } elseif ($class == 'companies'){
                     $desc = '';
-                    if($data->registration_country_abb){
-                        $desc = '('.strtoupper($data->registration_country_abbr).')';
+                    if($data->registration_country_abbr){
+                        $desc = ' ('.strtoupper($data->registration_country_abbr).')';
                     }
 
                     $output .= '
-               <li>'.$icon.'</i><a href="/'.$class.'/'.$data->id.'">'.$data->name.' '.$desc.'</a></li>
+               <li>'.$icon.'</i><a href="/'.$class.'/'.$data->id.'">'.$data->name.$desc.'</a></li>
                ';
                 } elseif ($class == 'orders'){
                     $desc = '';
+                    $orderName = $data->number ?? '';
+                    if($data->name){
+                        $orderName .= ($orderName ? ' - ' : '') . $data->name;
+                    }
                     $output .= '
-               <li>'.$icon.'</i><a href="/'.$class.'/'.$data->id.'">'.$data->number.' - '.$data->name.' '.$desc.'</a></li>
+               <li>'.$icon.'</i><a href="/'.$class.'/'.$data->id.'">'.$orderName.$desc.'</a></li>
                ';
                 }
 

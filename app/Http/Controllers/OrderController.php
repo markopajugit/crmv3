@@ -306,7 +306,10 @@ class OrderController extends BaseController
 
                         if($createRenewal){
                             $orderServiceCheck = OrderService::find($orderService->pivot->id);
-                            // Debug code removed for security
+                            if($order->id == 5850 && isset($_GET['debug'])){
+                                //$test = $order->replicate();
+                                //dd($test->payments()->get());
+                            }
                             if($orderServiceCheck->renewed == 1){
                                 continue;
                             }

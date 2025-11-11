@@ -9,20 +9,34 @@ class EntityAddress extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'addressable_type',
-        'addressable_id',
-        'type',
+        'person_id',
+        'company_id',
         'street',
         'city',
         'zip',
         'country',
-        'notes',
-        'is_primary',
+        'note',
     ];
 
-    public function addressable()
+    /**
+     * Get the person that owns the address.
+     */
+    public function person()
     {
-        return $this->morphTo();
+        return $this->belongsTo(Person::class);
+    }
+
+    /**
+     * Get the company that owns the address.
+     */
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
     }
 }

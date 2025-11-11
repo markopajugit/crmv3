@@ -24,18 +24,15 @@ class CreateFilesTable extends Migration
 
             $table->foreign('company_id')
                 ->references('id')
-                ->on('companies')
-                ->onDelete('cascade');
+                ->on('companies');
 
             $table->foreign('person_id')
                 ->references('id')
-                ->on('persons')
-                ->onDelete('cascade');
+                ->on('persons');
 
             $table->foreign('order_id')
                 ->references('id')
-                ->on('orders')
-                ->onDelete('cascade');
+                ->on('orders');
         });
 
     }

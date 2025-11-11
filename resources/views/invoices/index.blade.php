@@ -53,17 +53,14 @@
     </table>
 
     <script>
-        // Handle form submission
-        document.addEventListener('DOMContentLoaded', function() {
-            var searchForm = document.getElementById('searchForm');
-            if (searchForm) {
-                searchForm.addEventListener('submit', function(event) {
-                    event.preventDefault(); // Prevent the default form submission
-                    var searchInput = document.getElementById('searchInput').value;
-                    var url = '/invoices/' + encodeURIComponent(searchInput);
-                    window.location.href = url;
-                });
-            }
+        // jQuery to handle form submission
+        $(document).ready(function() {
+            $('#searchForm').submit(function(event) {
+                event.preventDefault(); // Prevent the default form submission
+                var searchInput = $('#searchInput').val();
+                var url = '/invoices/' + encodeURIComponent(searchInput);
+                window.location.href = url;
+            });
         });
     </script>
 

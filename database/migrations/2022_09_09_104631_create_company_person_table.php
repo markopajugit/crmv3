@@ -24,13 +24,11 @@ class CreateCompanyPersonTable extends Migration
 
             $table->foreign('person_id')
                 ->references('id')
-                ->on('persons')
-                ->onDelete('cascade');
+                ->on('persons');
 
             $table->foreign('company_id')
                 ->references('id')
-                ->on('companies')
-                ->onDelete('cascade');
+                ->on('companies');
         });
     }
 

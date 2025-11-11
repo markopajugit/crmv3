@@ -24,10 +24,14 @@ class PersonCompanyFactory extends Factory
     public function definition()
     {
         return [
-            'person_id' => $this->faker->numberBetween(1, Person::count()),
-            'company_id' => $this->faker->numberBetween(1, Company::count()),
+            'person_id' => function () {
+                return Person::inRandomOrder()->first()?->id ?? Person::factory()->create()->id;
+            },
+            'company_id' => function () {
+                return Company::inRandomOrder()->first()?->id ?? Company::factory()->create()->id;
+            },
             'relation' => $this->faker->randomElement(['Board Memeber', 'Shareholder', 'Agent']),
-            'selected_email' => $this->faker->safeEmail()
+            'selected_email' => $this->faker->email(),
         ];
     }
 }

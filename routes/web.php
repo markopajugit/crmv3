@@ -21,7 +21,7 @@ Route::post('/public/client/{id}/save', [\App\Http\Controllers\PublicController:
 
 Auth::routes(['register' => false]);
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
-Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index']);
+Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
 Route::resource('companies', \App\Http\Controllers\CompanyController::class);
 Route::resource('orders', \App\Http\Controllers\OrderController::class);
 Route::resource('persons', \App\Http\Controllers\PersonController::class);
@@ -130,13 +130,14 @@ Route::post('/person/risk/update', [\App\Http\Controllers\PersonController::clas
 
 Route::delete('invoices/{id}', [\App\Http\Controllers\InvoiceController::class, 'destroy']);
 
-/*TEST ROUTES - REMOVED FOR SECURITY*/
-// Route::get('/test/email', [FileUploadController::class, 'sendTestEmail']); // REMOVED - contained hardcoded email
+/*TEST ROUTES*/
+
+Route::get('/test/email', [FileUploadController::class, 'sendTestEmail']);
 Route::get('/changelog', [\App\Http\Controllers\HomeController::class, 'changelog']);
 
 
-// Route::get('/importData', [\App\Http\Controllers\HomeController::class, 'importData']); // REMOVED - debug/test route
-// Route::get('/addMissingCompanies', [\App\Http\Controllers\HomeController::class, 'addMissingCompanies']); // REMOVED - debug/test route
+Route::get('/importData', [\App\Http\Controllers\HomeController::class, 'importData']);
+Route::get('/addMissingCompanies', [\App\Http\Controllers\HomeController::class, 'addMissingCompanies']);
 
 
 /* DROPZONE */
@@ -159,7 +160,7 @@ Route::get('cron/check-kyc-expirations', [\App\Http\Controllers\CronController::
 
 
 /* TEST */
-// Route::get('test/manualSQL', [\App\Http\Controllers\HomeController::class, 'manualSQL']); // REMOVED - contains SQL injection vulnerabilities
+Route::get('test/manualSQL', [\App\Http\Controllers\HomeController::class, 'manualSQL']);
 
 Route::get('/report', [\App\Http\Controllers\HomeController::class, 'report']);
 
