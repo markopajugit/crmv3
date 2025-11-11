@@ -609,6 +609,12 @@
 
     <script type="text/javascript">
         window.addEventListener('load', function() {
+            if (typeof jQuery === 'undefined') {
+                console.error('jQuery is not loaded');
+                return;
+            }
+            var $ = jQuery;
+            
             $( "#insertedRegistrationDate" ).datepicker({
                 changeMonth: true,
                 changeYear: true,
