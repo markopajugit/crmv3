@@ -899,6 +899,38 @@
 
 @push('scripts')
     <script type="text/javascript">
+        // This should run IMMEDIATELY when script tag loads
+        console.log('=== BLADE SCRIPT TAG STARTING - RUNS IMMEDIATELY ===');
+        console.log('Current time:', new Date().toISOString());
+        console.log('Document ready state:', document.readyState);
+        
+        // Initialize Company Editor Component OUTSIDE of any jQuery-dependent functions
+        // This ensures it runs even if jQuery fails to load
+        (function initCompanyEditorGlobal() {
+            console.log('initCompanyEditorGlobal: Starting...');
+            function tryInit() {
+                console.log('tryInit: Checking for CompanyEditor...', typeof CompanyEditor, typeof window.CompanyEditor);
+                if (typeof CompanyEditor !== 'undefined' || typeof window.CompanyEditor !== 'undefined') {
+                    const EditorClass = CompanyEditor || window.CompanyEditor;
+                    console.log('tryInit: CompanyEditor found!', EditorClass);
+                    try {
+                        const companyEditor = new EditorClass(
+                            {{ $company->id ?? 0 }},
+                            "{{ route('companies.update', $company->id ?? 0) }}"
+                        );
+                        console.log('tryInit: CompanyEditor initialized successfully!', companyEditor);
+                    } catch (error) {
+                        console.error('tryInit: Error initializing CompanyEditor:', error);
+                    }
+                } else {
+                    console.warn('tryInit: CompanyEditor not found, will retry...');
+                    setTimeout(tryInit, 500);
+                }
+            }
+            // Wait a bit for app.js to load, then start trying
+            setTimeout(tryInit, 100);
+        })();
+        
         // generateCountryOptions is now available globally from CompanyEditor component
         // See resources/js/components/company-editor.js
 
@@ -1708,18 +1740,24 @@
         }); // end $(document).ready
 
         // Initialize Company Editor Component
-        console.log('show.blade.php: Checking for CompanyEditor...', typeof CompanyEditor, typeof window.CompanyEditor);
+        // Moved outside initCompanyShowKYC so it runs even if jQuery isn't loaded
+        console.log('show.blade.php: Inside initCompanyShowKYC, checking for CompanyEditor...', typeof CompanyEditor, typeof window.CompanyEditor);
         
         // Try to wait for CompanyEditor if it's not immediately available
         function initCompanyEditor() {
+            console.log('initCompanyEditor called, checking...', typeof CompanyEditor, typeof window.CompanyEditor);
             if (typeof CompanyEditor !== 'undefined' || typeof window.CompanyEditor !== 'undefined') {
                 const EditorClass = CompanyEditor || window.CompanyEditor;
                 console.log('show.blade.php: CompanyEditor found, initializing...', EditorClass);
-                const companyEditor = new EditorClass(
-                    {{ $company->id ?? 0 }},
-                    "{{ route('companies.update', $company->id ?? 0) }}"
-                );
-                console.log('show.blade.php: CompanyEditor initialized', companyEditor);
+                try {
+                    const companyEditor = new EditorClass(
+                        {{ $company->id ?? 0 }},
+                        "{{ route('companies.update', $company->id ?? 0) }}"
+                    );
+                    console.log('show.blade.php: CompanyEditor initialized successfully', companyEditor);
+                } catch (error) {
+                    console.error('show.blade.php: Error initializing CompanyEditor:', error);
+                }
             } else {
                 console.warn('show.blade.php: CompanyEditor not found, retrying in 100ms...');
                 setTimeout(initCompanyEditor, 100);

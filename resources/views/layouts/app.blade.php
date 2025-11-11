@@ -84,8 +84,22 @@
 </div>
 
 <!-- Scripts -->
+<script>
+    console.log('=== INLINE SCRIPT BEFORE VENDOR.JS ===');
+    // Uncomment to test: alert('JavaScript is working!');
+</script>
+@if(file_exists(public_path('js/vendor.js')))
 <script src="{{ mix('js/vendor.js') }}"></script>
+@endif
+<script>
+    console.log('=== INLINE SCRIPT BEFORE APP.JS ===');
+</script>
 <script src="{{ mix('js/app.js') }}"></script>
+<script>
+    console.log('=== INLINE SCRIPT AFTER APP.JS ===');
+    console.log('jQuery available:', typeof $ !== 'undefined', typeof jQuery !== 'undefined');
+    console.log('CompanyEditor available:', typeof CompanyEditor !== 'undefined', typeof window.CompanyEditor !== 'undefined');
+</script>
 
 @stack('scripts')
 
