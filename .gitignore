@@ -1,0 +1,84 @@
+# Laravel specific files to ignore
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env
+.env.backup
+.env.local
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+HomesteadVagrantfile
+npm-debug.log
+yarn-error.log
+
+# IDE and Editor files
+/.idea
+/.vscode
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+/storage/logs/*.log
+
+# Cache
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitignore
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+
+# Compiled assets (source files are tracked)
+/public/css
+/public/js
+/public/mix-manifest.json
+/public/hot
+
+# Exclude uploaded files from resources folder
+/resources/files/*
+!/resources/files/.gitkeep
+/resources/uploads/*
+!/resources/uploads/.gitkeep
+
+# Exclude compiled assets from resources (source files are tracked)
+/resources/css/app.css
+/resources/js/app.js
+
+# Temporary files
+*.tmp
+*.temp
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Testing
+/coverage
+/.phpunit.cache
+
+# Backup files
+*.bak
+*.backup
+
+# Build artifacts
+/dist
+/build

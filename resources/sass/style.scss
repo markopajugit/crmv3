@@ -1,0 +1,49 @@
+header.header{
+    background: lightgray;
+}
+
+h1 {
+
+}
+
+
+.body {
+    background:#4f5d73;
+    color: rgba(255, 255, 255, 0.7);
+    a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: underline;
+    }
+
+    a:active {
+      color: white;
+    }
+}
+
+
+.modal {
+    color: black!important;
+
+    a {
+        color: black!important;
+    }
+}
+
+footer.footer {
+    background:#4f5d73;
+}
+
+nav .pagination .page-item .page-link {
+    background:#4f5d73;
+    color:white;
+}
+
+nav .pagination .page-item.active .page-link {
+    border-color:white;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+table tr.clickable {
+    cursor: pointer;
+}
