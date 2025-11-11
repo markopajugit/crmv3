@@ -897,19 +897,52 @@ list-style: none;">
             // Check if something is covering the icon
             const rect = icon.getBoundingClientRect();
             console.log('[DEBUG] Icon bounding rect:', rect);
-            const elementAtPoint = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
+            console.log('[DEBUG] Viewport dimensions:', window.innerWidth, 'x', window.innerHeight);
+            console.log('[DEBUG] Scroll position:', window.scrollX, window.scrollY);
+            
+            // Adjust coordinates if icon is in a scrolled container
+            const centerX = rect.left + rect.width/2;
+            const centerY = rect.top + rect.height/2;
+            console.log('[DEBUG] Testing element at point:', centerX, centerY);
+            
+            const elementAtPoint = document.elementFromPoint(centerX, centerY);
             console.log('[DEBUG] Element at icon center:', elementAtPoint);
             console.log('[DEBUG] Element at icon center === icon?', elementAtPoint === icon);
             
+            // If elementAtPoint is null, try clicking the icon directly
+            if (elementAtPoint === null) {
+                console.warn('[DEBUG] Element at point is null - icon may be off-screen or covered');
+                console.log('[DEBUG] Icon is visible?', rect.width > 0 && rect.height > 0);
+                console.log('[DEBUG] Icon in viewport?', rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth);
+            }
+            
             // Add multiple event listeners to catch the event
+            // Use both capture and bubble phases
             icon.addEventListener('click', function(e) {
                 console.log('[DEBUG] Edit icon clicked directly (inline handler) - CLICK EVENT FIRED');
                 console.log('[DEBUG] Event target:', e.target);
                 console.log('[DEBUG] Event currentTarget:', e.currentTarget);
                 console.log('[DEBUG] Company ID:', {{ $company->id }});
                 console.log('[DEBUG] Event bubbles:', e.bubbles);
+                
+                // Try to trigger the edit functionality manually if jQuery isn't available
+                if (typeof window.$ === 'undefined') {
+                    console.log('[DEBUG] jQuery not available, attempting manual edit trigger');
+                    const h1 = icon.closest('h1');
+                    if (h1) {
+                        const currentName = h1.textContent.replace(icon.textContent, '').trim();
+                        console.log('[DEBUG] Current company name extracted:', currentName);
+                        // You could manually trigger the edit form here if needed
+                    }
+                }
+                
                 e.stopPropagation(); // Prevent other handlers
             }, true); // Use capture phase
+            
+            // Also add in bubble phase
+            icon.addEventListener('click', function(e) {
+                console.log('[DEBUG] Edit icon clicked (bubble phase) - CLICK EVENT FIRED');
+            }, false);
             
             icon.addEventListener('mousedown', function(e) {
                 console.log('[DEBUG] Edit icon mousedown event - FIRED');
