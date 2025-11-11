@@ -47,7 +47,7 @@ class Company extends Model
     }
 
     public function getContacts(){
-        return $this->hasMany(EntityContact::class);
+        return $this->morphMany(EntityContact::class, 'contactable');
     }
 
     public function getAddresses(){
@@ -55,11 +55,11 @@ class Company extends Model
     }
 
     public function getCurrentRisk(){
-        return $this->hasOne(EntityRisk::class)->latest();
+        return $this->morphOne(EntityRisk::class, 'riskable')->latest();
     }
 
     public function getRisksHistory(){
-        return $this->hasMany(EntityRisk::class);
+        return $this->morphMany(EntityRisk::class, 'riskable');
     }
 
     /**
