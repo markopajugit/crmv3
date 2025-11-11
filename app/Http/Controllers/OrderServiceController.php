@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 
 class OrderServiceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -68,8 +72,19 @@ class OrderServiceController extends Controller
      */
     public function update(Request $request)
     {
-        $orderService = OrderService::find($request->orderService);
-        $orderService->update($request->all());
+        $request->validate([
+            'orderService' => 'required|integer|exists:order_service,id'
+        ]);
+        
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $orderServiceData = $request->only([
+            'service_id', 'order_id', 'cost', 'name', 'date_from', 'date_to', 'renewed'
+        ]);
+        
+        $orderService = OrderService::findOrFail($request->orderService);
+        $orderService->update($orderServiceData);
+        
+        return response()->json(['success' => true, 'message' => 'Order service updated successfully']);
     }
 
     /**

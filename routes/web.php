@@ -16,8 +16,10 @@ use App\Http\Controllers\FileUploadController;
 |
 */
 
-Route::get('/public/client/{id}', [\App\Http\Controllers\PublicController::class, 'publicClientEdit']);
-Route::post('/public/client/{id}/save', [\App\Http\Controllers\PublicController::class, 'publicClientSave']);
+// Public routes - add authentication if these routes are actually used
+// Currently these routes appear to be placeholders - review and secure if needed
+Route::get('/public/client/{id}', [\App\Http\Controllers\PublicController::class, 'publicClientEdit'])->middleware('auth');
+Route::post('/public/client/{id}/save', [\App\Http\Controllers\PublicController::class, 'publicClientSave'])->middleware('auth');
 
 Auth::routes(['register' => false]);
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
@@ -60,14 +62,15 @@ Route::post('/order/contact/{id}', [App\Http\Controllers\OrderContactController:
 Route::post('/order/contact/update/{id}', [App\Http\Controllers\OrderContactController::class, 'updateOrderContact']);
 Route::post('/order/contact/delete/{id}', [App\Http\Controllers\OrderContactController::class, 'deleteOrderContact']);
 
-Route::get('/search', [App\Http\Controllers\SearchController::class, 'search']);
+// Search routes with rate limiting
+Route::get('/search', [App\Http\Controllers\SearchController::class, 'search'])->middleware('throttle:30,1');
 Route::get('/search/detailed', [App\Http\Controllers\SearchController::class, 'showDetailedSearchForm'])->name('search.detailed.form');
-Route::post('/search/detailed', [App\Http\Controllers\SearchController::class, 'detailedSearch'])->name('search.detailed');
-Route::get('/autocomplete', [App\Http\Controllers\SearchController::class, 'autoComplete'])->name('autocomplete');
-Route::get('/autocompleteModal', [App\Http\Controllers\SearchController::class, 'autoCompleteModal'])->name('autoCompleteModal');
-Route::get('/autocompleteModalUser', [App\Http\Controllers\SearchController::class, 'autoCompleteModalUser'])->name('autoCompleteModalUser');
-Route::get('/autocompleteModalPerson', [App\Http\Controllers\SearchController::class, 'autoCompleteModalPerson'])->name('autoCompleteModalPerson');
-Route::get('/search/documents', [App\Http\Controllers\SearchController::class, 'searchDocuments']);
+Route::post('/search/detailed', [App\Http\Controllers\SearchController::class, 'detailedSearch'])->name('search.detailed')->middleware('throttle:30,1');
+Route::get('/autocomplete', [App\Http\Controllers\SearchController::class, 'autoComplete'])->name('autocomplete')->middleware('throttle:60,1');
+Route::get('/autocompleteModal', [App\Http\Controllers\SearchController::class, 'autoCompleteModal'])->name('autoCompleteModal')->middleware('throttle:60,1');
+Route::get('/autocompleteModalUser', [App\Http\Controllers\SearchController::class, 'autoCompleteModalUser'])->name('autoCompleteModalUser')->middleware('throttle:60,1');
+Route::get('/autocompleteModalPerson', [App\Http\Controllers\SearchController::class, 'autoCompleteModalPerson'])->name('autoCompleteModalPerson')->middleware('throttle:60,1');
+Route::get('/search/documents', [App\Http\Controllers\SearchController::class, 'searchDocuments'])->middleware('throttle:30,1');
 
 Route::post('/companies/{id}/client', [\App\Http\Controllers\CompanyController::class, 'storeRelatedPerson']);
 Route::post('/orders/{id}/service', [\App\Http\Controllers\OrderController::class, 'storeRelatedService']);
@@ -82,30 +85,29 @@ Route::post('/companies/{id}/company/delete', [\App\Http\Controllers\CompanyCont
 
 Route::get('/proformas/', [\App\Http\Controllers\InvoiceController::class, 'proformas']);
 Route::get('/proformas/{id}', [\App\Http\Controllers\InvoiceController::class, 'showProforma']);
-Route::post('/invoices/storeInvoice', [\App\Http\Controllers\InvoiceController::class, 'storeInvoice'])->name('storeInvoice');
+Route::post('/invoices/storeInvoice', [\App\Http\Controllers\InvoiceController::class, 'storeInvoice'])->name('storeInvoice')->middleware('throttle:10,1');
 
 
 Route::get('/invoice/pdf/{id}', [\App\Http\Controllers\InvoiceController::class, 'createPDF']);
 Route::get('/view/pdf/{id}', [\App\Http\Controllers\InvoiceController::class, 'viewPDF']);
 
-Route::get('/test/pdf/{id}', [\App\Http\Controllers\InvoiceController::class, 'testPDF']);
+// File upload routes with rate limiting
+Route::post('storeFile', [FileUploadController::class, 'store'])->middleware('throttle:10,1');
 
-Route::post('storeFile', [FileUploadController::class, 'store']);
+Route::get('/file/company/{companyId}/{file}', [FileUploadController::class, 'viewUploadedCompanyFile'])->middleware('throttle:30,1');
+Route::get('/file/person/{personId}/{file}', [FileUploadController::class, 'viewUploadedPersonFile'])->middleware('throttle:30,1');
+Route::get('/file/order/{orderId}/{file}', [FileUploadController::class, 'viewUploadedOrderFile'])->middleware('throttle:30,1');
 
-Route::get('/file/company/{companyId}/{file}', [FileUploadController::class, 'viewUploadedCompanyFile']);
-Route::get('/file/person/{personId}/{file}', [FileUploadController::class, 'viewUploadedPersonFile']);
-Route::get('/file/order/{orderId}/{file}', [FileUploadController::class, 'viewUploadedOrderFile']);
+Route::get('/file/download/company/{companyId}/{file}', [FileUploadController::class, 'downloadUploadedCompanyFile'])->middleware('throttle:30,1');
+Route::get('/file/download/person/{personId}/{file}', [FileUploadController::class, 'downloadUploadedPersonFile'])->middleware('throttle:30,1');
+Route::get('/file/download/order/{orderId}/{file}', [FileUploadController::class, 'downloadUploadedOrderFile'])->middleware('throttle:30,1');
 
-Route::get('/file/download/company/{companyId}/{file}', [FileUploadController::class, 'downloadUploadedCompanyFile']);
-Route::get('/file/download/person/{personId}/{file}', [FileUploadController::class, 'downloadUploadedPersonFile']);
-Route::get('/file/download/order/{orderId}/{file}', [FileUploadController::class, 'downloadUploadedOrderFile']);
+Route::delete('/file/delete/company/{companyId}/{file}', [FileUploadController::class, 'deleteUploadedCompanyFile'])->middleware('throttle:10,1');
+Route::delete('/file/delete/person/{personId}/{file}', [FileUploadController::class, 'deleteUploadedPersonFile'])->middleware('throttle:10,1');
+Route::delete('/file/delete/order/{orderId}/{file}', [FileUploadController::class, 'deleteUploadedOrderFile'])->middleware('throttle:10,1');
 
-Route::delete('/file/delete/company/{companyId}/{file}', [FileUploadController::class, 'deleteUploadedCompanyFile']);
-Route::delete('/file/delete/person/{personId}/{file}', [FileUploadController::class, 'deleteUploadedPersonFile']);
-Route::delete('/file/delete/order/{orderId}/{file}', [FileUploadController::class, 'deleteUploadedOrderFile']);
-
-Route::post('/file/archivenr/{fileId}', [FileUploadController::class, 'updateArchiveNumber']);
-Route::post('/file/archivenr/generate/{fileId}', [FileUploadController::class, 'generateArchiveNumber']);
+Route::post('/file/archivenr/{fileId}', [FileUploadController::class, 'updateArchiveNumber'])->middleware('throttle:20,1');
+Route::post('/file/archivenr/generate/{fileId}', [FileUploadController::class, 'generateArchiveNumber'])->middleware('throttle:20,1');
 
 
 Route::post('/entitycontact/get/', [\App\Http\Controllers\EntityContactController::class, 'getEntityContacts']);
@@ -130,23 +132,27 @@ Route::post('/person/risk/update', [\App\Http\Controllers\PersonController::clas
 
 Route::delete('invoices/{id}', [\App\Http\Controllers\InvoiceController::class, 'destroy']);
 
-/*TEST ROUTES*/
+/*TEST ROUTES - Protected by environment check*/
 
-Route::get('/test/email', [FileUploadController::class, 'sendTestEmail']);
+// Only allow test routes in non-production environments
+if (!app()->environment('production')) {
+    Route::get('/test/email', [FileUploadController::class, 'sendTestEmail']);
+    Route::get('/test/manualSQL', [\App\Http\Controllers\HomeController::class, 'manualSQL']);
+    Route::get('/test/pdf/{id}', [\App\Http\Controllers\InvoiceController::class, 'testPDF']);
+    Route::get('/importData', [\App\Http\Controllers\HomeController::class, 'importData']);
+    Route::get('/addMissingCompanies', [\App\Http\Controllers\HomeController::class, 'addMissingCompanies']);
+}
+
 Route::get('/changelog', [\App\Http\Controllers\HomeController::class, 'changelog']);
-
-
-Route::get('/importData', [\App\Http\Controllers\HomeController::class, 'importData']);
-Route::get('/addMissingCompanies', [\App\Http\Controllers\HomeController::class, 'addMissingCompanies']);
 
 
 /* DROPZONE */
 
 Route::get('dropzone', [FileUploadController::class, 'dropZoneIndex']);
 
-Route::post('dropzone/upload', [FileUploadController::class, 'store'])->name('dropzone.upload');
+Route::post('dropzone/upload', [FileUploadController::class, 'store'])->name('dropzone.upload')->middleware('throttle:10,1');
 
-Route::post('dropzone/upload-virtual-document', [FileUploadController::class, 'storeVirtualOfficeDocument'])->name('dropzone.upload-virtual-document');
+Route::post('dropzone/upload-virtual-document', [FileUploadController::class, 'storeVirtualOfficeDocument'])->name('dropzone.upload-virtual-document')->middleware('throttle:10,1');
 
 Route::get('dropzone/fetch', [FileUploadController::class, 'fetch'])->name('dropzone.fetch');
 
@@ -159,8 +165,7 @@ Route::get('cron/last-updated-orders', [\App\Http\Controllers\CronController::cl
 Route::get('cron/check-kyc-expirations', [\App\Http\Controllers\CronController::class, 'checkKycExpirations']);
 
 
-/* TEST */
-Route::get('test/manualSQL', [\App\Http\Controllers\HomeController::class, 'manualSQL']);
+/* TEST routes moved to environment check above */
 
 Route::get('/report', [\App\Http\Controllers\HomeController::class, 'report']);
 

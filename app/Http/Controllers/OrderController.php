@@ -109,7 +109,14 @@ class OrderController extends BaseController
         $orderNo->value = $orderNo->value + 1;
         $orderNo->save();
 
-        Order::create(array_merge($request->all(), array('number' => $orderNumber)));
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $orderData = $request->only([
+            'name', 'description', 'company_id', 'person_id', 'notes', 
+            'responsible_user_id', 'status', 'payment_status', 'awaiting_status', 
+            'notification_sent', 'paid_date', 'renewed_from_order_id'
+        ]);
+        $orderData['number'] = $orderNumber;
+        Order::create($orderData);
 
         return redirect()->route('orders.index')
             ->with('success','Order created successfully.');
@@ -193,7 +200,14 @@ class OrderController extends BaseController
             mail($responsibleUserEmail,"Order ".$company->name." is now ".$request->payment_status,$message,$headers);
         }
 
-        $order->update(array_merge($request->all(), ['notification_sent' => false]));
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $orderData = $request->only([
+            'name', 'number', 'description', 'company_id', 'person_id', 'notes', 
+            'responsible_user_id', 'status', 'payment_status', 'awaiting_status', 
+            'notification_sent', 'paid_date', 'renewed_from_order_id'
+        ]);
+        $orderData['notification_sent'] = false;
+        $order->update($orderData);
 
         //dd($request->services);
         if($request->services){

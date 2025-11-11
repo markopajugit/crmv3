@@ -11,6 +11,11 @@ use Illuminate\Http\Request;
 
 class SearchController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function search(Request $request){
         $category = $request->get('category');
         $keyword = $request->get('s');
@@ -225,8 +230,17 @@ class SearchController extends Controller
     }
 
     public function autoComplete(Request $request){
-        $category = $request->get('category');
-        $keyword = $request->get('s');
+        // Validate and sanitize input
+        $category = $request->get('category', '');
+        $keyword = $request->get('s', '');
+        
+        // Sanitize keyword to prevent XSS
+        $keyword = htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8');
+        
+        // Validate category
+        if (!in_array($category, ['companies', 'persons', ''])) {
+            return response()->json(['error' => 'Invalid category'], 400);
+        }
 
         if($category == 'companies'){
             $data = [
@@ -257,43 +271,43 @@ class SearchController extends Controller
             }elseif ($class == 'orders'){
                 $icon = '<i class="fa-solid fa-file"></i>';
             }
-            foreach($classData as $data){
+            foreach($classData as $item){
                 if($class == 'persons'){
                     $desc = '';
-                    if($data->date_of_birth){
-                        $desc = ' ('.$data->date_of_birth.')';
+                    if($item->date_of_birth){
+                        $desc = ' (' . htmlspecialchars($item->date_of_birth, ENT_QUOTES, 'UTF-8') . ')';
                     }
-                    $output .= '
-               <li>'.$icon.'</i><a href="/'.$class.'/'.$data->id.'">'.$data->name.$desc.'</a></li>
-               ';
+                    $output .= '<li>' . $icon . '<a href="/' . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . '/' . (int)$item->id . '">' . htmlspecialchars($item->name, ENT_QUOTES, 'UTF-8') . $desc . '</a></li>';
                 } elseif ($class == 'companies'){
                     $desc = '';
-                    if($data->registration_country_abbr){
-                        $desc = ' ('.strtoupper($data->registration_country_abbr).')';
+                    if($item->registration_country_abbr){
+                        $desc = ' (' . htmlspecialchars(strtoupper($item->registration_country_abbr), ENT_QUOTES, 'UTF-8') . ')';
                     }
-
-                    $output .= '
-               <li>'.$icon.'</i><a href="/'.$class.'/'.$data->id.'">'.$data->name.$desc.'</a></li>
-               ';
+                    $output .= '<li>' . $icon . '<a href="/' . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . '/' . (int)$item->id . '">' . htmlspecialchars($item->name, ENT_QUOTES, 'UTF-8') . $desc . '</a></li>';
                 } elseif ($class == 'orders'){
                     $desc = '';
-                    $orderName = $data->name ?? '';
-                    $output .= '
-               <li>'.$icon.'</i><a href="/'.$class.'/'.$data->id.'">'.$orderName.$desc.'</a></li>
-               ';
+                    $orderName = $item->name ?? '';
+                    $output .= '<li>' . $icon . '<a href="/' . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . '/' . (int)$item->id . '">' . htmlspecialchars($orderName, ENT_QUOTES, 'UTF-8') . $desc . '</a></li>';
                 }
-
             }
         }
         $output .= '</ul>';
-        echo $output;
-
-        //return response()->json($data);
+        
+        return response($output)->header('Content-Type', 'text/html; charset=utf-8');
     }
 
     public function autoCompleteModal(Request $request){
-        $category = $request->get('category');
-        $keyword = $request->get('s');
+        // Validate and sanitize input
+        $category = $request->get('category', '');
+        $keyword = $request->get('s', '');
+        
+        // Sanitize keyword
+        $keyword = htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8');
+        
+        // Validate category
+        if (!in_array($category, ['companies', 'persons', ''])) {
+            return response()->json(['error' => 'Invalid category'], 400);
+        }
 
         if($category == 'companies'){
             $data = [
@@ -312,7 +326,6 @@ class SearchController extends Controller
             ];
         }
 
-        //dd($data);
         $output = '<ul>';
         $desc = '';
         foreach($data as $class => $classData)
@@ -323,38 +336,44 @@ class SearchController extends Controller
             } elseif ($class == 'companies'){
                 $icon = '<i class="fa-solid fa-building"></i>';
             }
-            foreach($classData as $data){
+            foreach($classData as $item){
+                $desc = '';
                 if($class == 'persons'){
-                    if($data->date_of_birth){
-                        $desc = ' ('.$data->date_of_birth.')';
+                    if($item->date_of_birth){
+                        $desc = ' (' . htmlspecialchars($item->date_of_birth, ENT_QUOTES, 'UTF-8') . ')';
                     }
                 } elseif ($class == 'companies'){
-                    if($data->registration_country_abbr){
-                        $desc = ' ('.strtoupper($data->registration_country_abbr).')';
+                    if($item->registration_country_abbr){
+                        $desc = ' (' . htmlspecialchars(strtoupper($item->registration_country_abbr), ENT_QUOTES, 'UTF-8') . ')';
                     }
                 }
-                $output .= '
-               <li class="modal-search-result" data-type="'.$class.'" data-id="'.$data->id.'" data-vat="'.$data->vat.'" data-street="'.$data->address_street.'" data-city="'.$data->address_city.'" data-zip="'.$data->address_zip.'" data-country="'.$data->address_dropdown.'" data-reg="'.$data->registry_code.'">'.$icon.'</i>'.$data->name. $desc.'</li>
-               ';
+                // Escape all attributes to prevent XSS
+                $output .= '<li class="modal-search-result" data-type="' . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . 
+                    '" data-id="' . (int)$item->id . 
+                    '" data-vat="' . htmlspecialchars($item->vat ?? '', ENT_QUOTES, 'UTF-8') . 
+                    '" data-street="' . htmlspecialchars($item->address_street ?? '', ENT_QUOTES, 'UTF-8') . 
+                    '" data-city="' . htmlspecialchars($item->address_city ?? '', ENT_QUOTES, 'UTF-8') . 
+                    '" data-zip="' . htmlspecialchars($item->address_zip ?? '', ENT_QUOTES, 'UTF-8') . 
+                    '" data-country="' . htmlspecialchars($item->address_dropdown ?? '', ENT_QUOTES, 'UTF-8') . 
+                    '" data-reg="' . htmlspecialchars($item->registry_code ?? '', ENT_QUOTES, 'UTF-8') . 
+                    '">' . $icon . htmlspecialchars($item->name, ENT_QUOTES, 'UTF-8') . $desc . '</li>';
             }
         }
         $output .= '</ul>';
-        echo $output;
-
-        //return response()->json($data);
+        
+        return response($output)->header('Content-Type', 'text/html; charset=utf-8');
     }
 
     public function autoCompleteModalUser(Request $request){
-        $category = $request->get('category');
-        $keyword = $request->get('s');
-
+        // Validate and sanitize input
+        $keyword = $request->get('s', '');
+        $keyword = htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8');
 
         $data = [
             'users' => User::where('name','LIKE','%'.$keyword.'%')->limit(5)->get()
         ];
 
-
-        $output = '';
+        $output = '<ul>';
         foreach($data as $class => $classData)
         {
             $icon = '';
@@ -362,27 +381,26 @@ class SearchController extends Controller
                 $icon = '<i class="fa-solid fa-user-tie"></i>';
             }
 
-            foreach($classData as $data){
-
-                $output .= '
-               <li class="modal-search-result" data-id="'.$data->id.'">'.$icon.'</i>'.$data->name.'</li>
-               ';
+            foreach($classData as $item){
+                $output .= '<li class="modal-search-result" data-id="' . (int)$item->id . '">' . 
+                    $icon . htmlspecialchars($item->name, ENT_QUOTES, 'UTF-8') . '</li>';
             }
         }
         $output .= '</ul>';
-        echo $output;
-
-        //return response()->json($data);
+        
+        return response($output)->header('Content-Type', 'text/html; charset=utf-8');
     }
 
     public function autoCompleteModalPerson(Request $request){
-        $keyword = $request->get('s');
+        // Validate and sanitize input
+        $keyword = $request->get('s', '');
+        $keyword = htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8');
 
         $data = [
             'users' => Person::where('name','LIKE','%'.$keyword.'%')->limit(5)->get()
         ];
 
-        $output = '';
+        $output = '<ul>';
         foreach($data as $class => $classData)
         {
             $icon = '';
@@ -390,17 +408,16 @@ class SearchController extends Controller
                 $icon = '<i class="fa-solid fa-user"></i>';
             }
 
-            foreach($classData as $data){
-
-                $output .= '
-               <li class="modal-search-result" data-email="'.$data->email.'" data-id="'.$data->id.'">'.$icon.'</i>'.$data->name.'</li>
-               ';
+            foreach($classData as $item){
+                $output .= '<li class="modal-search-result" data-email="' . 
+                    htmlspecialchars($item->email ?? '', ENT_QUOTES, 'UTF-8') . 
+                    '" data-id="' . (int)$item->id . '">' . 
+                    $icon . htmlspecialchars($item->name, ENT_QUOTES, 'UTF-8') . '</li>';
             }
         }
         $output .= '</ul>';
-        echo $output;
-
-        //return response()->json($data);
+        
+        return response($output)->header('Content-Type', 'text/html; charset=utf-8');
     }
 
     public function searchDocuments(Request $request){

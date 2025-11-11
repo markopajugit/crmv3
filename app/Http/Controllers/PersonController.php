@@ -83,7 +83,14 @@ class PersonController extends Controller
             'name' => 'required'
         ]);
 
-        $person = Person::create($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $personData = $request->only([
+            'name', 'address_street', 'address_city', 'address_zip', 'address_dropdown', 
+            'id_code', 'id_code_est', 'email', 'phone', 'tax_residency', 'notes', 
+            'date_of_birth', 'country', 'address_note', 'email_note', 'phone_note', 
+            'birthplace_country', 'birthplace_city', 'citizenship', 'pep'
+        ]);
+        $person = Person::create($personData);
 
         $person->companies()->sync($request->companies);
 
@@ -134,7 +141,14 @@ class PersonController extends Controller
      */
     public function update(Request $request, Person $person)
     {
-        $person->update($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $personData = $request->only([
+            'name', 'address_street', 'address_city', 'address_zip', 'address_dropdown', 
+            'id_code', 'id_code_est', 'email', 'phone', 'tax_residency', 'notes', 
+            'date_of_birth', 'country', 'address_note', 'email_note', 'phone_note', 
+            'birthplace_country', 'birthplace_city', 'citizenship', 'pep'
+        ]);
+        $person->update($personData);
         $relatedPersonsFromDB = PersonCompany::where('person_id', $person->id)->where('company_id', null)->get();
         $relatedPersons = array();
         foreach($relatedPersonsFromDB as $relatedPerson){

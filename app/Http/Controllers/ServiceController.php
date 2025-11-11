@@ -94,7 +94,9 @@ class ServiceController extends Controller
      */
     public function store(Request $request)
     {
-        $service = Service::create($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $serviceData = $request->only(['name', 'cost', 'type', 'service_category_id', 'reaccuring_frequency']);
+        $service = Service::create($serviceData);
 
         return redirect()->route('services.index')
             ->with('success','Service created successfully.');
@@ -108,7 +110,9 @@ class ServiceController extends Controller
      */
     public function storeCategory(Request $request)
     {
-        $service = ServiceCategory::create($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $categoryData = $request->only(['name']);
+        $service = ServiceCategory::create($categoryData);
 
         return redirect()->route('services.index')
             ->with('success','Service Category created successfully.');
@@ -158,13 +162,21 @@ class ServiceController extends Controller
      */
     public function update(Request $request, Service $service)
     {
-        $service->update($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $serviceData = $request->only(['name', 'cost', 'type', 'service_category_id', 'reaccuring_frequency']);
+        $service->update($serviceData);
+        
+        return response()->json(['success' => true, 'message' => 'Service updated successfully']);
     }
 
     public function updateCategory(Request $request, $id)
     {
-        $serviceCategory = ServiceCategory::find($id);
-        $serviceCategory->update($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $categoryData = $request->only(['name']);
+        $serviceCategory = ServiceCategory::findOrFail($id);
+        $serviceCategory->update($categoryData);
+        
+        return response()->json(['success' => true, 'message' => 'Category updated successfully']);
     }
 
     /**

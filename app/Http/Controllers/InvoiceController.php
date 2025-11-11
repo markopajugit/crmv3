@@ -107,7 +107,9 @@ class InvoiceController extends Controller
 
 
             if($request->is_proforma){
-                $count = Invoice::whereRaw("number LIKE CONCAT(DATE_FORMAT(NOW(), '%Y%m%d'), '%')")->count();
+                // Use parameterized query to prevent SQL injection
+                $datePrefix = date('Ymd');
+                $count = Invoice::where('number', 'LIKE', $datePrefix . '%')->count();
 
                 $nextInvoiceNo = '000';
                 if($count > 0){
@@ -115,12 +117,18 @@ class InvoiceController extends Controller
                     $nextInvoiceNo = sprintf("%03d", $next);
                 }
 
-                $newArray = array_merge($request->all(), array('number' => date('Ymd').$nextInvoiceNo));
+                // Only allow fillable fields to prevent mass assignment vulnerability
+                $invoiceData = $request->only([
+                    'service_id', 'order_id', 'issue_date', 'payment_date', 'vat', 
+                    'vat_no', 'status', 'vat_comment', 'is_proforma', 'registry_code', 
+                    'payer_name', 'street', 'city', 'zip', 'country'
+                ]);
+                $invoiceData['number'] = date('Ymd') . $nextInvoiceNo;
 
-                $invoice = Invoice::create($newArray);
+                $invoice = Invoice::create($invoiceData);
 
                 // Generate PDF asynchronously to avoid blocking the response
-                $this->savePDFAsync($invoice->id, $request->order_id, $request->all());
+                $this->savePDFAsync($invoice->id, $request->order_id, $invoiceData);
             } else {
 
                 $currentOrder = Order::find($request->order_id);
@@ -128,12 +136,18 @@ class InvoiceController extends Controller
                     throw new \Exception('Order not found');
                 }
                 $invoiceNo = $currentOrder->number;
-                $InvoiceData = array_merge($request->all(), array('number' => $invoiceNo));
-                //dd($request);
-                $invoice = Invoice::create($InvoiceData);
+                // Only allow fillable fields to prevent mass assignment vulnerability
+                $invoiceData = $request->only([
+                    'service_id', 'order_id', 'issue_date', 'payment_date', 'vat', 
+                    'vat_no', 'status', 'vat_comment', 'is_proforma', 'registry_code', 
+                    'payer_name', 'street', 'city', 'zip', 'country'
+                ]);
+                $invoiceData['number'] = $invoiceNo;
+                
+                $invoice = Invoice::create($invoiceData);
 
                 // Generate PDF asynchronously to avoid blocking the response
-                $this->savePDFAsync($invoice->id, $request->order_id, $InvoiceData);
+                $this->savePDFAsync($invoice->id, $request->order_id, $invoiceData);
             }
 
             // If AJAX request, return JSON response immediately (PDF generation happens in background)

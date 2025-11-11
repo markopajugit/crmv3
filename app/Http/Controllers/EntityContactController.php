@@ -10,27 +10,53 @@ use Illuminate\Http\Request;
 
 class EntityContactController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function getEntityContacts(Request $request){
+        // Validate input
+        $request->validate([
+            'entity' => 'required|in:person,company',
+            'entity_id' => 'required|integer'
+        ]);
+
+        $output = '<br>';
+        
         if($request->entity == 'person'){
-            $person = Person::find($request->entity_id);
-            $contacts = '<br><input type="radio" id="main" name="emails" value="'.$person->email.'"> <label for="main">'.$person->email.'</label><br>';
+            $person = Person::findOrFail($request->entity_id);
+            $email = htmlspecialchars($person->email ?? '', ENT_QUOTES, 'UTF-8');
+            $output .= '<input type="radio" id="main" name="emails" value="' . $email . '"> <label for="main">' . $email . '</label><br>';
             foreach($person->getContacts as $contact){
-                $contacts .= '<input type="radio" id="other-'.$contact->id.'" name="emails" value="'.$contact->value.'"> <label for="main">'.$contact->value.'</label><br>';
+                $contactValue = htmlspecialchars($contact->value ?? '', ENT_QUOTES, 'UTF-8');
+                $output .= '<input type="radio" id="other-' . (int)$contact->id . '" name="emails" value="' . $contactValue . '"> <label for="other-' . (int)$contact->id . '">' . $contactValue . '</label><br>';
             }
-            echo $contacts;
         }
 
         if($request->entity == 'company'){
-            $person = Company::find($request->entity_id);
-            $contacts = '<br><input type="radio" id="main" name="emails" value="'.$person->email.'"> <label for="main">'.$person->email.'</label><br>';
-            foreach($person->getContacts as $contact){
-                $contacts .= '<input type="radio" id="other-'.$contact->id.'" name="emails" value="'.$contact->value.'"> <label for="main">'.$contact->value.'</label><br>';
+            $company = Company::findOrFail($request->entity_id);
+            $email = htmlspecialchars($company->email ?? '', ENT_QUOTES, 'UTF-8');
+            $output .= '<input type="radio" id="main" name="emails" value="' . $email . '"> <label for="main">' . $email . '</label><br>';
+            foreach($company->getContacts as $contact){
+                $contactValue = htmlspecialchars($contact->value ?? '', ENT_QUOTES, 'UTF-8');
+                $output .= '<input type="radio" id="other-' . (int)$contact->id . '" name="emails" value="' . $contactValue . '"> <label for="other-' . (int)$contact->id . '">' . $contactValue . '</label><br>';
             }
-            echo $contacts;
         }
+        
+        return response($output)->header('Content-Type', 'text/html; charset=utf-8');
     }
 
     public function updateEntityContact(Request $request, $contactId){
+        $request->validate([
+            'entity' => 'required|in:person,company',
+            'type' => 'required|in:email,phone,taxResidency',
+            'value' => 'required|string|max:255',
+            'note' => 'nullable|string|max:1000',
+            'person_id' => 'nullable|integer|exists:persons,id',
+            'company_id' => 'nullable|integer|exists:companies,id',
+            'old_email' => 'nullable|string|max:255'
+        ]);
         if($contactId == 0){
             if($request->entity == 'person'){
                 $person = Person::find($request->person_id);
@@ -92,6 +118,13 @@ class EntityContactController extends Controller
     }
 
     public function addNewEntityContact(Request $request, $entityId){
+        $request->validate([
+            'entity' => 'required|in:person,company',
+            'type' => 'required|in:email,phone',
+            'value' => 'required|string|max:255',
+            'note' => 'nullable|string|max:1000'
+        ]);
+        
         $entityContact = new EntityContact;
         if($request->entity == 'person'){
             $entityContact->person_id = $entityId;
@@ -102,11 +135,15 @@ class EntityContactController extends Controller
         $entityContact->type = $request->type;
         $entityContact->note = $request->note;
         $entityContact->save();
+        
+        return response()->json(['success' => true, 'message' => 'Contact added successfully']);
     }
 
 
     public function deleteEntityContact($contactId){
-        $entityContact = EntityContact::find($contactId);
+        $entityContact = EntityContact::findOrFail($contactId);
         $entityContact->delete();
+        
+        return response()->json(['success' => true, 'message' => 'Contact deleted successfully']);
     }
 }

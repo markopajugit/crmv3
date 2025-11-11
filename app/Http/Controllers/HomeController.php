@@ -542,7 +542,11 @@ class HomeController extends BaseController
     }
 
     public function addMissingCompanies(){
-        $results = DB::select(DB::raw('SELECT id,related_company FROM `company_person` WHERE related_company is not null'));
+        // Use parameterized query instead of raw SQL
+        $results = DB::table('company_person')
+            ->select('id', 'related_company')
+            ->whereNotNull('related_company')
+            ->get();
     }
 
     public function importData(){

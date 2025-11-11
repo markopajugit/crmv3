@@ -88,7 +88,14 @@ class CompanyController extends BaseController
             $companyNo->save();
         }
 
-        $company = Company::create($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $companyData = $request->only([
+            'name', 'number', 'registry_code', 'registration_country', 'registration_date', 
+            'vat', 'notes', 'address_street', 'address_city', 'address_zip', 'address_dropdown', 
+            'email', 'phone', 'address_note', 'email_note', 'phone_note', 'deleted', 
+            'kyc_start', 'kyc_end', 'kyc_reason', 'tax_residency', 'activity_code', 'activity_code_description'
+        ]);
+        $company = Company::create($companyData);
 
         $company->persons()->sync($request->persons);
 
@@ -174,7 +181,14 @@ class CompanyController extends BaseController
             }
         }
 
-        $company->update($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $companyData = $request->only([
+            'name', 'number', 'registry_code', 'registration_country', 'registration_date', 
+            'vat', 'notes', 'address_street', 'address_city', 'address_zip', 'address_dropdown', 
+            'email', 'phone', 'address_note', 'email_note', 'phone_note', 'deleted', 
+            'kyc_start', 'kyc_end', 'kyc_reason', 'tax_residency', 'activity_code', 'activity_code_description'
+        ]);
+        $company->update($companyData);
 
         $relatedCompaniesQuery = PersonCompany::where('company_id', $company->id)->whereNull('person_id')->get();
         $relatedCompanies = array();

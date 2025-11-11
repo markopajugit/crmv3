@@ -9,12 +9,28 @@ use Illuminate\Http\Request;
 
 class EntityAddressController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function deleteEntityAddress($contactId){
-        $entityContact = EntityAddress::find($contactId);
-        $entityContact->delete();
+        $entityAddress = EntityAddress::findOrFail($contactId);
+        $entityAddress->delete();
+        
+        return response()->json(['success' => true, 'message' => 'Address deleted successfully']);
     }
 
     public function addNewEntityAddress(Request $request, $entityId){
+        $request->validate([
+            'entity' => 'required|in:person,company',
+            'street' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'zip' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:255',
+            'address_note' => 'nullable|string|max:1000'
+        ]);
+        
         $entityAddress = new EntityAddress();
         if($request->entity == 'person'){
             $entityAddress->person_id = $entityId;
@@ -27,9 +43,21 @@ class EntityAddressController extends Controller
         $entityAddress->country = $request->country;
         $entityAddress->note = $request->address_note;
         $entityAddress->save();
+        
+        return response()->json(['success' => true, 'message' => 'Address added successfully']);
     }
 
     public function updateEntityAddress(Request $request, $contactId){
+        $request->validate([
+            'entity' => 'required|in:person,company',
+            'street' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'zip' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:255',
+            'address_note' => 'nullable|string|max:1000',
+            'person_id' => 'nullable|integer|exists:persons,id',
+            'company_id' => 'nullable|integer|exists:companies,id'
+        ]);
         if($contactId == 0){
             if($request->entity == 'person'){
                 $person = Person::find($request->person_id);
@@ -57,5 +85,7 @@ class EntityAddressController extends Controller
             $entityAddress->note = $request->address_note;
             $entityAddress->save();
         }
+        
+        return response()->json(['success' => true, 'message' => 'Address updated successfully']);
     }
 }
