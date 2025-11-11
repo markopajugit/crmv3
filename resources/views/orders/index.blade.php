@@ -68,7 +68,7 @@
             @endphp
             @foreach ($order->orderServices as $service)
                 @php
-                    $servicesTotalCost = $servicesTotalCost + $service->cost;
+                    $servicesTotalCost = $servicesTotalCost + $service->cost; 
                 @endphp
             @endforeach
             <tr class="clickable" onclick="window.location='/orders/{{ $order->id }}';">
