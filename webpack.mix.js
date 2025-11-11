@@ -1,4 +1,5 @@
 const mix = require('laravel-mix');
+const path = require('path');
 
 /*
  |--------------------------------------------------------------------------
@@ -13,4 +14,16 @@ const mix = require('laravel-mix');
 
 mix.js('resources/js/app.js', 'public/js')
     .sass('resources/sass/app.scss', 'public/css')
-    .sourceMaps();
+    .sourceMaps()
+    .setPublicPath('public')
+    .webpackConfig({
+        context: path.resolve(__dirname),
+        resolve: {
+            extensions: ['.js', '.json', '.wasm'],
+            modules: ['node_modules', path.resolve(__dirname, 'resources')],
+            alias: {}
+        }
+    })
+    .options({
+        processCssUrls: false
+    });
