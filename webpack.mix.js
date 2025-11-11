@@ -12,8 +12,20 @@ const mix = require('laravel-mix');
  */
 
 mix.js('resources/js/app.js', 'public/js')
+    .extract([
+        'jquery',
+        'jquery-ui',
+        'bootstrap',
+        '@popperjs/core',
+        '@coreui/coreui',
+        'axios',
+        'lodash'
+    ])
     .sass('resources/sass/app.scss', 'public/css')
     .sourceMaps()
+    .options({
+        processCssUrls: false
+    })
     .webpackConfig({
         resolve: {
             extensions: ['.wasm', '.mjs', '.js', '.jsx', '.json'],

@@ -9,15 +9,8 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
-
-    <script src="{{ asset('js/app.js') }}" defer></script>
-
-
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
-
-
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <!-- Stylesheets -->
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
 </head>
 <body class="login">
 <div id="app">
@@ -78,5 +71,10 @@
         @yield('content')
     </main>
 </div>
+
+<!-- Scripts -->
+<script src="{{ mix('js/vendor.js') }}"></script>
+<script src="{{ mix('js/app.js') }}"></script>
+
 </body>
 </html>

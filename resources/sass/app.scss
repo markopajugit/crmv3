@@ -7,5 +7,17 @@
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
 
+// CoreUI
+@import '~@coreui/coreui/dist/css/coreui.min.css';
 
+// jQuery UI
+@import '~jquery-ui/themes/ui-lightness/jquery-ui.css';
+
+// Font Awesome
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '~@fortawesome/fontawesome-free/scss/solid';
+@import '~@fortawesome/fontawesome-free/scss/regular';
+@import '~@fortawesome/fontawesome-free/scss/brands';
+
+// Custom styles
 @import 'style';
