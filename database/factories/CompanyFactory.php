@@ -28,7 +28,7 @@ class CompanyFactory extends Factory
             'registry_code' => $this->faker->postcode(),
             'registration_country' => $country,
             'registration_country_abbr' => substr($country, 0, 3),
-            'email' => $this->faker->unique()->safeEmail(),
+            'email' => $this->faker->safeEmail() . '_' . uniqid(),
             'address' => $this->faker->address(),
             'vat' => $this->faker->postcode(),
             'notes' => $this->faker->text(),

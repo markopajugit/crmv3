@@ -16,9 +16,9 @@ class PersonFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'address' => $this->faker->address(),
-            'id_code' => $this->faker->creditCardNumber(),
-            'date_of_birth' => $this->faker->unique()->dateTimeBetween('-50 years', '-20 years')->format('d-m-Y'),
-            'email' => $this->faker->email(),
+            'id_code' => $this->faker->creditCardNumber() . '_' . uniqid(),
+            'date_of_birth' => $this->faker->dateTimeBetween('-50 years', '-20 years')->format('d-m-Y'),
+            'email' => $this->faker->email() . '_' . uniqid(),
             'country' => $this->faker->country(),
             'phone' => $this->faker->phoneNumber(),
             'notes' => $this->faker->text(),
