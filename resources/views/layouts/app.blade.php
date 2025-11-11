@@ -133,7 +133,7 @@
         </div>
     </div>
     <footer class="footer">
-        <div class="ms-auto" style="font-size: 10px; color: #ced4da;">Hardcoded OÜ v3.0.1</div>
+        <div class="ms-auto" style="font-size: 10px; color: #ced4da;">Hardcoded OÜ v2.3.5</div>
     </footer>
 </div>
 
