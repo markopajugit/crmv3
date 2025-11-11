@@ -15,7 +15,7 @@ class OrderService extends Model
      * @var array
      */
     protected $fillable = [
-        'service_id', 'order_id', 'cost', 'name', 'date_from', 'date_to'
+        'service_id', 'order_id', 'cost', 'name', 'date_from', 'date_to', 'renewed'
     ];
 
     protected $table = 'order_service';
