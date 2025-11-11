@@ -626,73 +626,89 @@
 
 
     <script type="text/javascript">
+        // Wait for jQuery to be loaded
+        (function() {
+            function initPersonCreate() {
+                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
+                    // jQuery not loaded yet, wait a bit and try again
+                    setTimeout(initPersonCreate, 50);
+                    return;
+                }
 
-        $( "#insertedDateOfBirth" ).datepicker({
-            changeMonth: true,
-            changeYear: true,
-            yearRange: "-100:+0",
-            dateFormat: "dd.mm.yy"
-        });
+                var $ = window.jQuery;
 
-        function printErrorMsg(msg) {
-            $(".print-error-msg").find("ul").html('');
-            $(".print-error-msg").css('display', 'block');
-            $.each(msg, function (key, value) {
-                $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
-            });
-        }
+                $( "#insertedDateOfBirth" ).datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "-100:+0",
+                    dateFormat: "dd.mm.yy"
+                });
 
-        $('.saveNewPerson').on('click', function(){
+                function printErrorMsg(msg) {
+                    $(".print-error-msg").find("ul").html('');
+                    $(".print-error-msg").css('display', 'block');
+                    $.each(msg, function (key, value) {
+                        $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
+                    });
+                }
 
-            $('#name').val($('#insertedName').val());
-            $('#date_of_birth').val($('#insertedDateOfBirth').val());
-            $('#country').val($('#insertedCountry').val());
-            $('#id_code').val($('#insertedIdCode').val());
-            $('#id_code_est').val($('#insertedEstIdCode').val());
-            $('#email').val($('#insertedEmail').val());
-            $('#address_street').val($('#insertedAddressStreet').val());
-            $('#address_city').val($('#insertedAddressCity').val());
-            $('#address_zip').val($('#insertedAddressZip').val());
-            $('#address_dropdown').val($('#insertedAddressDropdown').val());
-            $('#phone').val($('#insertedPhone').val());
-            $('#notes').val($('#insertedNotes').val());
+                $('.saveNewPerson').on('click', function(){
 
-            $('#addNewPerson').submit();
-        });
+                    $('#name').val($('#insertedName').val());
+                    $('#date_of_birth').val($('#insertedDateOfBirth').val());
+                    $('#country').val($('#insertedCountry').val());
+                    $('#id_code').val($('#insertedIdCode').val());
+                    $('#id_code_est').val($('#insertedEstIdCode').val());
+                    $('#email').val($('#insertedEmail').val());
+                    $('#address_street').val($('#insertedAddressStreet').val());
+                    $('#address_city').val($('#insertedAddressCity').val());
+                    $('#address_zip').val($('#insertedAddressZip').val());
+                    $('#address_dropdown').val($('#insertedAddressDropdown').val());
+                    $('#phone').val($('#insertedPhone').val());
+                    $('#notes').val($('#insertedNotes').val());
 
-        $(document).ready(function() {
-            //set initial state.
-            $('#kyc').val(this.checked);
+                    $('#addNewPerson').submit();
+                });
 
-            $('#kyc').change(function() {
-                if(this.checked) {
-                    //alert("is checked");
+                $(document).ready(function() {
+                    //set initial state.
+                    $('#kyc').val(this.checked);
 
-                    $.ajax({
-                        url: "{{ route('getKYC') }}",
-                        method: 'GET',
-                        data: {
-                            'name' : 'alexandr+ivanov'
-                            // If you need to send any data to the server, include it here
-                            // For example:
-                            // 'data': $('#yourDataInputId').val()
-                        },
-                        success: function(response) {
-                            // Handle the response from the server
-                            $('#kycresult').html(response);
-                            //alert(response);
-                        },
-                        error: function(xhr, status, error) {
-                            // Handle errors
-                            alert(xhr.responseText);
+                    $('#kyc').change(function() {
+                        if(this.checked) {
+                            //alert("is checked");
+
+                            $.ajax({
+                                url: "{{ route('getKYC') }}",
+                                method: 'GET',
+                                data: {
+                                    'name' : 'alexandr+ivanov'
+                                    // If you need to send any data to the server, include it here
+                                    // For example:
+                                    // 'data': $('#yourDataInputId').val()
+                                },
+                                success: function(response) {
+                                    // Handle the response from the server
+                                    $('#kycresult').html(response);
+                                    //alert(response);
+                                },
+                                error: function(xhr, status, error) {
+                                    // Handle errors
+                                    alert(xhr.responseText);
+                                }
+                            });
+
                         }
                     });
+                });
+            }
 
-                }
-            });
-        });
-
-
-
+            // Start initialization
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initPersonCreate);
+            } else {
+                initPersonCreate();
+            }
+        })();
     </script>
 @endsection

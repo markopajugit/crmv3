@@ -973,6 +973,15 @@ list-style: none;">
     </div>
 
     <script type="text/javascript">
+        // Wait for jQuery to be loaded
+        (function() {
+            function initCompanyShowMain() {
+                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
+                    setTimeout(initCompanyShowMain, 50);
+                    return;
+                }
+
+                var $ = window.jQuery;
 
         $( "#authorised_person_deadline" ).datepicker({
             changeMonth: true,
@@ -3508,6 +3517,16 @@ list-style: none;">
                 $('#editKycResponsibleUserResults').hide();
             });
         });
+
+            } // end initCompanyShowMain
+
+            // Start initialization
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initCompanyShowMain);
+            } else {
+                initCompanyShowMain();
+            }
+        })();
     </script>
 
 @endsection

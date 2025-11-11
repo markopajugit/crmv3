@@ -39,7 +39,7 @@ class Person extends Model
     }
 
     public function getAddresses(){
-        return $this->hasMany(EntityAddress::class);
+        return $this->morphMany(EntityAddress::class, 'addressable');
     }
 
     public function getCurrentRisk(){
