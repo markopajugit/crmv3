@@ -249,12 +249,12 @@
                 </div>
                 <div class="panel-body">
                     <table class="table">
-                        <tr id="dateRow">
+                        <tr id="dateRow" data-current-value="{{ $company->registration_date }}">
                             <td style="width:50%"><strong>Registration date:</strong></td>
                             <td id="currentRegistrationDate">{{ $company->registration_date }}</td>
                             <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editDate"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
                         </tr>
-                        <tr id="vatRow">
+                        <tr id="vatRow" data-current-value="{{ $company->vat }}">
                             <td style="width:50%"><strong>VAT No:</strong></td>
                             <td id="currentVat">{{ $company->vat }}</td>
                             <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editVat"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
@@ -264,7 +264,7 @@
                             <td id="currentAddress">{{ $company->address_street }}@if($company->address_city), {{ $company->address_city }}@endif <br> {{ $company->address_zip }}@if($company->address_dropdown), {{ $company->address_dropdown }}@endif</td>
                             <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editAddress"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
                         </tr>-->
-                        <tr id="regCountryRow">
+                        <tr id="regCountryRow" data-current-value="{{ $company->registration_country }}">
                             <td style="width:50%"><strong>Registration country:</strong></td>
                             <td id="currentRegCountry">{{ $company->registration_country }}</td>
                             <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editRegCountry"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
@@ -395,17 +395,17 @@
                                     </tbody></table>
                             </td>
                         </tr>
-                        <tr id="kycRow">
+                        <tr id="kycRow" data-kyc-start="{{ $company->kyc_start }}" data-kyc-end="{{ $company->kyc_end }}" data-kyc-reason="{{ $company->kyc_reason }}">
                             <td style="width:50%"><strong>Service provision period:</strong></td>
                             <td id="currentKYC">Start: {{ $company->kyc_start }}<br>End: {{ $company->kyc_end }}<br>Reason: {{ $company->kyc_reason }}</td>
                             <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editKyc"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
                         </tr>
-                        <tr id="activityCodeRow">
+                        <tr id="activityCodeRow" data-current-value="{{ $company->activity_code }}">
                             <td style="width:50%"><strong>Activity Code:</strong></td>
                             <td id="currentActivityCode">{{ $company->activity_code }}</td>
                             <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editActivityCode"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
                         </tr>
-                        <tr id="activityCodeDescriptionRow">
+                        <tr id="activityCodeDescriptionRow" data-current-value="{{ $company->activity_code_description }}">
                             <td style="width:50%"><strong>Activity Code Description:</strong></td>
                             <td id="currentActivityCodeDescription">{{ $company->activity_code_description }}</td>
                             <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editActivityCodeDescription"></i><i style="display: none;" class="fa-solid fa-check"></i></td>

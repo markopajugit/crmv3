@@ -68,12 +68,22 @@ class CompanyEditor {
     }
 
     init() {
-        // Wait for DOM to be ready
-        if (document.readyState === 'loading') {
-            $(document).ready(() => this.initializeComponents());
-        } else {
-            this.initializeComponents();
+        // Wait for DOM and jQuery to be ready
+        const self = this;
+        function tryInit() {
+            if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
+                setTimeout(tryInit, 50);
+                return;
+            }
+            
+            const $ = window.jQuery;
+            if (document.readyState === 'loading') {
+                $(document).ready(() => self.initializeComponents());
+            } else {
+                self.initializeComponents();
+            }
         }
+        tryInit();
     }
 
     initializeComponents() {
@@ -173,11 +183,14 @@ class CompanyEditor {
      * Initialize date field editor
      */
     initDateFieldEditor(editSelector, rowSelector, fieldName, label, inputId, saveId) {
-        $(editSelector).on('click', () => {
-            $(editSelector).hide();
-            const currentValue = $(rowSelector).data('current-value') || '';
+        // Use event delegation for edit button
+        $('.panel-details').on('click', editSelector, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const $row = $(e.target).closest('tr');
+            const currentValue = $row.data('current-value') || $row.find('td').eq(1).text().trim();
             
-            $(rowSelector).html(`
+            $row.html(`
                 <td><b>${label}</b></td>
                 <td><input type="text" value="${this.escapeHtml(currentValue)}" id="${inputId}" class="form-control"></td>
                 <td><i class="fa-solid fa-check" id="${saveId}" style="cursor: pointer;"></i></td>
@@ -202,10 +215,9 @@ class CompanyEditor {
                 $(rowSelector).html(`
                     <td><b>${label}</b></td>
                     <td>${this.escapeHtml(displayValue)}</td>
-                    <td><i class="fa-solid fa-pen-to-square editDate" style="cursor: pointer;"></i></td>
+                    <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square ${editSelector.replace('.', '')}" style="cursor: pointer;"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
                 `);
                 $(rowSelector).data('current-value', displayValue);
-                this.initDateFieldEditor(editSelector, rowSelector, fieldName, label, inputId, saveId);
             });
         });
     }
@@ -214,11 +226,14 @@ class CompanyEditor {
      * Initialize text field editor
      */
     initTextFieldEditor(editSelector, rowSelector, fieldName, label, inputId, saveId) {
-        $(editSelector).on('click', () => {
-            $(editSelector).hide();
-            const currentValue = $(rowSelector).data('current-value') || '';
+        // Use event delegation for edit button
+        $('.panel-details').on('click', editSelector, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const $row = $(e.target).closest('tr');
+            const currentValue = $row.data('current-value') || $row.find('td').eq(1).text().trim();
             
-            $(rowSelector).html(`
+            $row.html(`
                 <td><b>${label}</b></td>
                 <td><input type="text" value="${this.escapeHtml(currentValue)}" id="${inputId}" class="form-control"></td>
                 <td><i class="fa-solid fa-check" id="${saveId}" style="cursor: pointer;"></i></td>
@@ -235,10 +250,9 @@ class CompanyEditor {
                 $(rowSelector).html(`
                     <td><b>${label}</b></td>
                     <td>${this.escapeHtml(displayValue)}</td>
-                    <td><i class="fa-solid fa-pen-to-square ${editSelector.replace('.', '')}" style="cursor: pointer;"></i></td>
+                    <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square ${editSelector.replace('.', '')}" style="cursor: pointer;"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
                 `);
                 $(rowSelector).data('current-value', displayValue);
-                this.initTextFieldEditor(editSelector, rowSelector, fieldName, label, inputId, saveId);
             });
         });
     }
@@ -247,9 +261,12 @@ class CompanyEditor {
      * Initialize select field editor
      */
     initSelectFieldEditor(editSelector, rowSelector, fieldName, label, selectId, saveId, options) {
-        $(editSelector).on('click', () => {
-            $(editSelector).hide();
-            const currentValue = $(rowSelector).data('current-value') || '';
+        // Use event delegation for edit button
+        $('.panel-details').on('click', editSelector, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const $row = $(e.target).closest('tr');
+            const currentValue = $row.data('current-value') || $row.find('td').eq(1).text().trim();
             
             let optionsHtml = '<option value="">Select country</option>';
             options.forEach(country => {
@@ -257,7 +274,7 @@ class CompanyEditor {
                 optionsHtml += `<option value="${this.escapeHtml(country)}" ${selected}>${this.escapeHtml(country)}</option>`;
             });
             
-            $(rowSelector).html(`
+            $row.html(`
                 <td><b>${label}</b></td>
                 <td><select id="${selectId}" class="form-control">${optionsHtml}</select></td>
                 <td><i class="fa-solid fa-check" id="${saveId}" style="cursor: pointer;"></i></td>
@@ -274,10 +291,9 @@ class CompanyEditor {
                 $(rowSelector).html(`
                     <td><b>${label}</b></td>
                     <td>${this.escapeHtml(displayValue)}</td>
-                    <td><i class="fa-solid fa-pen-to-square ${editSelector.replace('.', '')}" style="cursor: pointer;"></i></td>
+                    <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square ${editSelector.replace('.', '')}" style="cursor: pointer;"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
                 `);
                 $(rowSelector).data('current-value', displayValue);
-                this.initSelectFieldEditor(editSelector, rowSelector, fieldName, label, selectId, saveId, options);
             });
         });
     }
@@ -286,7 +302,8 @@ class CompanyEditor {
      * Initialize notes editor
      */
     initNotesEditor() {
-        $('.editNotes').on('click', () => {
+        // Use event delegation for edit button
+        $(document).on('click', '.editNotes', () => {
             $('.editNotes').html('<i class="fa-solid fa-pen-to-square"></i>Save').hide();
             $('.saveNotes').show();
             
@@ -311,22 +328,26 @@ class CompanyEditor {
      */
     initRiskEditor() {
         const self = this;
-        $('#riskEdit .fa-pen-to-square').on('click', function() {
+        // Use event delegation for edit button
+        $('.panel-details').on('click', '#riskEdit .fa-pen-to-square', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             const $riskSpan = $(this).parent().siblings('.currentCompanyRisk').children('span');
-            const currentRisk = $riskSpan.data('risk-level') || '1';
+            const currentRisk = $riskSpan.data('risk-level') || $riskSpan.text().trim() || '1';
+            const riskValue = currentRisk === 'LOW' ? '1' : (currentRisk === 'MEDIUM' ? '2' : (currentRisk === 'HIGH' ? '3' : '1'));
             
             $riskSpan.html(`
                 <select name="riskOptions" id="riskOptions" class="form-control">
-                    <option value="1" ${currentRisk === '1' ? 'selected' : ''}>Low</option>
-                    <option value="2" ${currentRisk === '2' ? 'selected' : ''}>Medium</option>
-                    <option value="3" ${currentRisk === '3' ? 'selected' : ''}>High</option>
+                    <option value="1" ${riskValue === '1' ? 'selected' : ''}>Low</option>
+                    <option value="2" ${riskValue === '2' ? 'selected' : ''}>Medium</option>
+                    <option value="3" ${riskValue === '3' ? 'selected' : ''}>High</option>
                 </select>
             `);
             $(this).hide();
             $(this).siblings('.fa-check').show();
         });
 
-        $('#riskEdit .fa-check').on('click', () => {
+        $('.panel-details').on('click', '#riskEdit .fa-check', () => {
             const risk = $('#riskOptions').val();
             
             if (typeof ajaxRequest !== 'undefined') {
@@ -402,7 +423,10 @@ class CompanyEditor {
      */
     initTaxResidencyEditor() {
         const self = this;
-        $('#taxResidencyRow .fa-pen-to-square').on('click', function() {
+        // Use event delegation for edit button
+        $('.panel-details').on('click', '#taxResidencyRow .fa-pen-to-square', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             const $taxResidency = $(this).parent().siblings('.taxResidency');
             const currentValue = $taxResidency.find('.taxResidencyVal').html().trim();
             
@@ -423,7 +447,7 @@ class CompanyEditor {
             $(this).siblings('.fa-check').show();
         });
 
-        $('#taxResidencyRow .fa-check').on('click', () => {
+        $('.panel-details').on('click', '#taxResidencyRow .fa-check', () => {
             const value = $('#taxResidencyDropdown').val();
             const data = { tax_residency: value };
             
@@ -441,14 +465,17 @@ class CompanyEditor {
      */
     initKycEditor() {
         const self = this;
-        $('.editKyc').on('click', function() {
-            $(this).hide();
-            const kycStart = $('#kycRow').data('kyc-start') || '';
-            const kycEnd = $('#kycRow').data('kyc-end') || '';
-            const kycReason = $('#kycRow').data('kyc-reason') || '';
+        // Use event delegation for edit button
+        $('.panel-details').on('click', '.editKyc', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const $row = $('#kycRow');
+            const kycStart = $row.data('kyc-start') || '';
+            const kycEnd = $row.data('kyc-end') || '';
+            const kycReason = $row.data('kyc-reason') || '';
             
-            $('#kycRow').html(`
-                <td><b>KYC Start:</b></td>
+            $row.html(`
+                <td><b>Service provision period:</b></td>
                 <td>
                     Start: <input type="text" value="${self.escapeHtml(kycStart)}" id="updatedKycStart" class="form-control d-inline-block" style="width: auto;">
                     <br>
@@ -456,7 +483,7 @@ class CompanyEditor {
                     <br>
                     Reason: <input type="text" value="${self.escapeHtml(kycReason)}" id="updatedKycReason" class="form-control d-inline-block" style="width: auto;">
                 </td>
-                <td><i class="fa-solid fa-check" id="saveKyc" style="cursor: pointer;"></i></td>
+                <td style="padding:0;text-align: center;"><i class="fa-solid fa-check" id="saveKyc" style="cursor: pointer;"></i></td>
             `);
 
             $('#updatedKycStart, #updatedKycEnd').datepicker({
@@ -479,18 +506,14 @@ class CompanyEditor {
             self.updateCompanyField(data, (responseData) => {
                 // KYC fields might not be in response, so we'll just reload the row
                 const displayHtml = `
-                    <td><b>KYC Start:</b></td>
-                    <td>
-                        ${responseData.kyc_start || ''} - ${responseData.kyc_end || ''}
-                        ${responseData.kyc_reason ? '<br>Reason: ' + self.escapeHtml(responseData.kyc_reason) : ''}
-                    </td>
-                    <td><i class="fa-solid fa-pen-to-square editKyc" style="cursor: pointer;"></i></td>
+                    <td><b>Service provision period:</b></td>
+                    <td>Start: ${responseData.kyc_start || ''}<br>End: ${responseData.kyc_end || ''}<br>Reason: ${responseData.kyc_reason || ''}</td>
+                    <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editKyc" style="cursor: pointer;"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
                 `;
                 $('#kycRow').html(displayHtml);
                 $('#kycRow').data('kyc-start', responseData.kyc_start);
                 $('#kycRow').data('kyc-end', responseData.kyc_end);
                 $('#kycRow').data('kyc-reason', responseData.kyc_reason);
-                self.initKycEditor();
             });
         });
     }
@@ -503,12 +526,14 @@ class CompanyEditor {
         // Activity code editor
         this.initTextFieldEditor('.editActivityCode', '#activityCodeRow', 'activity_code', 'Activity Code:', 'updatedActivityCode', 'saveActivityCode');
         
-        // Activity code description editor
-        $('.editActivityCodeDescription').on('click', function() {
-            $(this).hide();
-            const currentValue = $('#activityCodeDescriptionRow').data('current-value') || '';
+        // Activity code description editor - use event delegation
+        $('.panel-details').on('click', '.editActivityCodeDescription', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const $row = $('#activityCodeDescriptionRow');
+            const currentValue = $row.data('current-value') || $row.find('td').eq(1).text().trim();
             
-            $('#activityCodeDescriptionRow').html(`
+            $row.html(`
                 <td><b>Activity Code Description:</b></td>
                 <td><textarea id="updatedActivityCodeDescription" rows="3" style="width: 100%;" class="form-control">${self.escapeHtml(currentValue)}</textarea></td>
                 <td><i class="fa-solid fa-check" id="saveActivityCodeDescription" style="cursor: pointer;"></i></td>
@@ -524,10 +549,9 @@ class CompanyEditor {
                 $('#activityCodeDescriptionRow').html(`
                     <td><b>Activity Code Description:</b></td>
                     <td>${self.escapeHtml(displayValue)}</td>
-                    <td><i class="fa-solid fa-pen-to-square editActivityCodeDescription" style="cursor: pointer;"></i></td>
+                    <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editActivityCodeDescription" style="cursor: pointer;"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
                 `);
                 $('#activityCodeDescriptionRow').data('current-value', displayValue);
-                self.initActivityCodeEditors();
             });
         });
     }
