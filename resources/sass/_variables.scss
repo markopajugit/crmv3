@@ -2,32 +2,32 @@
 // Modern Color Palette (Inspired by Startup Wise Guys)
 // ============================================================================
 
-// Primary Colors
-$primary: #2563eb;
-$primary-dark: #1e40af;
-$primary-light: #3b82f6;
+// Primary Colors - Red Theme
+$primary: #dc2626;
+$primary-dark: #b91c1c;
+$primary-light: #ef4444;
 
-// Background Colors
-$body-bg: #ffffff;
-$bg-secondary: #f8f9fa;
-$bg-tertiary: #f5f7fa;
+// Background Colors - Red Theme
+$body-bg: #dc2626;
+$bg-secondary: #b91c1c;
+$bg-tertiary: #991b1b;
 
-// Text Colors
-$text-primary: #1a1a1a;
-$text-secondary: #2d3748;
-$text-muted: #718096;
-$text-light: #a0aec0;
+// Text Colors - White on Red
+$text-primary: #ffffff;
+$text-secondary: #fef2f2;
+$text-muted: #fecaca;
+$text-light: #fee2e2;
 
-// Sidebar Colors
-$sidebar-bg: #1a202c;
-$sidebar-text: #e2e8f0;
-$sidebar-hover: #2d3748;
-$sidebar-active: #2563eb;
+// Sidebar Colors - Darker Red
+$sidebar-bg: #991b1b;
+$sidebar-text: #ffffff;
+$sidebar-hover: #b91c1c;
+$sidebar-active: #dc2626;
 
-// Border Colors
-$border-light: #e2e8f0;
-$border-medium: #cbd5e0;
-$border-dark: #a0aec0;
+// Border Colors - White/Transparent for Red Theme
+$border-light: rgba(255, 255, 255, 0.2);
+$border-medium: rgba(255, 255, 255, 0.3);
+$border-dark: rgba(255, 255, 255, 0.4);
 
 // Status Colors
 $success: #10b981;
