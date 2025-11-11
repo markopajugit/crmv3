@@ -12,16 +12,18 @@ const path = require('path');
  |
  */
 
-mix.js('resources/js/app.js', 'public/js')
-    .sass('resources/sass/app.scss', 'public/css')
+mix.setPublicPath('public')
+    .js('resources/js/app.js', 'js/app.js')
+    .sass('resources/sass/app.scss', 'css/app.css')
     .sourceMaps()
-    .setPublicPath('public')
     .webpackConfig({
-        context: path.resolve(__dirname),
         resolve: {
             extensions: ['.js', '.json', '.wasm'],
-            modules: ['node_modules', path.resolve(__dirname, 'resources')],
-            alias: {}
+            modules: ['node_modules'],
+            symlinks: false
+        },
+        resolveLoader: {
+            modules: ['node_modules']
         }
     })
     .options({
