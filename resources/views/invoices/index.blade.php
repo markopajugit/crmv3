@@ -1,68 +1,86 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="row mb-4">
-        <div class="col-6 col-sm-3"><h1>Invoices ({{$type}})</h1></div>
-        <div class="col-6 col-sm-3 m-2"><a class="btn" href="/invoices/paid" style="color:white;">View Paid invoices</a></div>
-        <div class="col-6 col-sm-3 m-2"><a class="btn" href="/invoices/unpaid" style="color:white;">View Unpaid invoices</a></div>
-        <div class="col-6 col-sm-3 m-2">
-            <form id="searchForm" method="GET">
-                <label for="searchInput">Search by payer name</label>
-                <input type="text" id="searchInput" name="q" placeholder="Enter Payer...">
-                <input type="submit" value="Search">
-            </form>
+
+@include('partials.index-header', [
+    'title' => 'Invoices (' . ucfirst($type) . ')',
+    'icon' => 'fa-file-invoice',
+    'count' => $invoices->total(),
+    'countId' => 'invoicesCount',
+    'singular' => 'invoice',
+    'plural' => 'invoices',
+    'createRoute' => null,
+    'createButtonText' => null
+])
+
+@include('partials.success-alert')
+
+@include('partials.search-bar-invoices', [
+    'searchInputId' => 'invoiceSearch',
+    'placeholder' => 'Search by invoice number, payer name, order name...',
+    'currentType' => $type
+])
+
+<!-- Invoices Table -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0" style="width: 100%; margin-bottom: 0;">
+                    <thead style="background-color: #f9fafb;">
+                        <tr>
+                            <th style="width: 10%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-hashtag" style="color: #DC2626; margin-right: 0.5rem;"></i> ID
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-hashtag" style="color: #DC2626; margin-right: 0.5rem;"></i> Number
+                            </th>
+                            <th style="width: 20%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-user" style="color: #DC2626; margin-right: 0.5rem;"></i> Recipient
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-calendar" style="color: #DC2626; margin-right: 0.5rem;"></i> Issue Date
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-calendar-check" style="color: #DC2626; margin-right: 0.5rem;"></i> Payment Date
+                            </th>
+                            <th style="width: 10%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-percent" style="color: #DC2626; margin-right: 0.5rem;"></i> VAT
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-file-invoice" style="color: #DC2626; margin-right: 0.5rem;"></i> Order
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesTableBody" style="background-color: #ffffff;">
+                        @include('invoices.partials.table')
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+</div>
 
-    @if ($message = Session::get('success'))
-        <div class="alert alert-success">
-            <p>{{ $message }}</p>
-        </div>
-    @endif
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Number</th>
-            <th>Recepient</th>
-            <th>Issue Date</th>
-            <th>Payment Date</th>
-            <th>VAT</th>
-            <th>Order</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach ($invoices as $invoice)
+@include('partials.index-pagination', [
+    'paginator' => $invoices,
+    'paginationId' => 'invoicesPagination'
+])
 
-            <tr class="clickable" onclick="window.location='/view/pdf/{{ $invoice->id }}';">
-                <td>{{ $invoice->id }}</td>
-                <td>{{ $invoice->number }}</td>
-                @if($invoice->order->company)
-                    <td>{{ $invoice->order->company->name }}</td>
-                @endif
-                @if($invoice->order->person)
-                    <td>{{ $invoice->order->person->name }}</td>
-                @endif
-                <td>{{ $invoice->issue_date }}</td>
-                <td>{{ $invoice->payment_date }}</td>
-                <td>{{ $invoice->vat }}</td>
-                <td>{{ $invoice->order->name }}</td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
-
-    <script>
-        // jQuery to handle form submission
-        $(document).ready(function() {
-            $('#searchForm').submit(function(event) {
-                event.preventDefault(); // Prevent the default form submission
-                var searchInput = $('#searchInput').val();
-                var url = '/invoices/' + encodeURIComponent(searchInput);
-                window.location.href = url;
-            });
-        });
-    </script>
-
-    {{ $invoices->onEachSide(5)->links() }}
 @endsection
+
+@push('scripts')
+@include('partials.index-styles', [
+    'searchInputId' => 'invoiceSearch',
+    'paginationId' => 'invoicesPagination'
+])
+
+@include('partials.index-scripts-invoices', [
+    'searchInputId' => 'invoiceSearch',
+    'tableBodyId' => 'invoicesTableBody',
+    'paginationId' => 'invoicesPagination',
+    'indexRoute' => 'invoices.index',
+    'countId' => 'invoicesCount',
+    'singular' => 'invoice',
+    'plural' => 'invoices'
+])
+@endpush

@@ -2,21 +2,16 @@ header.header{
     background: lightgray;
 }
 
-h1 {
-
-}
-
-
 .body {
-    background:#4f5d73;
-    color: rgba(255, 255, 255, 0.7);
+    background: #FFFFFF;
+    color: #000000;
     a {
-        color: rgba(255, 255, 255, 0.7);
+        color: #DC2626;
         text-decoration: underline;
     }
 
     a:active {
-      color: white;
+      color: #C41E3A;
     }
 }
 
@@ -30,18 +25,22 @@ h1 {
 }
 
 footer.footer {
-    background:#4f5d73;
+    background: #FFFFFF;
+    color: #6B7280;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 nav .pagination .page-item .page-link {
-    background:#4f5d73;
-    color:white;
+    background: #FFFFFF;
+    color: #DC2626;
+    border: 1px solid rgba(220, 38, 38, 0.3);
 }
 
 nav .pagination .page-item.active .page-link {
-    border-color:white;
+    background: #DC2626;
+    color: #FFFFFF;
+    border-color: #DC2626;
     font-weight: 500;
-    text-decoration: underline;
 }
 
 table tr.clickable {

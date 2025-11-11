@@ -21,9 +21,37 @@ class PersonController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $persons = Person::latest()->paginate(10);
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            $search = $request->get('search', '');
+            
+            $query = Person::query();
+            
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'LIKE', '%' . $search . '%')
+                      ->orWhere('id_code', 'LIKE', '%' . $search . '%')
+                      ->orWhere('id_code_est', 'LIKE', '%' . $search . '%')
+                      ->orWhere('email', 'LIKE', '%' . $search . '%')
+                      ->orWhere('phone', 'LIKE', '%' . $search . '%')
+                      ->orWhere('address_street', 'LIKE', '%' . $search . '%')
+                      ->orWhere('address_city', 'LIKE', '%' . $search . '%')
+                      ->orWhere('country', 'LIKE', '%' . $search . '%');
+                });
+            }
+            
+            $persons = $query->latest()->paginate(10);
+            
+            return response()->json([
+                'html' => view('persons.partials.table', compact('persons'))->render(),
+                'pagination' => view('persons.partials.pagination', compact('persons'))->render(),
+                'total' => $persons->total()
+            ]);
+        }
 
         return view('persons.index',compact('persons'))
             ->with('i', (request()->input('page', 1) - 1) * 10);

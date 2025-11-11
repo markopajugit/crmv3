@@ -20,9 +20,36 @@ class CompanyController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $companies = Company::latest()->paginate(10);
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            $search = $request->get('search', '');
+            
+            $query = Company::query();
+            
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'LIKE', '%' . $search . '%')
+                      ->orWhere('registry_code', 'LIKE', '%' . $search . '%')
+                      ->orWhere('registration_country', 'LIKE', '%' . $search . '%')
+                      ->orWhere('vat', 'LIKE', '%' . $search . '%')
+                      ->orWhere('email', 'LIKE', '%' . $search . '%')
+                      ->orWhere('address_street', 'LIKE', '%' . $search . '%')
+                      ->orWhere('address_city', 'LIKE', '%' . $search . '%');
+                });
+            }
+            
+            $companies = $query->latest()->paginate(10);
+            
+            return response()->json([
+                'html' => view('companies.partials.table', compact('companies'))->render(),
+                'pagination' => view('companies.partials.pagination', compact('companies'))->render(),
+                'total' => $companies->total()
+            ]);
+        }
 
         return view('companies.index',compact('companies'))
             ->with('i', (request()->input('page', 1) - 1) * 10);

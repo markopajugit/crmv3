@@ -19,4 +19,12 @@ class OrderService extends Model
     ];
 
     protected $table = 'order_service';
+
+    /**
+     * Get the order that owns the order service.
+     */
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 }

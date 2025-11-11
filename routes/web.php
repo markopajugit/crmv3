@@ -36,10 +36,10 @@ Route::resource('settings', \App\Http\Controllers\SettingsController::class);
 Route::resource('users', \App\Http\Controllers\UsersController::class);
 Route::resource('orderService', \App\Http\Controllers\OrderServiceController::class);
 
-Route::get('/renewals', [App\Http\Controllers\OrderController::class, 'renewals']);
+Route::get('/renewals', [App\Http\Controllers\OrderController::class, 'renewals'])->name('renewals.index');
 Route::get('/renewals/test', [App\Http\Controllers\OrderController::class, 'renewalsTest']);
 
-Route::get('/documents', [App\Http\Controllers\FileUploadController::class, 'showDocuments']);
+Route::get('/documents', [App\Http\Controllers\FileUploadController::class, 'showDocuments'])->name('documents.index');
 
 Route::get('/services/category/{id}', [App\Http\Controllers\ServiceController::class, 'showCategory']);
 Route::delete('/services/category/{id}', [App\Http\Controllers\ServiceController::class, 'destroyCategory']);

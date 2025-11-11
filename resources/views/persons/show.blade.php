@@ -2223,7 +2223,7 @@ list-style: none;">
         });
 
         $('#addressRow .fa-check').on('click', function(){
-            var contactid = $(this).parent().siblings('.contactAddress').data('contactid');
+            var contactid = $(this).closest('tr').find('.contactAddress').data('contactid');
             var street = $('#editAddressStreet').val();
             var city = $('#editAddressCity').val();
             var zip = $('#editAddressZip').val();

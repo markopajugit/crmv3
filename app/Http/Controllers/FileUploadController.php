@@ -226,27 +226,52 @@ class FileUploadController extends Controller
     }
 
     public function showDocuments(Request $request){
-        $files = File::all();
-        $categorizedFiles = array('virtualoffice' => [], 'general' => [], 'archived' => []);
-        foreach($files as $file){
-            if($file->archive_nr){
-                $categorizedFiles['archived'][] = $file;
-            } elseif($file->virtual_office){
-                $categorizedFiles['virtualoffice'][] = $file;
-            }
-            else {
-                $categorizedFiles['general'][] = $file;
-            }
+        $query = File::with(['company', 'person', 'order']);
+
+        // Category filter
+        $category = $request->get('category', 'all');
+        if ($category === 'archived') {
+            $query->whereNotNull('archive_nr');
+        } elseif ($category === 'virtualoffice') {
+            $query->where('virtual_office', 1);
+        } elseif ($category === 'general') {
+            $query->whereNull('archive_nr')->where(function($q) {
+                $q->whereNull('virtual_office')->orWhere('virtual_office', 0);
+            });
         }
 
-        //dd(count($categorizedFiles['archived']), count($categorizedFiles['general']));
+        // Text search
+        $search = $request->get('search', '');
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%')
+                  ->orWhere('archive_nr', 'LIKE', '%' . $search . '%')
+                  ->orWhereHas('company', function($q) use ($search) {
+                      $q->where('name', 'LIKE', '%' . $search . '%');
+                  })
+                  ->orWhereHas('person', function($q) use ($search) {
+                      $q->where('name', 'LIKE', '%' . $search . '%');
+                  })
+                  ->orWhereHas('order', function($q) use ($search) {
+                      $q->where('name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('number', 'LIKE', '%' . $search . '%');
+                  });
+            });
+        }
 
-        return view('files.index',[
-                'archived' => $categorizedFiles['archived'],
-                'general' => $categorizedFiles['general'],
-                'virtualoffice' => $categorizedFiles['virtualoffice']
-            ]
-        );
+        $files = $query->latest()->paginate(10)->appends(request()->query());
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            return response()->json([
+                'html' => view('documents.partials.table', compact('files', 'category'))->render(),
+                'pagination' => view('documents.partials.pagination', compact('files'))->render(),
+                'total' => $files->total()
+            ]);
+        }
+
+        return view('documents.index', compact('files', 'category'))
+            ->with('i', (request()->input('page', 1) - 1) * 10);
     }
 
 

@@ -20,11 +20,32 @@ class UsersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
+        $usersQuery = User::query();
 
-        return view('users.index',compact('users'));
+        // Text search
+        $search = $request->get('search', '');
+        if (!empty($search)) {
+            $usersQuery->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%')
+                  ->orWhere('email', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $users = $usersQuery->latest()->paginate(10);
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            return response()->json([
+                'html' => view('users.partials.table', compact('users'))->render(),
+                'pagination' => view('users.partials.pagination', compact('users'))->render(),
+                'total' => $users->total()
+            ]);
+        }
+
+        return view('users.index', compact('users'))
+            ->with('i', (request()->input('page', 1) - 1) * 10);
     }
 
     /**
@@ -57,7 +78,8 @@ class UsersController extends Controller
         $user->email = $request->email;
         $user->save();
 
-        return view('users.show',['user' => $user]);
+        return redirect()->route('users.index')
+            ->with('success', 'User created successfully.');
     }
 
     /**
@@ -92,13 +114,21 @@ class UsersController extends Controller
      */
     public function update(Request $request, $id)
     {
+        try {
+            $request->validate([
+                'new_password' => ['required', 'min:6'],
+                'new_confirm_password' => ['required', 'same:new_password'],
+            ]);
 
-        $request->validate([
-            'new_password' => ['required'],
-            'new_confirm_password' => ['same:new_password'],
-        ]);
+            $user = User::findOrFail($id);
+            $user->update(['password' => Hash::make($request->new_password)]);
 
-        User::find($id)->update(['password'=> Hash::make($request->new_password)]);
+            return response()->json(['success' => true, 'message' => 'Password updated successfully.']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => ['password' => 'An error occurred while updating the password.']], 500);
+        }
     }
 
     /**
@@ -109,10 +139,21 @@ class UsersController extends Controller
      */
     public function destroy($id)
     {
-        $user = User::find($id);
+        try {
+            $user = User::findOrFail($id);
+            
+            // Check if user has associated orders
+            if ($user->orders()->count() > 0) {
+                return response()->json([
+                    'error' => 'Cannot delete user with associated orders. Please remove all orders first.'
+                ], 422);
+            }
 
-        $user->delete();
+            $user->delete();
 
-        $users = User::all();
+            return response()->json(['success' => true, 'message' => 'User deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while deleting the user.'], 500);
+        }
     }
 }

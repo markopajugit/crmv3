@@ -18,12 +18,51 @@ class ServiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $services = Service::all();
-        $service_categories = ServiceCategory::all();
+        // Services query
+        $servicesQuery = Service::with('service_category');
 
-        return view('services.index',compact('services', 'service_categories'));
+        // Service categories query
+        $categoriesQuery = ServiceCategory::withCount('services');
+
+        // Text search for services
+        $serviceSearch = $request->get('service_search', '');
+        if (!empty($serviceSearch)) {
+            $servicesQuery->where(function($q) use ($serviceSearch) {
+                $q->where('name', 'LIKE', '%' . $serviceSearch . '%')
+                  ->orWhere('cost', 'LIKE', '%' . $serviceSearch . '%')
+                  ->orWhere('type', 'LIKE', '%' . $serviceSearch . '%')
+                  ->orWhereHas('service_category', function($q) use ($serviceSearch) {
+                      $q->where('name', 'LIKE', '%' . $serviceSearch . '%');
+                  });
+            });
+        }
+
+        // Text search for categories
+        $categorySearch = $request->get('category_search', '');
+        if (!empty($categorySearch)) {
+            $categoriesQuery->where('name', 'LIKE', '%' . $categorySearch . '%');
+        }
+
+        // Paginate both
+        $services = $servicesQuery->latest()->paginate(10, ['*'], 'services_page')->appends(request()->query());
+        $service_categories = $categoriesQuery->latest()->paginate(10, ['*'], 'categories_page')->appends(request()->query());
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            return response()->json([
+                'services_html' => view('services.partials.services-table', compact('services'))->render(),
+                'services_pagination' => view('services.partials.services-pagination', compact('services'))->render(),
+                'services_total' => $services->total(),
+                'categories_html' => view('services.partials.categories-table', compact('service_categories'))->render(),
+                'categories_pagination' => view('services.partials.categories-pagination', compact('service_categories'))->render(),
+                'categories_total' => $service_categories->total()
+            ]);
+        }
+
+        return view('services.index', compact('services', 'service_categories'))
+            ->with('i', (request()->input('services_page', 1) - 1) * 10);
     }
 
     /**

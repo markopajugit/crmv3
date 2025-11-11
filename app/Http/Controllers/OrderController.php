@@ -27,7 +27,23 @@ class OrderController extends BaseController
      */
     public function index(Request $request)
     {
-        $query = Order::query();
+        $users = User::all();
+        $query = Order::with(['company', 'person', 'responsible_user', 'orderServices']);
+
+        // Text search
+        $search = $request->get('search', '');
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('number', 'LIKE', '%' . $search . '%')
+                  ->orWhere('name', 'LIKE', '%' . $search . '%')
+                  ->orWhereHas('company', function($q) use ($search) {
+                      $q->where('name', 'LIKE', '%' . $search . '%');
+                  })
+                  ->orWhereHas('person', function($q) use ($search) {
+                      $q->where('name', 'LIKE', '%' . $search . '%');
+                  });
+            });
+        }
 
         // Dynamically filter based on user_id
         if ($request->filled('responsible') && $request->input('responsible') !== 'all') {
@@ -47,9 +63,17 @@ class OrderController extends BaseController
         // Retrieve the filtered results
         $orders = $query->latest()->paginate(30)->appends(request()->query());
 
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            return response()->json([
+                'html' => view('orders.partials.table', compact('orders'))->render(),
+                'pagination' => view('orders.partials.pagination', compact('orders'))->render(),
+                'total' => $orders->total()
+            ]);
+        }
 
-        return view('orders.index',compact('orders'))
-            ->with('i', (request()->input('page', 1) - 1) * 30)->with('company');
+        return view('orders.index', compact('orders', 'users'))
+            ->with('i', (request()->input('page', 1) - 1) * 30);
     }
 
     /**
@@ -277,101 +301,103 @@ class OrderController extends BaseController
             ->with('success','Related Service removed');
     }
 
-    public function renewals(){
+    public function renewals(Request $request)
+    {
+        // Auto-renewal logic (only run if not AJAX request)
+        if (!$request->ajax() && !$request->has('ajax')) {
+            $orders = Order::with('services')->get();
+            $ordersArray = array();
 
-        $orders = Order::with('services')->get();
+            foreach($orders as $order){
+                if(count($order->services) != 0){
+                    foreach($order->services as $orderService){
+                        if($orderService->pivot->date_from && $orderService->pivot->date_to){
 
-        $ordersArray = array();
-
-        foreach($orders as $order){
-            if(count($order->services) != 0){
-                foreach($order->services as $orderService){
-                    if($orderService->pivot->date_from && $orderService->pivot->date_to){
-
-                        if($orderService->type == 'Reaccuring' && $orderService->reaccuring_frequency == '3' && date('Y.m.d', strtotime($orderService->pivot->date_to)) < date('Y.m.d', strtotime('+15 days'))){
-                            $newDateFrom = ' + 3 months';
-                            $newDateTo = ' + 3 months';
-                            $createRenewal = true;
-                        } else if($orderService->type == 'Reaccuring' && $orderService->reaccuring_frequency == '6' && date('Y.m.d', strtotime($orderService->pivot->date_to)) < date('Y.m.d', strtotime('+1 month'))){
-                            $newDateFrom = ' + 6 months';
-                            $newDateTo = ' + 6 months';
-                            $createRenewal = true;
-                        } else if($orderService->type == 'Reaccuring' && $orderService->reaccuring_frequency == '12' && date('Y.m.d', strtotime($orderService->pivot->date_to)) < date('Y.m.d', strtotime('+2 months'))){
-                            $newDateFrom = ' + 1 years';
-                            $newDateTo = ' + 1 years';
-                            $createRenewal = true;
-                        } else {
-                            $createRenewal = false;
-                        }
-
-                        if($createRenewal){
-                            $orderServiceCheck = OrderService::find($orderService->pivot->id);
-                            if($order->id == 5850 && isset($_GET['debug'])){
-                                //$test = $order->replicate();
-                                //dd($test->payments()->get());
-                            }
-                            if($orderServiceCheck->renewed == 1){
-                                continue;
+                            if($orderService->type == 'Reaccuring' && $orderService->reaccuring_frequency == '3' && date('Y.m.d', strtotime($orderService->pivot->date_to)) < date('Y.m.d', strtotime('+15 days'))){
+                                $newDateFrom = ' + 3 months';
+                                $newDateTo = ' + 3 months';
+                                $createRenewal = true;
+                            } else if($orderService->type == 'Reaccuring' && $orderService->reaccuring_frequency == '6' && date('Y.m.d', strtotime($orderService->pivot->date_to)) < date('Y.m.d', strtotime('+1 month'))){
+                                $newDateFrom = ' + 6 months';
+                                $newDateTo = ' + 6 months';
+                                $createRenewal = true;
+                            } else if($orderService->type == 'Reaccuring' && $orderService->reaccuring_frequency == '12' && date('Y.m.d', strtotime($orderService->pivot->date_to)) < date('Y.m.d', strtotime('+2 months'))){
+                                $newDateFrom = ' + 1 years';
+                                $newDateTo = ' + 1 years';
+                                $createRenewal = true;
+                            } else {
+                                $createRenewal = false;
                             }
 
-                            $newOrder = $order->replicate();
-
-                            unset($newOrder->id);
-                            unset($newOrder->notes);
-                            unset($newOrder->invoices);
-                            unset($newOrder->files);
-                            $orderNo = Settings::where('key', 'next_order_no')->first();
-                            $orderNumber = 'C'.date('y').sprintf('%04u', $orderNo->value);
-                            $orderNo->value = $orderNo->value + 1;
-                            $orderNo->save();
-
-                            $newOrder->number = $orderNumber;
-                            $newOrder->status = "Not Active";
-                            $newOrder->payment_status = "Not paid";
-                            $newOrder->paid_date = null;
-                            $newOrder->renewed_from_order_id = $order->id;
-
-                            $newOrder->save();
-                            $ordersArray[] = $newOrder;
-
-                            foreach($order->services as $orderServiceCheckForEndDateDuplicates){
-                                if($orderService->pivot->date_to == $orderServiceCheckForEndDateDuplicates->pivot->date_to && $orderService->pivot->id != $orderServiceCheckForEndDateDuplicates->pivot->id){
-                                    $currentOrderService = OrderService::find($orderServiceCheckForEndDateDuplicates->pivot->id);
-                                    $currentOrderService->renewed = 1;
-                                    $currentOrderService->save();
-
-                                    $replicatedService = new OrderService();
-                                    $replicatedService->service_id = $orderServiceCheckForEndDateDuplicates->pivot->service_id;
-                                    $replicatedService->order_id = $newOrder->id;
-                                    $replicatedService->name = $orderServiceCheckForEndDateDuplicates->name;
-                                    $replicatedService->cost = $orderServiceCheckForEndDateDuplicates->pivot->cost;
-                                    $replicatedService->date_from = date('d.m.Y', strtotime($orderServiceCheckForEndDateDuplicates->pivot->date_from. $newDateFrom));
-                                    $replicatedService->date_to = date('d.m.Y', strtotime($orderServiceCheckForEndDateDuplicates->pivot->date_to. $newDateTo));
-                                    $replicatedService->save();
+                            if($createRenewal){
+                                $orderServiceCheck = OrderService::find($orderService->pivot->id);
+                                if($order->id == 5850 && isset($_GET['debug'])){
+                                    //$test = $order->replicate();
+                                    //dd($test->payments()->get());
                                 }
-                            }
+                                if($orderServiceCheck->renewed == 1){
+                                    continue;
+                                }
 
-                            $currentOrderService = OrderService::find($orderService->pivot->id);
-                            $currentOrderService->renewed = 1;
-                            $currentOrderService->save();
+                                $newOrder = $order->replicate();
 
-                            $replicatedService = new OrderService();
-                            $replicatedService->service_id = $orderService->pivot->service_id;
-                            $replicatedService->order_id = $newOrder->id;
-                            $replicatedService->name = $orderService->name;
-                            $replicatedService->cost = $orderService->pivot->cost;
-                            $replicatedService->date_from = date('d.m.Y', strtotime($orderService->pivot->date_from. $newDateFrom));
-                            $replicatedService->date_to = date('d.m.Y', strtotime($orderService->pivot->date_to. $newDateTo));
-                            $replicatedService->save();
+                                unset($newOrder->id);
+                                unset($newOrder->notes);
+                                unset($newOrder->invoices);
+                                unset($newOrder->files);
+                                $orderNo = Settings::where('key', 'next_order_no')->first();
+                                $orderNumber = 'C'.date('y').sprintf('%04u', $orderNo->value);
+                                $orderNo->value = $orderNo->value + 1;
+                                $orderNo->save();
+
+                                $newOrder->number = $orderNumber;
+                                $newOrder->status = "Not Active";
+                                $newOrder->payment_status = "Not paid";
+                                $newOrder->paid_date = null;
+                                $newOrder->renewed_from_order_id = $order->id;
+
+                                $newOrder->save();
+                                $ordersArray[] = $newOrder;
+
+                                foreach($order->services as $orderServiceCheckForEndDateDuplicates){
+                                    if($orderService->pivot->date_to == $orderServiceCheckForEndDateDuplicates->pivot->date_to && $orderService->pivot->id != $orderServiceCheckForEndDateDuplicates->pivot->id){
+                                        $currentOrderService = OrderService::find($orderServiceCheckForEndDateDuplicates->pivot->id);
+                                        $currentOrderService->renewed = 1;
+                                        $currentOrderService->save();
+
+                                        $replicatedService = new OrderService();
+                                        $replicatedService->service_id = $orderServiceCheckForEndDateDuplicates->pivot->service_id;
+                                        $replicatedService->order_id = $newOrder->id;
+                                        $replicatedService->name = $orderServiceCheckForEndDateDuplicates->name;
+                                        $replicatedService->cost = $orderServiceCheckForEndDateDuplicates->pivot->cost;
+                                        $replicatedService->date_from = date('d.m.Y', strtotime($orderServiceCheckForEndDateDuplicates->pivot->date_from. $newDateFrom));
+                                        $replicatedService->date_to = date('d.m.Y', strtotime($orderServiceCheckForEndDateDuplicates->pivot->date_to. $newDateTo));
+                                        $replicatedService->save();
+                                    }
+                                }
+
+                                $currentOrderService = OrderService::find($orderService->pivot->id);
+                                $currentOrderService->renewed = 1;
+                                $currentOrderService->save();
+
+                                $replicatedService = new OrderService();
+                                $replicatedService->service_id = $orderService->pivot->service_id;
+                                $replicatedService->order_id = $newOrder->id;
+                                $replicatedService->name = $orderService->name;
+                                $replicatedService->cost = $orderService->pivot->cost;
+                                $replicatedService->date_from = date('d.m.Y', strtotime($orderService->pivot->date_from. $newDateFrom));
+                                $replicatedService->date_to = date('d.m.Y', strtotime($orderService->pivot->date_to. $newDateTo));
+                                $replicatedService->save();
 
 
-                            foreach($order->getOrderContacts as $orderContact){
-                                $newOrderContact = new OrderContact();
-                                $newOrderContact->order_id = $newOrder->id;
-                                $newOrderContact->name = $orderContact->name;
-                                $newOrderContact->email = $orderContact->email;
-                                $newOrderContact->person_id = $orderContact->person_id;
-                                $newOrderContact->save();
+                                foreach($order->getOrderContacts as $orderContact){
+                                    $newOrderContact = new OrderContact();
+                                    $newOrderContact->order_id = $newOrder->id;
+                                    $newOrderContact->name = $orderContact->name;
+                                    $newOrderContact->email = $orderContact->email;
+                                    $newOrderContact->person_id = $orderContact->person_id;
+                                    $newOrderContact->save();
+                                }
                             }
                         }
                     }
@@ -379,12 +405,40 @@ class OrderController extends BaseController
             }
         }
 
-        $renewedOrders = Order::whereNotNull('renewed_from_order_id')->where('payment_status', '<>', 'Paid')->where('status', '<>', 'Finished')->get();
+        // Query for renewed orders
+        $query = Order::whereNotNull('renewed_from_order_id')
+            ->where('payment_status', '<>', 'Paid')
+            ->where('status', '<>', 'Finished')
+            ->with(['company', 'person', 'responsible_user']);
 
-        return view('renewals.index',array(
-            'orders' => $renewedOrders
-            )
-        );
+        // Text search
+        $search = $request->get('search', '');
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('number', 'LIKE', '%' . $search . '%')
+                  ->orWhere('name', 'LIKE', '%' . $search . '%')
+                  ->orWhereHas('company', function($q) use ($search) {
+                      $q->where('name', 'LIKE', '%' . $search . '%');
+                  })
+                  ->orWhereHas('person', function($q) use ($search) {
+                      $q->where('name', 'LIKE', '%' . $search . '%');
+                  });
+            });
+        }
+
+        $renewedOrders = $query->latest()->paginate(10)->appends(request()->query());
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            return response()->json([
+                'html' => view('renewals.partials.table', compact('renewedOrders'))->render(),
+                'pagination' => view('renewals.partials.pagination', compact('renewedOrders'))->render(),
+                'total' => $renewedOrders->total()
+            ]);
+        }
+
+        return view('renewals.index', compact('renewedOrders'))
+            ->with('i', (request()->input('page', 1) - 1) * 10);
     }
 
     public function filter(){

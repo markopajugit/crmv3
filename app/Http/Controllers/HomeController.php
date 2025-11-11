@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\File;
 use App\Models\Invoice;
+use App\Models\Kyc;
 use App\Models\Order;
 use App\Models\OrderService;
+use App\Models\Payment;
 use App\Models\Person;
 use App\Models\PersonCompany;
 use Carbon\Carbon;
@@ -25,27 +27,513 @@ class HomeController extends BaseController
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function index(Request $request)
     {
-        $companies = Company::count();
-        $persons = Person::count();
-        $orders = Order::count();
-
         $user = auth()->user();
-
-        $myOrdersPaid = Order::where('responsible_user_id', $user->id)->whereIn('payment_status', ['Paid'])->orderBy('created_at', 'desc')->get();
-
-        $myOrdersNotPaid = Order::where('responsible_user_id', $user->id)->where('status', '<>', 'Cancelled')->whereIn('payment_status', ['Partially paid', 'Not paid'])->orderBy('created_at', 'desc')->get();
-
-        return view('home',array(
-            'totals' => array(
-                'companies' => $companies, 'persons' => $persons, 'orders' => $orders
-            ),
+        
+        // Get filter parameters
+        $period = (int) $request->get('period', config('dashboard.default_period', 30));
+        $statusFilter = $request->get('status');
+        $paymentStatusFilter = $request->get('payment_status');
+        $userIdFilter = $request->get('user_id');
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+        
+        // Normalize empty filter values to null (preserve date strings as they come from HTML5 date inputs)
+        $statusFilter = $statusFilter ?: null;
+        $paymentStatusFilter = $paymentStatusFilter ?: null;
+        $userIdFilter = $userIdFilter ?: null;
+        $dateFrom = $dateFrom && trim($dateFrom) !== '' ? trim($dateFrom) : null;
+        $dateTo = $dateTo && trim($dateTo) !== '' ? trim($dateTo) : null;
+        
+        // Validate period
+        if (!in_array($period, config('dashboard.period_options', [7, 30]))) {
+            $period = config('dashboard.default_period', 30);
+        }
+        
+        // Calculate date range
+        $endDate = Carbon::now()->endOfDay();
+        $startDate = $endDate->copy()->subDays($period)->startOfDay();
+        $useCustomDateRange = false;
+        
+        // Handle custom date range
+        if ($dateFrom || $dateTo) {
+            try {
+                if ($dateFrom && $dateTo) {
+                    // Both dates provided
+                    $startDate = Carbon::createFromFormat('Y-m-d', $dateFrom)->startOfDay();
+                    $endDate = Carbon::createFromFormat('Y-m-d', $dateTo)->endOfDay();
+                    $useCustomDateRange = true;
+                } elseif ($dateFrom) {
+                    // Only start date provided
+                    $startDate = Carbon::createFromFormat('Y-m-d', $dateFrom)->startOfDay();
+                    $endDate = Carbon::now()->endOfDay();
+                    $useCustomDateRange = true;
+                } elseif ($dateTo) {
+                    // Only end date provided
+                    $endDate = Carbon::createFromFormat('Y-m-d', $dateTo)->endOfDay();
+                    $startDate = $endDate->copy()->subDays($period)->startOfDay();
+                    $useCustomDateRange = true;
+                }
+            } catch (Exception $e) {
+                try {
+                    // Fallback to Carbon parse
+                    if ($dateFrom && $dateTo) {
+                        $startDate = Carbon::parse($dateFrom)->startOfDay();
+                        $endDate = Carbon::parse($dateTo)->endOfDay();
+                        $useCustomDateRange = true;
+                    } elseif ($dateFrom) {
+                        $startDate = Carbon::parse($dateFrom)->startOfDay();
+                        $endDate = Carbon::now()->endOfDay();
+                        $useCustomDateRange = true;
+                    } elseif ($dateTo) {
+                        $endDate = Carbon::parse($dateTo)->endOfDay();
+                        $startDate = $endDate->copy()->subDays($period)->startOfDay();
+                        $useCustomDateRange = true;
+                    }
+                } catch (Exception $e2) {
+                    // Invalid dates, use default period
+                    $endDate = Carbon::now()->endOfDay();
+                    $startDate = $endDate->copy()->subDays($period)->startOfDay();
+                    $useCustomDateRange = false;
+                }
+            }
+        }
+        
+        // Validate date range (start should be before end)
+        if ($startDate->gt($endDate)) {
+            // Swap if start is after end
+            $temp = $startDate;
+            $startDate = $endDate;
+            $endDate = $temp;
+        }
+        
+        // Statistics - All users see totals (configurable)
+        $showTotals = config('dashboard.show_totals_to_all_users', true);
+        
+        $statistics = [
+            'companies' => $showTotals ? Company::count() : 0,
+            'persons' => $showTotals ? Person::count() : 0,
+            'orders' => $showTotals ? Order::count() : 0,
+            'invoices' => $showTotals ? Invoice::where('is_proforma', false)->count() : 0,
+        ];
+        
+        // Orders by status
+        $ordersByStatus = [];
+        if ($showTotals) {
+            $ordersByStatus = [
+                'in_progress' => Order::where('status', 'In Progress')->count(),
+                'finished' => Order::where('status', 'Finished')->count(),
+                'not_active' => Order::where('status', 'Not Active')->count(),
+                'cancelled' => Order::where('status', 'Cancelled')->count(),
+            ];
+        }
+        
+        // Invoices by payment status
+        $invoicesByStatus = [];
+        if ($showTotals) {
+            $invoicesByStatus = [
+                'paid' => Invoice::where('is_proforma', false)->whereNotNull('payment_date')->count(),
+                'unpaid' => Invoice::where('is_proforma', false)->whereNull('payment_date')->count(),
+            ];
+        }
+        
+        // Financial Metrics
+        $baseOrdersQuery = Order::query();
+        
+        // Apply filters
+        if ($statusFilter) {
+            $baseOrdersQuery->where('status', $statusFilter);
+        }
+        if ($paymentStatusFilter) {
+            $baseOrdersQuery->where('payment_status', $paymentStatusFilter);
+        }
+        if ($userIdFilter) {
+            $baseOrdersQuery->where('responsible_user_id', $userIdFilter);
+        }
+        
+        // Helper function to extract numeric value from cost (handles text like "100", "100.50", "100eur", etc.)
+        $extractCost = function($cost) {
+            if (is_numeric($cost)) {
+                return (float) $cost;
+            }
+            // Remove non-numeric characters except decimal point
+            $cleaned = preg_replace('/[^0-9.]/', '', (string) $cost);
+            return $cleaned ? (float) $cleaned : 0;
+        };
+        
+        // Total revenue (sum of all order services) - all time
+        // Note: Both OrderService model and Order->services() pivot use the same 'order_service' table
+        // Try multiple methods to get revenue since services can be stored via different relationships
+        
+        // Method 1: Direct query via OrderService model
+        $allOrderServices = OrderService::all();
+        $totalRevenue = 0;
+        foreach ($allOrderServices as $service) {
+            $totalRevenue += $extractCost($service->cost);
+        }
+        
+        // Debug: Check if we have any order services at all
+        $orderServicesCount = OrderService::count();
+        $ordersWithServicesCount = Order::whereHas('orderServices')->count();
+        $ordersWithPivotCount = Order::whereHas('services')->count();
+        $totalOrdersCount = Order::count();
+        
+        // Method 2: If OrderService count is 0, try getting revenue from pivot relationship
+        // This handles cases where services were synced via belongsToMany but OrderService model doesn't find them
+        if ($orderServicesCount == 0 && $ordersWithPivotCount > 0) {
+            $pivotRevenue = 0;
+            $ordersWithPivotServices = Order::with('services')->get();
+            foreach ($ordersWithPivotServices as $order) {
+                foreach ($order->services as $service) {
+                    if ($service->pivot) {
+                        $pivotRevenue += $extractCost($service->pivot->cost ?? $service->cost ?? 0);
+                    }
+                }
+            }
+            // If we found revenue via pivot but not via OrderService, use pivot value
+            if ($pivotRevenue > 0) {
+                $totalRevenue = $pivotRevenue;
+                $orderServicesCount = $ordersWithPivotCount; // Update count for display
+            }
+        }
+        
+        // Method 3: Direct database query as last resort (handles any edge cases)
+        if ($totalRevenue == 0 && $totalOrdersCount > 0) {
+            $directRevenue = 0;
+            $directServices = DB::table('order_service')->whereNotNull('cost')->get();
+            foreach ($directServices as $service) {
+                $directRevenue += $extractCost($service->cost);
+            }
+            
+            if ($directRevenue > 0) {
+                $totalRevenue = $directRevenue;
+                $orderServicesCount = DB::table('order_service')->count();
+            }
+        }
+        
+        // Revenue in selected period (based on order creation date OR order service creation date)
+        // Get order services created in period OR orders created in period
+        $orderServicesInPeriod = OrderService::where(function($query) use ($startDate, $endDate) {
+            // Either the order service was created in this period
+            $query->whereBetween('created_at', [$startDate, $endDate])
+                  // OR the order was created in this period
+                  ->orWhereHas('order', function($q) use ($startDate, $endDate) {
+                      $q->whereBetween('created_at', [$startDate, $endDate]);
+                  });
+        })->whereHas('order', function($query) use ($statusFilter, $paymentStatusFilter, $userIdFilter) {
+            if ($statusFilter) {
+                $query->where('status', $statusFilter);
+            }
+            if ($paymentStatusFilter) {
+                $query->where('payment_status', $paymentStatusFilter);
+            }
+            if ($userIdFilter) {
+                $query->where('responsible_user_id', $userIdFilter);
+            }
+        })->get();
+        
+        $revenueThisPeriod = 0;
+        foreach ($orderServicesInPeriod as $service) {
+            $revenueThisPeriod += $extractCost($service->cost);
+        }
+        
+        // Fallback: If no OrderService records found, try pivot relationship
+        if ($orderServicesInPeriod->isEmpty()) {
+            $ordersInPeriod = Order::whereBetween('created_at', [$startDate, $endDate]);
+            if ($statusFilter) {
+                $ordersInPeriod->where('status', $statusFilter);
+            }
+            if ($paymentStatusFilter) {
+                $ordersInPeriod->where('payment_status', $paymentStatusFilter);
+            }
+            if ($userIdFilter) {
+                $ordersInPeriod->where('responsible_user_id', $userIdFilter);
+            }
+            $ordersInPeriod = $ordersInPeriod->with('services')->get();
+            
+            foreach ($ordersInPeriod as $order) {
+                foreach ($order->services as $service) {
+                    if ($service->pivot) {
+                        $revenueThisPeriod += $extractCost($service->pivot->cost ?? $service->cost ?? 0);
+                    }
+                }
+            }
+        }
+        
+        // Outstanding revenue (unpaid/partially paid orders)
+        $outstandingOrderServices = OrderService::whereHas('order', function($query) use ($statusFilter, $paymentStatusFilter, $userIdFilter) {
+            $query->whereIn('payment_status', ['Not paid', 'Not Paid', 'Partially paid', 'Partially Paid'])
+                  ->where('status', '<>', 'Cancelled');
+            if ($statusFilter) {
+                $query->where('status', $statusFilter);
+            }
+            if ($paymentStatusFilter) {
+                $query->where('payment_status', $paymentStatusFilter);
+            }
+            if ($userIdFilter) {
+                $query->where('responsible_user_id', $userIdFilter);
+            }
+        })->get();
+        
+        $outstandingRevenue = 0;
+        foreach ($outstandingOrderServices as $service) {
+            $outstandingRevenue += $extractCost($service->cost);
+        }
+        
+        // Payments in period
+        // Note: paid_date might be stored as string, so we'll get all and filter
+        $paymentsQuery = Payment::whereNotNull('paid_date');
+        if ($userIdFilter) {
+            $paymentsQuery->whereHas('order', function($query) use ($userIdFilter) {
+                $query->where('responsible_user_id', $userIdFilter);
+            });
+        }
+        $allPayments = $paymentsQuery->get();
+        
+        // Filter payments by date range (handle different date formats)
+        $paidThisPeriod = 0;
+        foreach ($allPayments as $payment) {
+            try {
+                $paymentDate = null;
+                if (is_string($payment->paid_date)) {
+                    // Try different date formats
+                    if (strpos($payment->paid_date, '.') !== false) {
+                        $paymentDate = Carbon::createFromFormat('d.m.Y', $payment->paid_date);
+                    } else {
+                        $paymentDate = Carbon::parse($payment->paid_date);
+                    }
+                } else {
+                    $paymentDate = Carbon::parse($payment->paid_date);
+                }
+                
+                if ($paymentDate && $paymentDate->between($startDate, $endDate)) {
+                    $paidThisPeriod += (float) $payment->sum;
+                }
+            } catch (Exception $e) {
+                // Skip invalid dates
+                continue;
+            }
+        }
+        
+        // Unpaid invoices
+        $unpaidInvoicesQuery = Invoice::where('is_proforma', false)->whereNull('payment_date');
+        $unpaidInvoicesCount = $unpaidInvoicesQuery->count();
+        
+        // Revenue trend data for chart (daily breakdown)
+        // Use custom date range if provided, otherwise use period-based range
+        $trendStartDate = $startDate->copy();
+        $trendEndDate = $endDate->copy();
+        
+        $revenueTrendData = [];
+        $currentDate = $trendStartDate->copy();
+        while ($currentDate <= $trendEndDate) {
+            $dayStart = $currentDate->copy()->startOfDay();
+            $dayEnd = $currentDate->copy()->endOfDay();
+            
+            $dayOrderServices = OrderService::whereHas('order', function($query) use ($dayStart, $dayEnd, $statusFilter, $paymentStatusFilter, $userIdFilter) {
+                $query->whereBetween('created_at', [$dayStart, $dayEnd]);
+                if ($statusFilter) {
+                    $query->where('status', $statusFilter);
+                }
+                if ($paymentStatusFilter) {
+                    $query->where('payment_status', $paymentStatusFilter);
+                }
+                if ($userIdFilter) {
+                    $query->where('responsible_user_id', $userIdFilter);
+                }
+            })->get();
+            
+            $dayRevenue = 0;
+            foreach ($dayOrderServices as $service) {
+                $dayRevenue += $extractCost($service->cost);
+            }
+            
+            $revenueTrendData[] = [
+                'date' => $currentDate->format('Y-m-d'),
+                'label' => $currentDate->format('M d'),
+                'revenue' => $dayRevenue
+            ];
+            
+            $currentDate->addDay();
+        }
+        
+        // Activity Metrics
+        $recentOrdersLimit = config('dashboard.recent_orders_limit', 10);
+        
+        $recentOrdersQuery = Order::with(['company', 'person', 'responsible_user'])
+            ->orderBy('created_at', 'desc')
+            ->limit($recentOrdersLimit);
+        
+        // Apply date range filter if custom dates are set
+        if ($useCustomDateRange) {
+            $recentOrdersQuery->whereBetween('created_at', [$startDate, $endDate]);
+        }
+        
+        if ($statusFilter) {
+            $recentOrdersQuery->where('status', $statusFilter);
+        }
+        if ($paymentStatusFilter) {
+            $recentOrdersQuery->where('payment_status', $paymentStatusFilter);
+        }
+        if ($userIdFilter) {
+            $recentOrdersQuery->where('responsible_user_id', $userIdFilter);
+        }
+        
+        $recentOrders = $recentOrdersQuery->get();
+        
+        // Orders not updated in selected period
+        $notRecentlyUpdatedOrdersQuery = Order::with(['responsible_user'])
+            ->where('updated_at', '<', $startDate)
+            ->where('status', '<>', 'Cancelled');
+        
+        // Apply filters
+        if ($statusFilter) {
+            $notRecentlyUpdatedOrdersQuery->where('status', $statusFilter);
+        }
+        if ($paymentStatusFilter) {
+            $notRecentlyUpdatedOrdersQuery->where('payment_status', $paymentStatusFilter);
+        }
+        if ($userIdFilter) {
+            $notRecentlyUpdatedOrdersQuery->where('responsible_user_id', $userIdFilter);
+        }
+        
+        $notRecentlyUpdatedOrders = $notRecentlyUpdatedOrdersQuery->orderBy('updated_at', 'asc')->get();
+        
+        // Orders with services expiring soon (next 30 days)
+        $expiringSoonDate = Carbon::now()->addDays(30);
+        
+        // Get all orders with order services and filter in PHP since date_to might be in different formats
+        $allOrdersWithServicesQuery = Order::with(['orderServices', 'company', 'person'])
+            ->whereHas('orderServices', function($query) {
+                $query->whereNotNull('date_to');
+            });
+        
+        // Apply filters
+        if ($statusFilter) {
+            $allOrdersWithServicesQuery->where('status', $statusFilter);
+        }
+        if ($paymentStatusFilter) {
+            $allOrdersWithServicesQuery->where('payment_status', $paymentStatusFilter);
+        }
+        if ($userIdFilter) {
+            $allOrdersWithServicesQuery->where('responsible_user_id', $userIdFilter);
+        }
+        
+        $allOrdersWithServices = $allOrdersWithServicesQuery->get();
+        
+        $upcomingRenewals = collect();
+        foreach ($allOrdersWithServices as $order) {
+            foreach ($order->orderServices as $service) {
+                if ($service->date_to) {
+                    try {
+                        $expiryDate = null;
+                        // Try to parse the date in different formats
+                        if (is_string($service->date_to)) {
+                            if (strpos($service->date_to, '.') !== false) {
+                                $expiryDate = Carbon::createFromFormat('d.m.Y', $service->date_to);
+                            } else {
+                                $expiryDate = Carbon::parse($service->date_to);
+                            }
+                        } else {
+                            $expiryDate = Carbon::parse($service->date_to);
+                        }
+                        
+                        if ($expiryDate && $expiryDate->between(Carbon::now(), $expiringSoonDate)) {
+                            if (!$upcomingRenewals->contains('id', $order->id)) {
+                                $upcomingRenewals->push($order);
+                            }
+                            break; // Found one expiring service for this order
+                        }
+                    } catch (Exception $e) {
+                        // Skip invalid dates
+                        continue;
+                    }
+                }
+            }
+        }
+        
+        $upcomingRenewals = $upcomingRenewals->take(10);
+        
+        // KYC expiring soon (next 30 days)
+        $kycExpiringSoon = Kyc::whereNotNull('end_date')
+            ->whereBetween('end_date', [Carbon::now()->format('Y-m-d'), $expiringSoonDate->format('Y-m-d')])
+            ->with(['kycable'])
+            ->orderBy('end_date', 'asc')
+            ->limit(10)
+            ->get();
+        
+        // User-specific metrics
+        $myActiveOrders = Order::where('responsible_user_id', $user->id)
+            ->where('status', '<>', 'Cancelled')
+            ->whereIn('status', ['In Progress', 'Not Active'])
+            ->count();
+        
+        $myOrdersByStatus = [
+            'in_progress' => Order::where('responsible_user_id', $user->id)->where('status', 'In Progress')->count(),
+            'finished' => Order::where('responsible_user_id', $user->id)->where('status', 'Finished')->count(),
+            'not_active' => Order::where('responsible_user_id', $user->id)->where('status', 'Not Active')->count(),
+        ];
+        
+        $myOrderServicesInPeriod = OrderService::whereHas('order', function($query) use ($user, $startDate, $endDate) {
+            $query->where('responsible_user_id', $user->id)
+                  ->whereBetween('created_at', [$startDate, $endDate]);
+        })->get();
+        
+        $myRevenueThisPeriod = 0;
+        foreach ($myOrderServicesInPeriod as $service) {
+            $myRevenueThisPeriod += $extractCost($service->cost);
+        }
+        
+        // My unpaid orders
+        $myOrdersNotPaid = Order::where('responsible_user_id', $user->id)
+            ->where('status', '<>', 'Cancelled')
+            ->whereIn('payment_status', ['Partially paid', 'Partially Paid', 'Not paid', 'Not Paid'])
+            ->with(['company', 'person', 'orderServices'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get all users for filter dropdown
+        $users = \App\Models\User::orderBy('name')->get();
+        
+        return view('home', [
             'user' => $user,
-            'myOrdersPaid' => $myOrdersPaid,
-            'myOrdersNotPaid' => $myOrdersNotPaid
-            )
-        );
+            'statistics' => $statistics,
+            'ordersByStatus' => $ordersByStatus,
+            'invoicesByStatus' => $invoicesByStatus,
+            'totalRevenue' => $totalRevenue,
+            'revenueThisPeriod' => $revenueThisPeriod,
+            'outstandingRevenue' => $outstandingRevenue,
+            'paidThisPeriod' => $paidThisPeriod,
+            'unpaidInvoicesCount' => $unpaidInvoicesCount,
+            'revenueTrendData' => $revenueTrendData,
+            'recentOrders' => $recentOrders,
+            'notRecentlyUpdatedOrders' => $notRecentlyUpdatedOrders,
+            'upcomingRenewals' => $upcomingRenewals,
+            'kycExpiringSoon' => $kycExpiringSoon,
+            'myActiveOrders' => $myActiveOrders,
+            'myOrdersByStatus' => $myOrdersByStatus,
+            'myRevenueThisPeriod' => $myRevenueThisPeriod,
+            'myOrdersNotPaid' => $myOrdersNotPaid,
+            'users' => $users,
+            'filters' => [
+                'period' => $period,
+                'status' => $statusFilter,
+                'payment_status' => $paymentStatusFilter,
+                'user_id' => $userIdFilter,
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
+            ],
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'debug' => [
+                'orderServicesCount' => $orderServicesCount,
+                'ordersWithServicesCount' => $ordersWithServicesCount,
+                'ordersWithPivotCount' => $ordersWithPivotCount,
+                'totalOrdersCount' => $totalOrdersCount,
+                'orderServicesInPeriodCount' => $orderServicesInPeriod->count(),
+            ],
+        ]);
     }
 
 

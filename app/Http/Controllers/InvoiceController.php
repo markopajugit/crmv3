@@ -24,29 +24,59 @@ class InvoiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $invoices = Invoice::where('is_proforma', false)->latest()->paginate(10);
-        $type = 'all';
+        $query = Invoice::where('is_proforma', false)->with(['order.company', 'order.person']);
 
-        return view('invoices.index',compact('invoices', 'type'))
+        // Text search
+        $search = $request->get('search', '');
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('number', 'LIKE', '%' . $search . '%')
+                  ->orWhere('payer_name', 'LIKE', '%' . $search . '%')
+                  ->orWhereHas('order', function($q) use ($search) {
+                      $q->where('name', 'LIKE', '%' . $search . '%')
+                        ->orWhereHas('company', function($q) use ($search) {
+                            $q->where('name', 'LIKE', '%' . $search . '%');
+                        })
+                        ->orWhereHas('person', function($q) use ($search) {
+                            $q->where('name', 'LIKE', '%' . $search . '%');
+                        });
+                  });
+            });
+        }
+
+        // Type filter (all, paid, unpaid)
+        $type = $request->get('type', 'all');
+        if ($type === 'paid') {
+            $query->whereNotNull('payment_date');
+        } elseif ($type === 'unpaid') {
+            $query->whereNull('payment_date');
+        }
+
+        $invoices = $query->latest()->paginate(10)->appends(request()->query());
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            return response()->json([
+                'html' => view('invoices.partials.table', compact('invoices'))->render(),
+                'pagination' => view('invoices.partials.pagination', compact('invoices'))->render(),
+                'total' => $invoices->total()
+            ]);
+        }
+
+        return view('invoices.index', compact('invoices', 'type'))
             ->with('i', (request()->input('page', 1) - 1) * 10);
     }
 
-    public function paidInvoices(){
-        $invoices = Invoice::where('is_proforma', false)->whereNotNull('payment_date')->latest()->paginate(10);
-        $type = 'paid';
-
-        return view('invoices.index',compact('invoices', 'type'))
-            ->with('i', (request()->input('page', 1) - 1) * 10);
+    public function paidInvoices(Request $request){
+        $request->merge(['type' => 'paid']);
+        return $this->index($request);
     }
 
-    public function unpaidInvoices(){
-        $invoices = Invoice::where('is_proforma', false)->whereNull('payment_date')->latest()->paginate(10);
-        $type = 'unpaid';
-
-        return view('invoices.index',compact('invoices', 'type'))
-            ->with('i', (request()->input('page', 1) - 1) * 10);
+    public function unpaidInvoices(Request $request){
+        $request->merge(['type' => 'unpaid']);
+        return $this->index($request);
     }
 
     /**

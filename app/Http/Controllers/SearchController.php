@@ -242,16 +242,16 @@ class SearchController extends Controller
             $data = [
                 'companies' => Company::where('name','LIKE','%'.$keyword.'%')->limit(5)->get(),
                 'persons' => Person::where('name','LIKE','%'.$keyword.'%')->limit(5)->get(),
-                'orders' => Order::where('name','LIKE','%'.$keyword.'%')->orWhere('number','LIKE','%'.$keyword.'%')->limit(5)->get()
+                'orders' => Order::where('name','LIKE','%'.$keyword.'%')->limit(5)->get()
             ];
         }
 
-        $output = '';
+        $output = '<ul>';
         foreach($data as $class => $classData)
         {
             $icon = '';
             if($class == 'persons'){
-                $icon = '<i class="fa-solid fa-user">';
+                $icon = '<i class="fa-solid fa-user"></i>';
             } elseif ($class == 'companies'){
                 $icon = '<i class="fa-solid fa-building"></i>';
             }elseif ($class == 'orders'){
@@ -277,10 +277,7 @@ class SearchController extends Controller
                ';
                 } elseif ($class == 'orders'){
                     $desc = '';
-                    $orderName = $data->number ?? '';
-                    if($data->name){
-                        $orderName .= ($orderName ? ' - ' : '') . $data->name;
-                    }
+                    $orderName = $data->name ?? '';
                     $output .= '
                <li>'.$icon.'</i><a href="/'.$class.'/'.$data->id.'">'.$orderName.$desc.'</a></li>
                ';
@@ -322,7 +319,7 @@ class SearchController extends Controller
         {
             $icon = '';
             if($class == 'persons'){
-                $icon = '<i class="fa-solid fa-user">';
+                $icon = '<i class="fa-solid fa-user"></i>';
             } elseif ($class == 'companies'){
                 $icon = '<i class="fa-solid fa-building"></i>';
             }

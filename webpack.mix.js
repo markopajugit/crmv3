@@ -12,5 +12,36 @@ const mix = require('laravel-mix');
  */
 
 mix.js('resources/js/app.js', 'public/js')
-    .sass('resources/sass/app.scss', 'public/css')
-    .sourceMaps();
+    .sass('resources/sass/app.scss', 'public/css', {
+        sassOptions: {
+            quietDeps: true, // Suppress deprecation warnings from dependencies
+            silenceDeprecations: ['import', 'legacy-js-api'] // Silence specific deprecation warnings
+        }
+    })
+    .sourceMaps()
+    .options({
+        processCssUrls: false
+    })
+    .webpackConfig({
+        stats: {
+            children: false
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.s[ac]ss$/i,
+                    use: [
+                        {
+                            loader: 'sass-loader',
+                            options: {
+                                sassOptions: {
+                                    quietDeps: true,
+                                    silenceDeprecations: ['import', 'legacy-js-api']
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    });
