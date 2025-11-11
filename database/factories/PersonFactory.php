@@ -15,7 +15,10 @@ class PersonFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
-            'address' => $this->faker->address(),
+            'address_street' => $this->faker->streetAddress(),
+            'address_city' => $this->faker->city(),
+            'address_zip' => $this->faker->postcode(),
+            'address_dropdown' => $this->faker->country(),
             'id_code' => $this->faker->creditCardNumber() . '_' . uniqid(),
             'date_of_birth' => $this->faker->dateTimeBetween('-50 years', '-20 years')->format('d-m-Y'),
             'email' => $this->faker->email() . '_' . uniqid(),
