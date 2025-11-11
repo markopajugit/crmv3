@@ -9,27 +9,8 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
-    <script
-        src="https://code.jquery.com/jquery-3.6.1.min.js"
-        integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
-        crossorigin="anonymous"></script>
-
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-
-    <link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@4.2.0/dist/css/coreui.min.css" rel="stylesheet" integrity="sha384-UkVD+zxJKGsZP3s/JuRzapi4dQrDDuEf/kHphzg8P3v8wuQ6m9RLjTkPGeFcglQU" crossorigin="anonymous">
-
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
-
-    <script
-        src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"
-        integrity="sha256-xLD7nhI62fcsEZK2/v8LsBcb4lG7dgULkuXoXB/j91c="
-        crossorigin="anonymous"></script>
+    <!-- Stylesheets -->
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
 
@@ -39,7 +20,7 @@
         <div class="container-fluid">
 
             <form action="/search/" class="header-search">
-                <input id="search" class="form-control mr-sm-2" style="width:45%; display: inline-block;" type="search" autocomplete="off" placeholder="Search" name="s" aria-label="Search" value="{{ request()->get('s') }}">
+                <input id="search" class="form-control mr-sm-2" style="width:45%; display: inline-block;" type="search" autocomplete="off" placeholder="Search" name="s" aria-label="Search" value="{{ request()->get('s') }}" data-autocomplete-route="{{ route('autocomplete') }}">
                 <div id="searchResults" style=" display:none;position: absolute;padding: 10px;list-style: none;"></div>
                 <select name="category" id="categoryName" style="width:30%; display: inline-block;" class="form-control">
                     <option value="all" @if(request()->get('category') == 'all') selected @endif>All</option>
@@ -48,38 +29,6 @@
                 </select>
                 <button class="btn" style="width: 20%;top: -2px;position: relative;" type="submit">Search</button>
             </form>
-
-            <script type="text/javascript">
-                $(document).ready(function(){
-
-                    $(document).click(function(event) {
-                        var $target = $(event.target);
-                        if(!$target.closest('#searchResults').length &&
-                            $('#searchResults').is(":visible")) {
-                            $('#searchResults').hide();
-                        }
-                    });
-
-                    $('#search').keyup(function(){
-                        var query = $(this).val();
-                        if(query != '')
-                        {
-                            var _token = $('input[name="_token"]').val();
-                            $.ajax({
-                                url:"{{ route('autocomplete') }}",
-                                method:"get",
-                                data:{s:query, _token:_token, category: $('#categoryName').val()},
-                                success:function(data){
-                                    console.log(data);
-                                    $('#searchResults').fadeIn();
-                                    $('#searchResults').html(data);
-                                }
-                            });
-                        }
-                    });
-
-                });
-            </script>
 
             <ul class="navbar-nav ms-auto">
 
@@ -135,7 +84,9 @@
     </footer>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@coreui/coreui@4.2.0/dist/js/coreui.bundle.min.js" integrity="sha384-n0qOYeB4ohUPebL1M9qb/hfYkTp4lvnZM6U6phkRofqsMzK29IdkBJPegsyfj/r4" crossorigin="anonymous"></script>
+<!-- Scripts -->
+<script src="{{ mix('js/vendor.js') }}"></script>
+<script src="{{ mix('js/app.js') }}"></script>
 
 </body>
 
