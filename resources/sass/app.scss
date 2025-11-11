@@ -10,8 +10,8 @@
 // CoreUI
 @import '~@coreui/coreui/dist/css/coreui.min.css';
 
-// jQuery UI
-@import '~jquery-ui/themes/ui-lightness/jquery-ui.css';
+// jQuery UI CSS (needed for datepicker and other widgets)
+@import '~jquery-ui-dist/jquery-ui.css';
 
 // Font Awesome
 @import '~@fortawesome/fontawesome-free/scss/fontawesome';
