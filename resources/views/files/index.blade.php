@@ -24,35 +24,6 @@
         <button class="btn" style="width: 20%;top: -2px;position: relative;" type="submit">Search</button>
     </form>
 
-    <script type="text/javascript">
-        $(document).ready(function(){
-
-
-
-        });
-    </script>
-
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <td>Category</td>
-            <td>Name</td>
-            <td>Archive Nr</td>
-            <td>View</td>
-        </tr>
-        </thead>
-        <tbody>
-        @if(request()->get('category') == 'archived')
-            @foreach($archived as $doc)
-                <tr>
-                    <td>Archive</td>
-                    <td>{{$doc->name}}</td>
-                    <td>{{$doc->archive_nr}}</td>
-                    @if($doc->person_id)
-                        <td><a href="/persons/{{$doc->person_id}}">View Person</a></td>
-                    @elseif($doc->company_id)
-                        <td><a href="/companies/{{$doc->company_id}}">View Company</a></td>
-                    @elseif($doc->order_id)
                         <td><a href="/orders/{{$doc->order_id}}">View Order</a></td>
                     @else
                         <td></td>

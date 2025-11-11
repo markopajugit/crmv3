@@ -62,25 +62,3 @@
     </button>
 
 
-    <script type="text/javascript">
-        function printErrorMsg(msg) {
-            $(".print-error-msg").find("ul").html('');
-            $(".print-error-msg").css('display', 'block');
-            $.each(msg, function (key, value) {
-                $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
-            });
-        }
-
-        $('.saveNewUser').on('click', function(){
-
-            $('#name').val($('#insertedName').val());
-            $('#email').val($('#insertedEmail').val());
-            $('#password').val($('#insertedPassword').val());
-            $('#confirm_password').val($('#insertedConfirm_password').val());
-
-            $('#addNewPerson').submit();
-        });
-
-
-    </script>
-@endsection

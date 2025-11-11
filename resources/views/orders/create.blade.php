@@ -72,37 +72,4 @@
 
     </form>
 
-    <script type="text/javascript">
-
-
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-        $("#newOrder .btn-submit").click(function(){
-
-            var company_id = $("#companyID").val();
-            var name = $("#nameID").val();
-            var description = $("#descriptionID").val();
-            var notes = $("#notesID").val();
-
-            $.ajax({
-                type:'POST',
-                url:"{{ route('orders.store') }}",
-                data:{company_id:company_id, name:name, description:description, notes:notes},
-                success:function(data){
-                    if($.isEmptyObject(data.error)){
-                        window.location.reload()
-                    }else{
-                        printErrorMsg(data.error);
-                    }
-                }
-            });
-
-        });
-
-    </script>
 @endsection

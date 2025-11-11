@@ -21,7 +21,7 @@
             <th>Phone</th>
         </tr>
         @foreach ($persons as $person)
-            <tr class="clickable" onclick="window.location='/persons/{{ $person->id }}';">
+            <tr class="clickable" data-action="navigate" data-url='/persons/{{ $person->id }}'>
                 <td>{{ $person->name }}</td>
                 <td>{{ $person->id_code }}
                     @if($person->country)({{ $person->country }})@endif

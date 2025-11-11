@@ -24,7 +24,7 @@
         </thead>
         <tbody>
         @foreach ($companies as $company)
-            <tr class="clickable" onclick="window.location='/companies/{{ $company->id }}';">
+            <tr class="clickable" data-action="navigate" data-url='/companies/{{ $company->id }}'>
                 <td>{{ $company->id}}</td>
                 <td>{{ $company->name }}</td>
                 <td>{{ $company->registry_code }}</td>

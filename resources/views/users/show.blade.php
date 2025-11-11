@@ -102,42 +102,6 @@
         </div>
     </div>
 
-    <script type="text/javascript">
-
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-
-        //Delete relatedPerson
-        $('.deleteUser').on('click', function (e) {
-
-            e.preventDefault();
-            if (window.confirm("Delete User?")) {
-
-                var userId = {{ $user->id }};
-
-                console.log(userId);
-
-                $.ajax({
-                    type: 'DELETE',
-                    url: "/users/"+userId,
-                    success: function (data) {
-                        window.location.replace("/users");
-                    }
-
-                });
-            }
-        });
-
-
-        $('#confirmNewPassword').on('click', function (e) {
-            var userId = {{ $user->id }};
-            var new_password = $('#new_password').val();
-            var new_confirm_password = $('#new_confirm_password').val();
 
             $.ajax({
                 type: 'PUT',

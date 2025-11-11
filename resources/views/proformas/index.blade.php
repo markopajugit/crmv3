@@ -24,7 +24,7 @@
         </thead>
         <tbody>
         @foreach ($proformas as $proforma)
-            <tr class="clickable" onclick="window.location='/view/pdf/{{ $proforma->id }}';">
+            <tr class="clickable" data-action="navigate" data-url='/view/pdf/{{ $proforma->id }}'>
                 <td>{{ $proforma->id }}</td>
                 <td>{{ $proforma->number }}</td>
                 @if($proforma->order->company)

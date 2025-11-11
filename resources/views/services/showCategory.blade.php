@@ -35,34 +35,6 @@
     </div>
 
 
-    <script type="text/javascript">
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-        $('.editDetails').on('click', function(){
-
-            $(this).html('<i class="fa-solid fa-pen-to-square"></i>Save');
-
-            $(this).hide();
-
-            $('.saveDetails').show();
-
-            var currentName = $('#currentName').html();
-            var currentCost = $("#currentCost").html();
-            var currentType = $("#currentType").html();
-
-            $('.panel-details .panel-body').html(`<form action="{{ route('services.update',$service_category->id) }}" method="POST">@csrf @method('PUT')<table class="table">
-                <tbody>
-
-        <tr>
-            <td style="width:50%"><strong>Name:</strong></td>
-        <td><input type="text" name="name" id="name" value="`+currentName+`"></td>
-            </tr>
-
         </tbody></table></form>`);
 
         });

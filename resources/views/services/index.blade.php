@@ -43,7 +43,7 @@
             <th></th>
         </tr>
         @foreach ($service_categories as $service)
-            <tr class="clickable" onclick="window.location='/services/category/{{ $service->id }}';">
+            <tr class="clickable" data-action="navigate" data-url='/services/category/{{ $service->id }}'>
                 <td>{{ $service->name }}</td>
                 <td>{{ $service->type }}</td>
                 <td>@if($service->type == 'Reaccuring')

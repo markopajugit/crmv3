@@ -71,7 +71,7 @@
                     $servicesTotalCost = $servicesTotalCost + $service->cost;
                 @endphp
             @endforeach
-            <tr class="clickable" onclick="window.location='/orders/{{ $order->id }}';">
+            <tr class="clickable" data-action="navigate" data-url="/orders/{{ $order->id }}">
                 <td>{{ $order->number }}</td>
                 <td>{{ $order->company->name ?? $order->person->name . ' (Person)' }}</td>
                 <td>{{ $order->name }}</td>

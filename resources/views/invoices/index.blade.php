@@ -34,7 +34,7 @@
         <tbody>
         @foreach ($invoices as $invoice)
 
-            <tr class="clickable" onclick="window.location='/view/pdf/{{ $invoice->id }}';">
+            <tr class="clickable" data-action="navigate" data-url="/view/pdf/{{ $invoice->id }}">
                 <td>{{ $invoice->id }}</td>
                 <td>{{ $invoice->number }}</td>
                 @if($invoice->order->company)

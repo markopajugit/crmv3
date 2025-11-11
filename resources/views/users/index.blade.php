@@ -22,7 +22,7 @@
         </thead>
         <tbody>
         @foreach ($users as $user)
-            <tr class="clickable" onclick="window.location='/users/{{ $user->id }}';">
+            <tr class="clickable" data-action="navigate" data-url='/users/{{ $user->id }}'>
                 <td>{{ $user->id }}</td>
                 <td>{{ $user->name }}</td>
                 <td>{{ $user->email }}</td>
