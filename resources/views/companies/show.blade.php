@@ -1995,7 +1995,7 @@
         // Initialize Company Editor Component
         if (typeof CompanyEditor !== 'undefined') {
             const companyEditor = new CompanyEditor(
-                {{ $company->id }},
+                {{ $company->id ?? 0 }},
                 "{{ route('companies.update', $company->id) }}"
             );
         }
