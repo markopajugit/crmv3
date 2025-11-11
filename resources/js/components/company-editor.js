@@ -3,6 +3,8 @@
  * Handles all inline editing functionality for company show page
  */
 
+console.log('company-editor.js: File is being loaded/executed');
+
 // Import AJAX helper utilities
 // Note: In a real ES6 module setup, this would be: import { ajaxRequest, handleAjaxResponse, updateFieldValue, showError, showSuccess, showLoading, hideLoading } from '../utils/ajax-helper';
 // For now, we'll assume these are available globally or we'll define them inline
@@ -1222,4 +1224,5 @@ if (typeof module !== 'undefined' && module.exports) {
 // Make available globally
 window.CompanyEditor = CompanyEditor;
 window.generateCountryOptions = generateCountryOptions;
+console.log('company-editor.js: CompanyEditor class exported to window.CompanyEditor', typeof window.CompanyEditor);
 

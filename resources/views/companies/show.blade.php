@@ -1708,12 +1708,26 @@
         }); // end $(document).ready
 
         // Initialize Company Editor Component
-        if (typeof CompanyEditor !== 'undefined') {
-            const companyEditor = new CompanyEditor(
-                {{ $company->id ?? 0 }},
-                "{{ route('companies.update', $company->id ?? 0) }}"
-            );
+        console.log('show.blade.php: Checking for CompanyEditor...', typeof CompanyEditor, typeof window.CompanyEditor);
+        
+        // Try to wait for CompanyEditor if it's not immediately available
+        function initCompanyEditor() {
+            if (typeof CompanyEditor !== 'undefined' || typeof window.CompanyEditor !== 'undefined') {
+                const EditorClass = CompanyEditor || window.CompanyEditor;
+                console.log('show.blade.php: CompanyEditor found, initializing...', EditorClass);
+                const companyEditor = new EditorClass(
+                    {{ $company->id ?? 0 }},
+                    "{{ route('companies.update', $company->id ?? 0) }}"
+                );
+                console.log('show.blade.php: CompanyEditor initialized', companyEditor);
+            } else {
+                console.warn('show.blade.php: CompanyEditor not found, retrying in 100ms...');
+                setTimeout(initCompanyEditor, 100);
+            }
         }
+        
+        // Try immediately, then retry if needed
+        initCompanyEditor();
 
             } // end initCompanyShowKYC
 
