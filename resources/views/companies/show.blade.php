@@ -880,17 +880,78 @@ list-style: none;">
     // Add direct click handler for edit icon (works immediately)
     document.addEventListener('DOMContentLoaded', function() {
         console.log('[DEBUG] DOMContentLoaded fired on company show page');
+        console.log('[DEBUG] jQuery available:', typeof window.$ !== 'undefined');
+        console.log('[DEBUG] jQuery version:', typeof window.$ !== 'undefined' ? window.$.fn.jquery : 'N/A');
         
         const editIcons = document.querySelectorAll('h1 i.fa-pen-to-square');
         console.log('[DEBUG] Found edit icons:', editIcons.length);
+        console.log('[DEBUG] Edit icons:', editIcons);
         
         editIcons.forEach(function(icon, index) {
-            console.log('[DEBUG] Adding click handler to edit icon #' + (index + 1));
+            console.log('[DEBUG] Adding click handler to edit icon #' + (index + 1), icon);
+            console.log('[DEBUG] Icon parent:', icon.parentElement);
+            console.log('[DEBUG] Icon computed style pointer-events:', window.getComputedStyle(icon).pointerEvents);
+            console.log('[DEBUG] Icon computed style cursor:', window.getComputedStyle(icon).cursor);
+            console.log('[DEBUG] Icon offsetWidth:', icon.offsetWidth, 'offsetHeight:', icon.offsetHeight);
+            
+            // Check if something is covering the icon
+            const rect = icon.getBoundingClientRect();
+            console.log('[DEBUG] Icon bounding rect:', rect);
+            const elementAtPoint = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
+            console.log('[DEBUG] Element at icon center:', elementAtPoint);
+            console.log('[DEBUG] Element at icon center === icon?', elementAtPoint === icon);
+            
+            // Add multiple event listeners to catch the event
             icon.addEventListener('click', function(e) {
-                console.log('[DEBUG] Edit icon clicked directly (inline handler)');
+                console.log('[DEBUG] Edit icon clicked directly (inline handler) - CLICK EVENT FIRED');
                 console.log('[DEBUG] Event target:', e.target);
+                console.log('[DEBUG] Event currentTarget:', e.currentTarget);
                 console.log('[DEBUG] Company ID:', {{ $company->id }});
+                console.log('[DEBUG] Event bubbles:', e.bubbles);
+                e.stopPropagation(); // Prevent other handlers
+            }, true); // Use capture phase
+            
+            icon.addEventListener('mousedown', function(e) {
+                console.log('[DEBUG] Edit icon mousedown event - FIRED');
+                console.log('[DEBUG] Mousedown target:', e.target);
             });
+            
+            icon.addEventListener('mouseup', function(e) {
+                console.log('[DEBUG] Edit icon mouseup event - FIRED');
+                console.log('[DEBUG] Mouseup target:', e.target);
+            });
+            
+            icon.addEventListener('mouseenter', function(e) {
+                console.log('[DEBUG] Edit icon mouseenter event');
+            });
+            
+            icon.addEventListener('mouseleave', function(e) {
+                console.log('[DEBUG] Edit icon mouseleave event');
+            });
+            
+            // Also try on the parent h1
+            const h1 = icon.closest('h1');
+            if (h1) {
+                console.log('[DEBUG] Also adding handler to h1 parent');
+                h1.addEventListener('click', function(e) {
+                    console.log('[DEBUG] H1 clicked, target:', e.target);
+                    if (e.target === icon || icon.contains(e.target)) {
+                        console.log('[DEBUG] Edit icon clicked via h1 parent handler');
+                        console.log('[DEBUG] Event target:', e.target);
+                    }
+                });
+            }
+            
+            // Check jQuery handlers
+            if (typeof window.$ !== 'undefined') {
+                setTimeout(function() {
+                    const $icon = window.$(icon);
+                    const events = $._data ? $._data(icon, 'events') : 'Not available';
+                    console.log('[DEBUG] jQuery events on icon:', events);
+                    console.log('[DEBUG] Testing jQuery click trigger');
+                    $icon.trigger('click');
+                }, 2000);
+            }
         });
     });
     
