@@ -1,5 +1,4 @@
 const mix = require('laravel-mix');
-const path = require('path');
 
 /*
  |--------------------------------------------------------------------------
@@ -12,20 +11,26 @@ const path = require('path');
  |
  */
 
-mix.setPublicPath('public')
-    .js('resources/js/app.js', 'js/app.js')
-    .sass('resources/sass/app.scss', 'css/app.css')
+if (mix.inProduction()) {
+    mix.options({
+        terser: {
+            terserOptions: {
+                compress: {
+                    drop_console: true,
+                },
+            },
+        },
+    });
+}
+
+mix.js('resources/js/app.js', 'public/js')
+    .sass('resources/sass/app.scss', 'public/css')
     .sourceMaps()
     .webpackConfig({
         resolve: {
-            extensions: ['.js', '.json', '.wasm'],
-            modules: ['node_modules'],
-            symlinks: false
+            symlinks: false,
         },
-        resolveLoader: {
-            modules: ['node_modules']
+        entry: {
+            app: './resources/js/app.js'
         }
-    })
-    .options({
-        processCssUrls: false
     });
