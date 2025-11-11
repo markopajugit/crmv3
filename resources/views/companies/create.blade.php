@@ -608,65 +608,74 @@
     </button>
 
     <script type="text/javascript">
-        window.addEventListener('load', function() {
-            if (typeof jQuery === 'undefined') {
-                console.error('jQuery is not loaded');
-                return;
-            }
-            var $ = jQuery;
-            
-            $( "#insertedRegistrationDate" ).datepicker({
-                changeMonth: true,
-                changeYear: true,
-                yearRange: "-100:+0",
-                dateFormat: "dd.mm.yy"
-            });
+        (function() {
+            function initCompanyCreate() {
+                // Check if jQuery is available (from bootstrap.js in app.js)
+                if (typeof window.jQuery === 'undefined' && typeof window.$ === 'undefined') {
+                    // jQuery not loaded yet, wait a bit and try again
+                    setTimeout(initCompanyCreate, 100);
+                    return;
+                }
+                
+                var $ = window.jQuery || window.$;
+                
+                $( "#insertedRegistrationDate" ).datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "-100:+0",
+                    dateFormat: "dd.mm.yy"
+                });
 
-            function printErrorMsg(msg) {
-                $(".print-error-msg").find("ul").html('');
-                $(".print-error-msg").css('display', 'block');
-                $.each(msg, function (key, value) {
-                    $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
+                function printErrorMsg(msg) {
+                    $(".print-error-msg").find("ul").html('');
+                    $(".print-error-msg").css('display', 'block');
+                    $.each(msg, function (key, value) {
+                        $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
+                    });
+                }
+
+                $('.saveNewCompany').on('click', function(){
+
+                    $('#name').val($('#insertedName').val());
+                    $('#registry_code').val($('#insertedRegistryCode').val());
+                    $('#registration_country').val($('#insertedRegistrationCountry').val());
+                    $('#vat').val($('#insertedVat').val());
+                    $('#registration_date').val($('#insertedRegistrationDate').val());
+                    $('#email').val($('#insertedEmail').val());
+                    $('#address_street').val($('#insertedAddressStreet').val());
+                    $('#address_city').val($('#insertedAddressCity').val());
+                    $('#address_zip').val($('#insertedAddressZip').val());
+                    $('#address_dropdown').val($('#insertedAddressDropdown').val());
+                    $('#notes').val($('#insertedNotes').val());
+
+
+                    if ($('input#generateNumber').is(':checked')) {
+                        $('#number').val(0);
+                    } else {
+                        $('#number').val($('#company_number').val());
+                    }
+
+
+                    $('#addNewCompany').submit();
+                });
+
+
+                $('input#generateNumber').change(function()
+                {
+                    if ($(this).is(':checked')) {
+                        $('#company_number_holder').hide();
+                    } else {
+                        $('#company_number_holder').show();
+                    }
                 });
             }
-
-            $('.saveNewCompany').on('click', function(){
-
-                $('#name').val($('#insertedName').val());
-                $('#registry_code').val($('#insertedRegistryCode').val());
-                $('#registration_country').val($('#insertedRegistrationCountry').val());
-                $('#vat').val($('#insertedVat').val());
-                $('#registration_date').val($('#insertedRegistrationDate').val());
-                $('#email').val($('#insertedEmail').val());
-                $('#address_street').val($('#insertedAddressStreet').val());
-                $('#address_city').val($('#insertedAddressCity').val());
-                $('#address_zip').val($('#insertedAddressZip').val());
-                $('#address_dropdown').val($('#insertedAddressDropdown').val());
-                $('#notes').val($('#insertedNotes').val());
-
-
-                if ($('input#generateNumber').is(':checked')) {
-                    $('#number').val(0);
-                } else {
-                    $('#number').val($('#company_number').val());
-                }
-
-
-                $('#addNewCompany').submit();
-            });
-
-
-
-
-
-            $('input#generateNumber').change(function()
-            {
-                if ($(this).is(':checked')) {
-                    $('#company_number_holder').hide();
-                } else {
-                    $('#company_number_holder').show();
-                }
-            });
-        });
+            
+            // Start initialization after scripts are loaded
+            if (document.readyState === 'complete') {
+                initCompanyCreate();
+            } else {
+                window.addEventListener('load', initCompanyCreate);
+            }
+        })();
     </script>
 @endsection
