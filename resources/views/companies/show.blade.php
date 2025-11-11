@@ -920,6 +920,50 @@ list-style: none;">
             icon.onclick = function(e) {
                 console.log('[DEBUG] Edit icon onclick handler - FIRED');
                 console.log('[DEBUG] Event:', e);
+                
+                // Manual edit trigger (works without jQuery)
+                const h1 = icon.closest('h1');
+                if (h1) {
+                    console.log('[DEBUG] Triggering manual edit mode');
+                    const currentName = h1.textContent.replace(icon.textContent, '').trim().replace(/^\d+\s*/, ''); // Remove company number
+                    const companyNumber = h1.querySelector('i:not(.fa-pen-to-square):not(.fa-building)')?.textContent || '';
+                    
+                    console.log('[DEBUG] Current company name:', currentName);
+                    console.log('[DEBUG] Company number:', companyNumber);
+                    
+                    // Create edit form
+                    const form = document.createElement('form');
+                    form.action = '{{ route("companies.update", $company->id) }}';
+                    form.method = 'POST';
+                    form.style.display = 'inline';
+                    
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                    form.innerHTML = `
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <input type="hidden" name="_method" value="PUT">
+                        <i class="fa-solid fa-building"></i>
+                        <input type="text" name="name" value="${currentName}" style="font-size:26px;">
+                        <button type="button" class="cancelEdit btn" style="margin-right: 5px;">Cancel</button>
+                        <button type="submit" class="saveEdit btn">Save</button>
+                    `;
+                    
+                    h1.innerHTML = '';
+                    h1.appendChild(form);
+                    
+                    // Hide h5 if it exists
+                    const h5 = document.querySelector('h5');
+                    if (h5) h5.style.display = 'none';
+                    
+                    // Focus the input
+                    const input = form.querySelector('input[name="name"]');
+                    if (input) input.focus();
+                    
+                    // Handle cancel
+                    form.querySelector('.cancelEdit')?.addEventListener('click', function() {
+                        window.location.reload();
+                    });
+                }
+                
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
