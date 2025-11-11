@@ -991,10 +991,48 @@ list-style: none;">
                 console.log('[DEBUG] Checking handlers after 2 seconds...');
                 const handlers = icon.onclick ? 'onclick exists' : 'no onclick';
                 console.log('[DEBUG] Icon onclick handler:', handlers);
+                
+                // Re-check if icon still exists
+                const iconStillExists = document.querySelector('h1 i.fa-pen-to-square');
+                console.log('[DEBUG] Icon still in DOM?', iconStillExists !== null);
+                console.log('[DEBUG] Icon still same element?', iconStillExists === icon);
+                
+                // Check if icon is still visible
+                const rect = icon.getBoundingClientRect();
+                console.log('[DEBUG] Icon rect after 2s:', rect);
+                
                 console.log('[DEBUG] Icon element:', icon);
                 console.log('[DEBUG] Testing programmatic click...');
-                icon.click();
+                try {
+                    icon.click();
+                    console.log('[DEBUG] Programmatic click executed');
+                } catch(e) {
+                    console.error('[DEBUG] Error triggering click:', e);
+                }
             }, 2000);
+            
+            // Monitor for icon removal/replacement
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList') {
+                        mutation.removedNodes.forEach(function(node) {
+                            if (node === icon || (node.nodeType === 1 && node.contains && node.contains(icon))) {
+                                console.warn('[DEBUG] Icon was removed from DOM!');
+                            }
+                        });
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1 && node.classList && node.classList.contains('fa-pen-to-square')) {
+                                console.warn('[DEBUG] New edit icon added to DOM!');
+                            }
+                        });
+                    }
+                });
+            });
+            
+            if (icon.parentElement) {
+                observer.observe(icon.parentElement, { childList: true, subtree: true });
+                console.log('[DEBUG] MutationObserver set up to watch for icon changes');
+            }
             
             // Also try on the parent h1
             const h1 = icon.closest('h1');
