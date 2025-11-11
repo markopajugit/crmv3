@@ -1,74 +1,669 @@
 // ============================================================================
-// Custom Application Styles
+// Custom Application Styles - Modern Design
 // ============================================================================
 
-// ----------------------------------------------------------------------------
-// Header Styles
-// ----------------------------------------------------------------------------
-header.header {
-    background: lightgray;
+@import 'variables';
+
+// ============================================================================
+// Global Styles
+// ============================================================================
+body {
+    font-family: $font-family-sans-serif;
+    color: $text-primary;
+    background-color: $bg-secondary;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-// ----------------------------------------------------------------------------
+// ============================================================================
 // Typography
-// ----------------------------------------------------------------------------
+// ============================================================================
+h1, h2, h3, h4, h5, h6 {
+    color: $text-primary;
+    font-weight: $font-weight-semibold;
+    line-height: 1.2;
+    margin-bottom: $spacing-md;
+}
+
 h1 {
-    // Add custom h1 styles here if needed
+    font-size: 2rem;
+    font-weight: $font-weight-bold;
 }
 
-// ----------------------------------------------------------------------------
+h2 {
+    font-size: 1.75rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+// ============================================================================
+// Header Styles
+// ============================================================================
+header.header {
+    background: $body-bg;
+    border-bottom: 1px solid $border-light;
+    box-shadow: $shadow-sm;
+    padding: $spacing-sm $spacing-md;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+
+    .header-search {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        width: 100%;
+        max-width: 800px;
+        position: relative;
+
+        .form-control {
+            flex: 1;
+            min-width: 200px;
+            border: 1px solid $border-light;
+            border-radius: $border-radius-md;
+            padding: 0.625rem 1rem;
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+
+            &:focus {
+                border-color: $primary;
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+                outline: none;
+            }
+        }
+
+        select.form-control {
+            flex: 0 0 auto;
+            min-width: 150px;
+            background-color: $body-bg;
+        }
+
+        .btn {
+            flex: 0 0 auto;
+            background-color: $primary;
+            color: white;
+            border: none;
+            border-radius: $border-radius-md;
+            padding: 0.625rem 1.5rem;
+            font-weight: $font-weight-medium;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+
+            &:hover {
+                background-color: $primary-dark;
+                transform: translateY(-1px);
+                box-shadow: $shadow-md;
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
+        }
+    }
+
+    .navbar-nav {
+        .nav-link {
+            color: $text-secondary;
+            font-weight: $font-weight-medium;
+            padding: 0.5rem 1rem;
+            border-radius: $border-radius-md;
+            transition: all 0.2s ease;
+
+            &:hover {
+                color: $primary;
+                background-color: $bg-secondary;
+            }
+        }
+
+        .dropdown-menu {
+            border: 1px solid $border-light;
+            box-shadow: $shadow-lg;
+            border-radius: $border-radius-md;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+
+            .dropdown-item {
+                padding: 0.625rem 1.25rem;
+                color: $text-secondary;
+                transition: all 0.15s ease;
+
+                &:hover {
+                    background-color: $bg-secondary;
+                    color: $primary;
+                }
+            }
+        }
+    }
+}
+
+// ============================================================================
+// Sidebar Styles
+// ============================================================================
+.sidebar {
+    background-color: $sidebar-bg !important;
+    box-shadow: $shadow-md;
+
+    .sidebar-brand {
+        background-color: $sidebar-bg !important;
+        padding: $spacing-md;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+    }
+
+    .sidebar-nav {
+        background-color: $sidebar-bg !important;
+
+        .nav-item {
+            margin: 0.25rem $spacing-sm;
+
+            .nav-link {
+                color: $sidebar-text;
+                padding: $spacing-sm $spacing-md;
+                border-radius: $border-radius-md;
+                font-weight: $font-weight-medium;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                gap: $spacing-sm;
+                text-align: left;
+                font-size: 0.9375rem;
+
+                i {
+                    width: 20px;
+                    text-align: center;
+                    font-size: 1rem;
+                }
+
+                &:hover {
+                    background-color: $sidebar-hover;
+                    color: white;
+                    transform: translateX(4px);
+                }
+
+                &.active {
+                    background-color: $sidebar-active;
+                    color: white;
+                    font-weight: $font-weight-semibold;
+                }
+            }
+        }
+    }
+
+    .sidebar-logo {
+        padding: $spacing-md;
+        display: block;
+        width: 100%;
+        max-width: 150px;
+        height: auto;
+        margin: 0 auto;
+    }
+}
+
+// ============================================================================
 // Body/Layout Styles
-// ----------------------------------------------------------------------------
+// ============================================================================
 .body {
-    background: #4f5d73;
-    color: rgba(255, 255, 255, 0.7);
+    background: $bg-secondary;
+    color: $text-primary;
+    padding: $spacing-lg;
 
     a {
-        color: rgba(255, 255, 255, 0.7);
-        text-decoration: underline;
-    }
+        color: $primary;
+        text-decoration: none;
+        transition: color 0.2s ease;
 
-    a:active {
-        color: white;
+        &:hover {
+            color: $primary-dark;
+            text-decoration: underline;
+        }
+
+        &:active {
+            color: $primary-dark;
+        }
     }
 }
 
-// ----------------------------------------------------------------------------
+.wrapper {
+    background-color: $bg-secondary;
+}
+
+.container-fluid {
+    padding: 0;
+}
+
+// ============================================================================
 // Footer Styles
-// ----------------------------------------------------------------------------
+// ============================================================================
 footer.footer {
-    background: #4f5d73;
+    background: $body-bg;
+    border-top: 1px solid $border-light;
+    padding: $spacing-md $spacing-lg;
+    color: $text-muted;
+    font-size: 0.875rem;
 }
 
-// ----------------------------------------------------------------------------
-// Modal Styles
-// ----------------------------------------------------------------------------
-.modal {
-    color: black !important;
+// ============================================================================
+// Button Styles
+// ============================================================================
+.btn {
+    border-radius: $border-radius-md;
+    font-weight: $font-weight-medium;
+    padding: 0.625rem 1.5rem;
+    transition: all 0.2s ease;
+    border: none;
 
-    a {
-        color: black !important;
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: $shadow-md;
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    &.btn-primary {
+        background-color: $primary;
+        color: white;
+
+        &:hover {
+            background-color: $primary-dark;
+        }
+    }
+
+    &.btn-success {
+        background-color: $success;
+        color: white;
+
+        &:hover {
+            background-color: darken($success, 10%);
+        }
+    }
+
+    &.btn-danger {
+        background-color: $danger;
+        color: white;
+
+        &:hover {
+            background-color: darken($danger, 10%);
+        }
+    }
+
+    &.btn-warning {
+        background-color: $warning;
+        color: white;
+
+        &:hover {
+            background-color: darken($warning, 10%);
+        }
+    }
+
+    &.btn-secondary {
+        background-color: $text-muted;
+        color: white;
+
+        &:hover {
+            background-color: darken($text-muted, 10%);
+        }
     }
 }
 
-// ----------------------------------------------------------------------------
-// Navigation & Pagination
-// ----------------------------------------------------------------------------
-nav .pagination .page-item .page-link {
-    background: #4f5d73;
-    color: white;
+// ============================================================================
+// Card/Panel Styles
+// ============================================================================
+.panel {
+    background: $body-bg;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-sm;
+    border: 1px solid $border-light;
+    margin-bottom: $spacing-lg;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+        box-shadow: $shadow-md;
+    }
+
+    &.panel-default {
+        .panel-heading {
+            background: $body-bg;
+            border-bottom: 1px solid $border-light;
+            padding: $spacing-md $spacing-lg;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .panel-heading__title {
+                font-size: 1.25rem;
+                font-weight: $font-weight-semibold;
+                color: $text-primary;
+            }
+        }
+
+        .panel-body {
+            padding: $spacing-lg;
+            background: $body-bg;
+        }
+    }
 }
 
-nav .pagination .page-item.active .page-link {
-    border-color: white;
-    font-weight: 500;
-    text-decoration: underline;
-}
-
-// ----------------------------------------------------------------------------
+// ============================================================================
 // Table Styles
-// ----------------------------------------------------------------------------
-table tr.clickable {
+// ============================================================================
+.table {
+    background: $body-bg;
+    border-radius: $border-radius-md;
+    overflow: hidden;
+    margin-bottom: 0;
+
+    thead {
+        background-color: $bg-tertiary;
+
+        th {
+            color: $text-primary;
+            font-weight: $font-weight-semibold;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            padding: $spacing-md;
+            border-bottom: 2px solid $border-light;
+        }
+    }
+
+    tbody {
+        tr {
+            transition: all 0.15s ease;
+            border-bottom: 1px solid $border-light;
+
+            &:hover {
+                background-color: $bg-secondary;
+            }
+
+            &.clickable {
+                cursor: pointer;
+
+                &:hover {
+                    background-color: $bg-secondary;
+                    transform: scale(1.01);
+                }
+            }
+
+            td {
+                padding: $spacing-md;
+                color: $text-secondary;
+                vertical-align: middle;
+
+                a {
+                    color: $primary;
+                    font-weight: $font-weight-medium;
+
+                    &:hover {
+                        color: $primary-dark;
+                    }
+                }
+
+                strong {
+                    color: $text-primary;
+                    font-weight: $font-weight-semibold;
+                }
+            }
+        }
+    }
+
+    &.table-hover {
+        tbody tr:hover {
+            background-color: $bg-secondary;
+        }
+    }
+}
+
+// ============================================================================
+// Form Styles
+// ============================================================================
+.form-control {
+    border: 1px solid $border-light;
+    border-radius: $border-radius-md;
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background-color: $body-bg;
+    color: $text-primary;
+
+    &:focus {
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+        background-color: $body-bg;
+    }
+
+    &::placeholder {
+        color: $text-muted;
+    }
+}
+
+.form-label {
+    color: $text-primary;
+    font-weight: $font-weight-medium;
+    margin-bottom: 0.5rem;
+}
+
+select.form-control {
+    background-color: $body-bg;
     cursor: pointer;
 }
 
+// ============================================================================
+// Alert Styles
+// ============================================================================
+.alert {
+    border-radius: $border-radius-md;
+    border: none;
+    padding: $spacing-md $spacing-lg;
+    margin-bottom: $spacing-md;
+    font-weight: $font-weight-medium;
+    box-shadow: $shadow-sm;
+
+    &.alert-success {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: darken($success, 20%);
+        border-left: 4px solid $success;
+    }
+
+    &.alert-danger {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: darken($danger, 20%);
+        border-left: 4px solid $danger;
+    }
+
+    &.alert-warning {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: darken($warning, 20%);
+        border-left: 4px solid $warning;
+    }
+
+    &.alert-info {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: darken($info, 20%);
+        border-left: 4px solid $info;
+    }
+}
+
+// ============================================================================
+// Pagination Styles
+// ============================================================================
+.pagination {
+    .page-item {
+        .page-link {
+            background-color: $body-bg;
+            border: 1px solid $border-light;
+            color: $text-secondary;
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.25rem;
+            border-radius: $border-radius-md;
+            transition: all 0.2s ease;
+            font-weight: $font-weight-medium;
+
+            &:hover {
+                background-color: $bg-secondary;
+                border-color: $primary;
+                color: $primary;
+                transform: translateY(-1px);
+            }
+        }
+
+        &.active .page-link {
+            background-color: $primary;
+            border-color: $primary;
+            color: white;
+            font-weight: $font-weight-semibold;
+            box-shadow: $shadow-sm;
+        }
+
+        &.disabled .page-link {
+            background-color: $bg-secondary;
+            color: $text-muted;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+    }
+}
+
+// ============================================================================
+// Modal Styles
+// ============================================================================
+.modal {
+    .modal-content {
+        border-radius: $border-radius-lg;
+        border: none;
+        box-shadow: $shadow-lg;
+    }
+
+    .modal-header {
+        background-color: $bg-tertiary;
+        border-bottom: 1px solid $border-light;
+        padding: $spacing-lg;
+        border-radius: $border-radius-lg $border-radius-lg 0 0;
+
+        .modal-title {
+            font-weight: $font-weight-semibold;
+            color: $text-primary;
+        }
+    }
+
+    .modal-body {
+        padding: $spacing-lg;
+        color: $text-primary;
+
+        a {
+            color: $primary;
+
+            &:hover {
+                color: $primary-dark;
+            }
+        }
+    }
+
+    .modal-footer {
+        border-top: 1px solid $border-light;
+        padding: $spacing-lg;
+        background-color: $bg-secondary;
+        border-radius: 0 0 $border-radius-lg $border-radius-lg;
+    }
+}
+
+// ============================================================================
+// Dropdown Styles
+// ============================================================================
+.dropdown-menu {
+    border: 1px solid $border-light;
+    box-shadow: $shadow-lg;
+    border-radius: $border-radius-md;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+    background-color: $body-bg;
+
+    .dropdown-item {
+        padding: 0.625rem 1.25rem;
+        color: $text-secondary;
+        transition: all 0.15s ease;
+        font-weight: $font-weight-normal;
+
+        &:hover {
+            background-color: $bg-secondary;
+            color: $primary;
+        }
+
+        &:active {
+            background-color: $primary;
+            color: white;
+        }
+    }
+}
+
+// ============================================================================
+// Search Results
+// ============================================================================
+#searchResults {
+    background: $body-bg;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-md;
+    box-shadow: $shadow-lg;
+    margin-top: 0.5rem;
+    z-index: 1000;
+    padding: $spacing-sm;
+    max-height: 400px;
+    overflow-y: auto;
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+            padding: $spacing-sm;
+            border-radius: $border-radius-sm;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+
+            &:hover {
+                background-color: $bg-secondary;
+            }
+        }
+    }
+}
+
+// ============================================================================
+// Status Colors in Tables
+// ============================================================================
+td[style*="color: darkgoldenrod"],
+td[style*="color: red"],
+td[style*="color: green"] {
+    font-weight: $font-weight-semibold;
+}
+
+// ============================================================================
+// Utility Classes
+// ============================================================================
+.text-muted {
+    color: $text-muted !important;
+}
+
+.bg-light {
+    background-color: $bg-secondary !important;
+}
+
+.border-light {
+    border-color: $border-light !important;
+}

@@ -1,31 +1,68 @@
 <div class="sidebar sidebar-dark sidebar-fixed" id="sidebar">
-    <div class="sidebar-brand d-none d-md-flex" style="background: #000000;">
+    <div class="sidebar-brand d-none d-md-flex">
         <a class="navbar-brand" href="{{ url('/dashboard') }}">
-            <!--<img src="{{ asset('images/logo.png') }}" style="height: 100px;">-->
-            <img src="{{ asset('images/wisor-logo.jpg') }}" style="margin-left:12px;width:150px;" alt="logo">
+            <img src="{{ asset('images/wisor-logo.jpg') }}" alt="Logo" class="sidebar-logo">
         </a>
     </div>
-    <ul class="sidebar-nav" data-coreui="navigation" data-simplebar="init" style="background: #000000;">
-        <div class="simplebar-wrapper" style="margin: 0px;">
+    <ul class="sidebar-nav" data-coreui="navigation" data-simplebar="init">
+        <div class="simplebar-wrapper">
             <div class="simplebar-height-auto-observer-wrapper">
                 <div class="simplebar-height-auto-observer"></div>
             </div>
             <div class="simplebar-mask">
-                <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
-                    <div class="simplebar-content-wrapper" style="height: 100%;">
-                        <div class="simplebar-content" style="padding: 0px;">
-                            <li class="nav-item"><a class="nav-link" href="{{ url('/dashboard') }}">Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url('/persons') }}">Persons</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url('/companies') }}">Companies</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url('/orders') }}">Orders</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url('/invoices') }}">Invoices</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url('/renewals') }}">Renewals</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url('/documents') }}">Documents</a></li>
-                            <!--<li class="nav-item"><a class="nav-link" href="{{ url('/proformas') }}">Proformas</a></li>-->
-                            <li class="nav-item"><a class="nav-link" href="{{ url('/services') }}">Services</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url('/users') }}">Users</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url('/search/detailed') }}">Detailed Search</a></li>
-                            <!--<li class="nav-item"><a class="nav-link" href="{{ url('/settings') }}">Settings</a></li>-->
+                <div class="simplebar-offset">
+                    <div class="simplebar-content-wrapper">
+                        <div class="simplebar-content">
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('dashboard') || request()->is('/') ? 'active' : '' }}" href="{{ url('/dashboard') }}">
+                                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('persons*') ? 'active' : '' }}" href="{{ url('/persons') }}">
+                                    <i class="fa-solid fa-user"></i> Persons
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('companies*') ? 'active' : '' }}" href="{{ url('/companies') }}">
+                                    <i class="fa-solid fa-building"></i> Companies
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('orders*') ? 'active' : '' }}" href="{{ url('/orders') }}">
+                                    <i class="fa-solid fa-file"></i> Orders
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('invoices*') ? 'active' : '' }}" href="{{ url('/invoices') }}">
+                                    <i class="fa-solid fa-receipt"></i> Invoices
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('renewals*') ? 'active' : '' }}" href="{{ url('/renewals') }}">
+                                    <i class="fa-solid fa-rotate"></i> Renewals
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('documents*') ? 'active' : '' }}" href="{{ url('/documents') }}">
+                                    <i class="fa-solid fa-folder"></i> Documents
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('services*') ? 'active' : '' }}" href="{{ url('/services') }}">
+                                    <i class="fa-solid fa-briefcase"></i> Services
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('users*') ? 'active' : '' }}" href="{{ url('/users') }}">
+                                    <i class="fa-solid fa-users"></i> Users
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->is('search*') ? 'active' : '' }}" href="{{ url('/search/detailed') }}">
+                                    <i class="fa-solid fa-search"></i> Detailed Search
+                                </a>
+                            </li>
                         </div>
                     </div>
                 </div>
@@ -33,11 +70,3 @@
         </div>
     </ul>
 </div>
-
-<style>
-    .sidebar-nav .nav-link {
-        text-align: center;
-        display: block;
-        font-size: 20px;
-    }
-</style>

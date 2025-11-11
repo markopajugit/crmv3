@@ -1,5 +1,5 @@
-// Fonts
-@import url('https://fonts.googleapis.com/css?family=Nunito');
+// Fonts - Inter (Modern, Professional)
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 // Variables
 @import 'variables';
@@ -12,6 +12,9 @@
 
 // jQuery UI CSS (needed for datepicker and other widgets)
 @import '~jquery-ui-dist/jquery-ui.css';
+
+// Font Awesome - Set font path before importing
+$fa-font-path: '../webfonts' !default;
 
 // Font Awesome
 @import '~@fortawesome/fontawesome-free/scss/fontawesome';
