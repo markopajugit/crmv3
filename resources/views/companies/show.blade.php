@@ -875,7 +875,27 @@ list-style: none;">
 </div>
 
 <script>
+    console.log('[DEBUG] Company show page script loaded - inline script');
+    
+    // Add direct click handler for edit icon (works immediately)
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('[DEBUG] DOMContentLoaded fired on company show page');
+        
+        const editIcons = document.querySelectorAll('h1 i.fa-pen-to-square');
+        console.log('[DEBUG] Found edit icons:', editIcons.length);
+        
+        editIcons.forEach(function(icon, index) {
+            console.log('[DEBUG] Adding click handler to edit icon #' + (index + 1));
+            icon.addEventListener('click', function(e) {
+                console.log('[DEBUG] Edit icon clicked directly (inline handler)');
+                console.log('[DEBUG] Event target:', e.target);
+                console.log('[DEBUG] Company ID:', {{ $company->id }});
+            });
+        });
+    });
+    
     if (window.initCompanyShow) {
+        console.log('[DEBUG] Calling window.initCompanyShow()');
         window.initCompanyShow({
             entityId: {{ $company->id }},
             kycStoreRoute: '{{ route('kyc.store') }}',
@@ -885,6 +905,8 @@ list-style: none;">
             taxResidencyUpdateRoute: '/entitycontact/update/0',
             updateRoute: '{{ route('companies.update', $company->id) }}'
         });
+    } else {
+        console.warn('[DEBUG] window.initCompanyShow is not available - JS may need to be compiled');
     }
 </script>
 

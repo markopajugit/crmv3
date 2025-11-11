@@ -66,9 +66,37 @@
     </form>
 
 <script>
-    console.log('[DEBUG] Company edit page script loaded');
-    if (window.initCompanyEdit) {
-        window.initCompanyEdit();
+    console.log('[DEBUG] Company edit page script loaded - inline script');
+    console.log('[DEBUG] Document ready state:', document.readyState);
+    
+    // Wait for DOM and scripts to load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[DEBUG] DOMContentLoaded fired on company edit page');
+            if (window.initCompanyEdit) {
+                console.log('[DEBUG] Calling window.initCompanyEdit()');
+                window.initCompanyEdit();
+            } else {
+                console.warn('[DEBUG] window.initCompanyEdit is not available yet');
+            }
+        });
+    } else {
+        console.log('[DEBUG] DOM already ready, checking for initCompanyEdit');
+        if (window.initCompanyEdit) {
+            console.log('[DEBUG] Calling window.initCompanyEdit() immediately');
+            window.initCompanyEdit();
+        } else {
+            console.warn('[DEBUG] window.initCompanyEdit is not available');
+            // Try again after a short delay
+            setTimeout(function() {
+                if (window.initCompanyEdit) {
+                    console.log('[DEBUG] Calling window.initCompanyEdit() after delay');
+                    window.initCompanyEdit();
+                } else {
+                    console.error('[DEBUG] window.initCompanyEdit still not available - JS may need to be compiled');
+                }
+            }, 1000);
+        }
     }
 </script>
 @endsection
