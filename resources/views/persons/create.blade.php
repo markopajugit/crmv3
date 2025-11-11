@@ -1,6 +1,186 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    /* Base Typography - Ensure Nunito font is used */
+    body, .card, .panel, .modal, input, select, textarea, button, .btn {
+        font-family: 'Nunito', sans-serif;
+    }
+
+    /* Form Styling */
+    .form-label,
+    strong {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    /* Style all inputs, selects, and textareas */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    input[type="search"],
+    input[type="password"],
+    textarea,
+    select,
+    .form-control {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 0.625rem 0.75rem;
+        font-size: 0.875rem;
+        color: #1f2937;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    input[type="search"]:focus,
+    input[type="password"]:focus,
+    textarea:focus,
+    select:focus,
+    .form-control:focus {
+        border-color: #DC2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+
+    input[type="text"]::placeholder,
+    input[type="email"]::placeholder,
+    input[type="tel"]::placeholder,
+    input[type="number"]::placeholder,
+    input[type="search"]::placeholder,
+    input[type="password"]::placeholder,
+    textarea::placeholder,
+    .form-control::placeholder {
+        color: #9CA3AF;
+    }
+
+    textarea,
+    textarea.form-control {
+        resize: vertical;
+    }
+
+    select,
+    select.form-control {
+        cursor: pointer;
+    }
+
+    /* Button Styling */
+    .btn {
+        padding: 0.625rem 1.5rem;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: #DC2626;
+        color: #ffffff;
+    }
+
+    .btn-primary:hover {
+        background-color: #B91C1C;
+    }
+
+    .btn-success,
+    .saveNewPerson {
+        background-color: #10B981;
+        color: #ffffff;
+    }
+
+    .btn-success:hover,
+    .saveNewPerson:hover {
+        background-color: #059669;
+    }
+
+    /* Alert Styling */
+    .alert {
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-danger {
+        background-color: #FEF2F2;
+        border-color: #FECACA;
+        color: #991B1B;
+    }
+
+    .alert-danger ul {
+        margin-bottom: 0;
+        padding-left: 1.25rem;
+    }
+
+    /* Panel Styling */
+    .panel {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .panel-heading {
+        background-color: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem 1.5rem;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .panel-heading__title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .panel-body {
+        padding: 1.5rem;
+    }
+
+    .panel-body .table {
+        margin-bottom: 0;
+    }
+
+    .panel-body .table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+    }
+
+    /* Checkbox Styling */
+    input[type="checkbox"] {
+        width: auto;
+        margin-right: 0.5rem;
+        cursor: pointer;
+    }
+
+    /* Heading Styling */
+    h1 input[type="text"],
+    h5 input[type="text"] {
+        border: none;
+        border-bottom: 2px solid #d1d5db;
+        border-radius: 0;
+        padding: 0.25rem 0.5rem;
+        font-size: inherit;
+        font-weight: inherit;
+        background: transparent;
+    }
+
+    h1 input[type="text"]:focus,
+    h5 input[type="text"]:focus {
+        border-bottom-color: #DC2626;
+        box-shadow: none;
+        outline: none;
+    }
+</style>
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul>

@@ -1,10 +1,362 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    /* Base Typography - Ensure Nunito font is used */
+    body, .card, .panel, .modal, input, select, textarea, button, .btn {
+        font-family: 'Nunito', sans-serif;
+    }
+
+    /* Form Styling */
+    .form-label,
+    strong,
+    b {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    /* Style all inputs, selects, and textareas */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    input[type="search"],
+    input[type="password"],
+    textarea,
+    select,
+    .form-control {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 0.625rem 0.75rem;
+        font-size: 0.875rem;
+        color: #1f2937;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        width: 100%;
+        box-sizing: border-box;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    input[type="search"]:focus,
+    input[type="password"]:focus,
+    textarea:focus,
+    select:focus,
+    .form-control:focus {
+        border-color: #DC2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+
+    input[type="text"]::placeholder,
+    input[type="email"]::placeholder,
+    input[type="tel"]::placeholder,
+    input[type="number"]::placeholder,
+    input[type="search"]::placeholder,
+    input[type="password"]::placeholder,
+    textarea::placeholder,
+    .form-control::placeholder {
+        color: #9CA3AF;
+    }
+
+    textarea,
+    textarea.form-control {
+        resize: vertical;
+    }
+
+    select,
+    select.form-control {
+        cursor: pointer;
+    }
+
+    /* Button Styling */
+    .btn {
+        padding: 0.625rem 1.5rem;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        border: none;
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background-color: #DC2626;
+        color: #ffffff;
+        border-color: #DC2626;
+    }
+
+    .btn-primary:hover {
+        background-color: #B91C1C;
+        border-color: #B91C1C;
+    }
+
+    .btn-success {
+        background-color: #10B981;
+        color: #ffffff;
+        border-color: #10B981;
+    }
+
+    .btn-success:hover {
+        background-color: #059669;
+        border-color: #059669;
+    }
+
+    .btn-secondary {
+        background-color: #6B7280;
+        color: #ffffff;
+        border-color: #6B7280;
+    }
+
+    .btn-secondary:hover {
+        background-color: #4B5563;
+        border-color: #4B5563;
+    }
+
+    .btn-danger {
+        background-color: #EF4444;
+        color: #ffffff;
+        border-color: #EF4444;
+    }
+
+    .btn-danger:hover {
+        background-color: #DC2626;
+        border-color: #DC2626;
+    }
+
+    .btn-info {
+        background-color: #3B82F6;
+        color: #ffffff;
+        border-color: #3B82F6;
+    }
+
+    .btn-info:hover {
+        background-color: #2563EB;
+        border-color: #2563EB;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .btn-outline-primary,
+    .btn-outline-secondary {
+        border-width: 1px;
+        border-style: solid;
+    }
+
+    .btn-outline-primary {
+        color: #DC2626;
+        border-color: #DC2626;
+        background-color: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #DC2626;
+        color: #ffffff;
+    }
+
+    .btn-outline-secondary {
+        color: #6B7280;
+        border-color: #6B7280;
+        background-color: transparent;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6B7280;
+        color: #ffffff;
+    }
+
+    /* Card Styling */
+    .card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .card-header {
+        background-color: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1.25rem;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Panel Styling (for backward compatibility) */
+    .panel {
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .panel-heading {
+        background-color: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem 1.5rem;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .panel-heading__title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .panel-body {
+        padding: 1.5rem;
+    }
+
+    /* Modal Styling */
+    .modal-content {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .modal-header {
+        background-color: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1.25rem 1.5rem;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .modal-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        color: #374151;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e5e7eb;
+        padding: 1rem 1.5rem;
+        background-color: #f9fafb;
+        border-radius: 0 0 8px 8px;
+    }
+
+    /* Heading Styling */
+    h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    h3 {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1f2937;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    /* Table Styling */
+    .table {
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.875rem;
+    }
+
+    .table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+    }
+
+    /* Alert Styling */
+    .alert {
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .alert-danger {
+        background-color: #FEF2F2;
+        border-color: #FECACA;
+        color: #991B1B;
+    }
+
+    .alert-danger ul {
+        margin-bottom: 0;
+        padding-left: 1.25rem;
+    }
+
+    .print-error-msg {
+        background-color: #FEF2F2;
+        border-color: #FECACA;
+        color: #991B1B;
+    }
+
+    /* Icon Styling */
+    .fa-pen-to-square,
+    .fa-check,
+    .fa-trash,
+    .fa-xmark,
+    .fa-plus {
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .fa-pen-to-square:hover {
+        color: #DC2626;
+    }
+
+    .fa-check:hover {
+        color: #10B981;
+    }
+
+    .fa-trash:hover,
+    .fa-xmark:hover {
+        color: #EF4444;
+    }
+
+    /* Loading Indicator */
+    #loading {
+        font-family: 'Nunito', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+        width: 0%;
+        height: 20px;
+        background-color: #10B981;
+        transition: width 0.3s ease;
+    }
+
+    /* Search Results */
+    #searchResultsPerson {
+        font-family: 'Nunito', sans-serif;
+    }
+</style>
 <div id="loading" style="display:none;
     width: 500px;
     z-index: 10;
-    font-size: 50px;
+    font-size: 1.5rem;
+    font-weight: 600;
     background: white;
     text-align: center;
     position: fixed;
@@ -12,9 +364,11 @@
     margin-right: auto;
     left: 0;
     right: 0;
-    text-align: center;
-    top: 400px;">Uploading files...
-    <div class="progress">
+    top: 400px;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">Uploading files...
+    <div class="progress" style="margin-top: 1rem; height: 20px; border-radius: 4px; overflow: hidden; background-color: #e5e7eb;">
         <div class="progress-bar progress-bar-primary" role="progressbar" data-dz-uploadprogress>
             <span class="progress-text"></span>
         </div>
@@ -132,17 +486,6 @@
 
         });
     </script>
-    <style>
-        td .fa-plus {
-            color:green;
-        }
-
-        .progress-bar {
-            width: 0%;
-            height: 20px;
-            background-color: #4CAF50;
-        }
-    </style>
 
 @include('partials.success-alert')
 

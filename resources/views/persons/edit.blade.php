@@ -235,6 +235,68 @@
 
     </form>
 
+<style>
+    /* Base Typography - Ensure Nunito font is used */
+    body, .card, .panel, .modal, input, select, textarea, button, .btn {
+        font-family: 'Nunito', sans-serif;
+    }
+
+    /* Form Styling for Edit Page */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group strong {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 0.625rem 0.75rem;
+        font-size: 0.875rem;
+        color: #1f2937;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        width: 100%;
+        box-sizing: border-box;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .form-control:focus {
+        border-color: #DC2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: #9CA3AF;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+    }
+
+    .btn-primary {
+        background-color: #DC2626;
+        border-color: #DC2626;
+        color: #ffffff;
+        padding: 0.625rem 1.5rem;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .btn-primary:hover {
+        background-color: #B91C1C;
+        border-color: #B91C1C;
+    }
+</style>
+
 <script>
     // Ensure jQuery is loaded before executing
     (function($) {
