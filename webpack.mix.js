@@ -11,26 +11,6 @@ const mix = require('laravel-mix');
  |
  */
 
-if (mix.inProduction()) {
-    mix.options({
-        terser: {
-            terserOptions: {
-                compress: {
-                    drop_console: true,
-                },
-            },
-        },
-    });
-}
-
 mix.js('resources/js/app.js', 'public/js')
     .sass('resources/sass/app.scss', 'public/css')
-    .sourceMaps()
-    .webpackConfig({
-        resolve: {
-            symlinks: false,
-        },
-        entry: {
-            app: './resources/js/app.js'
-        }
-    });
+    .sourceMaps();
