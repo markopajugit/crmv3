@@ -16,6 +16,7 @@ if (typeof window.$ === 'undefined') {
  * @param {Object} options - Configuration options
  */
 export function initCompanyEditor(options = {}) {
+    console.log('[DEBUG] Company editor initialized', options);
     if (typeof window.$ === 'undefined') return;
 
     const config = {
@@ -23,13 +24,17 @@ export function initCompanyEditor(options = {}) {
         entityId: options.entityId || null,
         ...options
     };
+    console.log('[DEBUG] Company editor config:', config);
 
     // Handle inline name editing
     $(document).on('click', 'h1 i.fa-pen-to-square', function() {
+        console.log('[DEBUG] Edit icon clicked on company');
         const $button = $(this);
         const $h1 = $button.parent();
         const currentName = $h1.clone().children().remove().end().text().trim();
         const companyNumber = $('h5').text().trim();
+        console.log('[DEBUG] Current company name:', currentName);
+        console.log('[DEBUG] Company number:', companyNumber);
 
         $h1.html(`
             <form action="${config.updateRoute}/${config.entityId}" method="POST" style="display: inline;">

@@ -64,4 +64,11 @@
         </div>
 
     </form>
+
+<script>
+    console.log('[DEBUG] Company edit page script loaded');
+    if (window.initCompanyEdit) {
+        window.initCompanyEdit();
+    }
+</script>
 @endsection
