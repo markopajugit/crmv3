@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('order_service', function (Blueprint $table) {
-            $table->boolean('renewed')->default(0)->after('date_to');
-        });
+        if (!Schema::hasColumn('order_service', 'renewed')) {
+            Schema::table('order_service', function (Blueprint $table) {
+                $table->boolean('renewed')->default(0)->after('date_to');
+            });
+        }
     }
 
     /**
