@@ -84,17 +84,17 @@
                 </div>
                 <form>
                     <div class="modal-body">
-                        <label for="persons">Persons</label>
-
-                        <input type="hidden" name="persons" id="personID">
-                        <input id="searchPerson" class="form-control mr-sm-2" type="search" autocomplete="off"
-                               placeholder="Search" name="s" aria-label="Search">
-                        <div id="searchResultsPerson" style=" display:none;   position: absolute;
-background: white;padding: 10px;
-list-style: none;">
+                        <div class="mb-3">
+                            <label for="persons" class="form-label">Persons</label>
+                            <input type="hidden" name="persons" id="personID">
+                            <div class="position-relative">
+                                <input id="searchPerson" class="form-control" type="search" autocomplete="off"
+                                       placeholder="Search for person" name="s" aria-label="Search">
+                                <div id="searchResultsPerson" class="search-results" style="display:none;"></div>
+                            </div>
                         </div>
 
-                        <div id="emails"></div>
+                        <div id="emails" class="mb-3"></div>
                     </div>
                     <div class="modal-footer">
                         <button id="closeModal" type="button" class="btn btn-secondary" data-coreui-dismiss="modal">
@@ -640,13 +640,14 @@ list-style: none;">
                                    required="">
                         </div>
 
-                        <div>Responsible User</div>
-                        <input type="hidden" name="users" id="userID">
-                        <input id="searchUser" class="form-control mr-sm-2" type="search" autocomplete="off"
-                               placeholder="Search" name="s" aria-label="Search">
-                        <div id="searchResultsUser" style=" display:none;   position: absolute;
-background: white;padding: 10px;
-list-style: none;">
+                        <div class="mb-3">
+                            <label for="searchUser" class="form-label">Responsible User</label>
+                            <input type="hidden" name="users" id="userID">
+                            <div class="position-relative">
+                                <input id="searchUser" class="form-control" type="search" autocomplete="off"
+                                       placeholder="Search for user" name="s" aria-label="Search">
+                                <div id="searchResultsUser" class="search-results" style="display:none;"></div>
+                            </div>
                         </div>
 
 
@@ -673,8 +674,10 @@ list-style: none;">
                     <div class="modal-body">
                         <input type="hidden" id="companyID" class="form-control" value="{{ $company->id }}">
 
-                        <label for="noteContent">Content</label>
-                        <textarea id="noteContent" name="noteContent" rows="4" cols="50"></textarea>
+                        <div class="mb-3">
+                            <label for="noteContent" class="form-label">Content</label>
+                            <textarea id="noteContent" name="noteContent" class="form-control" rows="4" placeholder="Enter note content"></textarea>
+                        </div>
 
                     </div>
                     <div class="modal-footer">
@@ -699,41 +702,62 @@ list-style: none;">
                     <div class="modal-body">
                         <input type="hidden" id="companyID" class="form-control" value="{{ $company->id }}">
 
-                        <label for="persons">Person or Company</label>
-
-                        <input type="hidden" name="persons" id="selectedPersonRelation">
-                        <input type="hidden" name="companies" id="selectedCompanyRelation">
-                        <input id="searchPerson2" class="form-control mr-sm-2" type="search" autocomplete="off"
-                               placeholder="Search" name="s" aria-label="Search">
-                        <div id="searchResultsPerson2" style=" display:none;   position: absolute;
-background: white;padding: 10px;
-list-style: none;">
+                        <div class="mb-3">
+                            <label for="searchPerson2" class="form-label">Person or Company</label>
+                            <input type="hidden" name="persons" id="selectedPersonRelation">
+                            <input type="hidden" name="companies" id="selectedCompanyRelation">
+                            <div class="position-relative">
+                                <input id="searchPerson2" class="form-control" type="search" autocomplete="off"
+                                       placeholder="Search for person or company" name="s" aria-label="Search">
+                                <div id="searchResultsPerson2" class="search-results" style="display:none;"></div>
+                            </div>
                         </div>
-                        <br>
-                        <p>Relation:</p>
-                        <input class="personCompanyRelation" type="checkbox" id="boardmember" name="boardmember" value="Board Member">
-                        <label for="boardmember">Board Member</label><br>
-                        <input class="personCompanyRelation" type="checkbox" id="shareholder" name="shareholder" value="Shareholder">
-                        <label for="shareholder">Shareholder</label><br>
-                        <input class="personCompanyRelation" type="checkbox" id="agent" name="agent" value="Agent">
-                        <label for="agent">Agent</label><br>
-                        <input class="personCompanyRelation" type="checkbox" id="agentrepresentative" name="agentrepresentative" value="Agent representative">
-                        <label for="agentrepresentative">Agent representative</label><br>
-                        <input class="personCompanyRelation" type="checkbox" id="ubo" name="ubo" value="UBO">
-                        <label for="ubo">UBO</label><br>
-                        <input class="personCompanyRelation" type="checkbox" id="procura" name="procura" value="Procura">
-                        <label for="procura">Procura</label><br>
-                        <input class="personCompanyRelation" type="checkbox" id="acp" name="acp" value="Authorised contact person">
-                        <label for="acp">Authorised contact person</label>  <input id="authorised_person_deadline" type="text"><br>
-                        <input class="personCompanyRelation" type="checkbox" id="auditor" name="auditor" value="Auditor">
-                        <label for="auditor">Auditor</label><br>
-                        <input class="personCompanyRelation" type="checkbox" id="client" name="client" value="Client">
-                        <label for="client">Client</label><br>
-                        <!--<input class="personCompanyRelation" type="checkbox" id="maincontact" name="maincontact" value="Main Contact">
-                        <label for="maincontact">Main Contact</label><br>-->
 
-                        <label for="other">Other</label>
-                        <input class="personCompanyRelationOther" type="text" id="otherRelation" name="other">
+                        <div class="mb-3">
+                            <label class="form-label">Relation</label>
+                            <div class="form-check">
+                                <input class="form-check-input personCompanyRelation" type="checkbox" id="boardmember" name="boardmember" value="Board Member">
+                                <label class="form-check-label" for="boardmember">Board Member</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input personCompanyRelation" type="checkbox" id="shareholder" name="shareholder" value="Shareholder">
+                                <label class="form-check-label" for="shareholder">Shareholder</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input personCompanyRelation" type="checkbox" id="agent" name="agent" value="Agent">
+                                <label class="form-check-label" for="agent">Agent</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input personCompanyRelation" type="checkbox" id="agentrepresentative" name="agentrepresentative" value="Agent representative">
+                                <label class="form-check-label" for="agentrepresentative">Agent representative</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input personCompanyRelation" type="checkbox" id="ubo" name="ubo" value="UBO">
+                                <label class="form-check-label" for="ubo">UBO</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input personCompanyRelation" type="checkbox" id="procura" name="procura" value="Procura">
+                                <label class="form-check-label" for="procura">Procura</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input personCompanyRelation" type="checkbox" id="acp" name="acp" value="Authorised contact person">
+                                <label class="form-check-label" for="acp">Authorised contact person</label>
+                                <input id="authorised_person_deadline" type="text" class="form-control form-control-sm d-inline-block ms-2" style="width: auto;" placeholder="Deadline">
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input personCompanyRelation" type="checkbox" id="auditor" name="auditor" value="Auditor">
+                                <label class="form-check-label" for="auditor">Auditor</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input personCompanyRelation" type="checkbox" id="client" name="client" value="Client">
+                                <label class="form-check-label" for="client">Client</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="otherRelation" class="form-label">Other</label>
+                            <input class="form-control personCompanyRelationOther" type="text" id="otherRelation" name="other" placeholder="Enter other relation type">
+                        </div>
 
 
                     </div>
@@ -794,8 +818,10 @@ list-style: none;">
                         <div class="mb-3">
                             <label for="kycResponsibleUser" class="form-label">Responsible User</label>
                             <input type="hidden" name="responsible_user_id" id="kycResponsibleUserId">
-                            <input id="kycResponsibleUser" class="form-control" type="search" autocomplete="off" placeholder="Search for responsible user" aria-label="Search">
-                            <div id="kycResponsibleUserResults" style="display:none; position: absolute; background: white; padding: 10px; list-style: none; z-index: 1000;"></div>
+                            <div class="position-relative">
+                                <input id="kycResponsibleUser" class="form-control" type="search" autocomplete="off" placeholder="Search for responsible user" aria-label="Search">
+                                <div id="kycResponsibleUserResults" class="search-results" style="display:none;"></div>
+                            </div>
                         </div>
 
                     </div>
@@ -855,8 +881,10 @@ list-style: none;">
                         <div class="mb-3">
                             <label for="editKycResponsibleUser" class="form-label">Responsible User</label>
                             <input type="hidden" name="responsible_user_id" id="editKycResponsibleUserId">
-                            <input id="editKycResponsibleUser" class="form-control" type="search" autocomplete="off" placeholder="Search for responsible user" aria-label="Search">
-                            <div id="editKycResponsibleUserResults" style="display:none; position: absolute; background: white; padding: 10px; list-style: none; z-index: 1000;"></div>
+                            <div class="position-relative">
+                                <input id="editKycResponsibleUser" class="form-control" type="search" autocomplete="off" placeholder="Search for responsible user" aria-label="Search">
+                                <div id="editKycResponsibleUserResults" class="search-results" style="display:none;"></div>
+                            </div>
                         </div>
 
                     </div>
@@ -1403,7 +1431,15 @@ list-style: none;">
             @endif
         });
 
+            } // end initCompanyShowMain
 
+            // Start initialization
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initCompanyShowMain);
+            } else {
+                initCompanyShowMain();
+            }
+        })();
 
     </script>
 
@@ -1923,16 +1959,6 @@ list-style: none;">
                 $('#editKycResponsibleUserResults').hide();
             });
         });
-
-            } // end initCompanyShowMain
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initCompanyShowMain);
-            } else {
-                initCompanyShowMain();
-            }
-        })();
 
         // Initialize Company Editor Component
         if (typeof CompanyEditor !== 'undefined') {
