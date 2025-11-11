@@ -45,6 +45,20 @@ const COUNTRIES = [
     'Western Sahara', 'Yemen', 'Zambia', 'Zimbabwe'
 ];
 
+/**
+ * Generate country options HTML for select dropdowns
+ * @param {string} selectedValue - The country to pre-select
+ * @returns {string} HTML string with option elements
+ */
+function generateCountryOptions(selectedValue = '') {
+    let html = '<option value="">country</option>';
+    COUNTRIES.forEach(country => {
+        const selected = country === selectedValue ? ' selected' : '';
+        html += `<option value="${country}"${selected}>${country}</option>`;
+    });
+    return html;
+}
+
 class CompanyEditor {
     constructor(companyId, updateUrl) {
         this.companyId = companyId;
@@ -70,6 +84,10 @@ class CompanyEditor {
         this.initTaxResidencyEditor();
         this.initKycEditor();
         this.initActivityCodeEditors();
+        this.initContactEditors();
+        this.initAddressEditor();
+        this.initContactManagement();
+        this.initDocumentManagement();
         this.initRelatedEntities();
     }
 
@@ -77,15 +95,18 @@ class CompanyEditor {
      * Initialize company name/number/registry code editor
      */
     initCompanyNameEditor() {
-        const $h1 = $('h1');
-        const $h5 = $('h5');
+        const $h1 = $('h1[data-company-number]');
+        const $h5 = $('h5[data-registry-code]');
         
         // Store original content
         this.originalContent.h1 = $h1.html();
         this.originalContent.h5 = $h5.html();
 
-        $h1.on('click', 'i.fa-pen-to-square', () => {
-            const $editIcon = $h1.find('i.fa-pen-to-square');
+        // Use more specific selector for the edit icon
+        $h1.on('click', 'i.fa-pen-to-square, i.fa-solid.fa-pen-to-square', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const $editIcon = $h1.find('i.fa-pen-to-square, i.fa-solid.fa-pen-to-square');
             const currentNumber = $h1.data('company-number') || '';
             const currentName = $h1.data('company-name') || '';
             const currentRegistry = $h5.data('registry-code') || '';
@@ -512,6 +533,493 @@ class CompanyEditor {
     }
 
     /**
+     * Initialize phone and email contact editors
+     */
+    initContactEditors() {
+        const self = this;
+        
+        // Phone editor
+        $('#phoneRow').on('click', 'i.fa-pen-to-square, i.fa-solid.fa-pen-to-square', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const $editIcon = $(this);
+            const contactid = $editIcon.parent().siblings('.contactPhone').data('contactid');
+            const contactValue = $editIcon.parent().siblings('.contactPhone').children('.contactPhoneVal').html();
+            let contactNote = $editIcon.parent().siblings('.contactPhone').children('.contactPhoneNote').html();
+            if (typeof contactNote === "undefined" || contactNote === null) {
+                contactNote = '';
+            }
+
+            $editIcon.hide();
+            $editIcon.siblings('.fa-check').show();
+
+            $editIcon.parent().siblings('.contactPhone').html(`
+                <input type="text" id="updatedPhone" name="updatedPhone" value="${self.escapeHtml(contactValue)}" data-contactid="${contactid}">
+                <input type="text" id="updatedPhoneNote" name="updatedPhoneNote" placeholder="Notes" value="${self.escapeHtml(contactNote)}">
+            `);
+        });
+
+        // Phone save handler
+        $('#phoneRow').on('click', '.fa-check', function() {
+            const updatedPhoneValue = $('#updatedPhone').val();
+            const updatedPhoneNote = $('#updatedPhoneNote').val();
+            const contactid = $('#updatedPhone').data('contactid');
+
+            $.ajax({
+                url: `/entitycontact/update/${contactid}`,
+                method: 'POST',
+                data: {
+                    value: updatedPhoneValue,
+                    company_id: self.companyId,
+                    type: 'phone',
+                    entity: 'company',
+                    note: updatedPhoneNote
+                },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).done((response) => {
+                if (response.success || response) {
+                    window.location.reload();
+                } else {
+                    if (showError && typeof showError === 'function') {
+                        showError(response.error || 'Failed to update phone');
+                    }
+                }
+            }).fail((xhr) => {
+                if (showError && typeof showError === 'function') {
+                    showError(xhr.responseJSON?.error || 'Failed to update phone');
+                }
+            });
+        });
+
+        // Email editor
+        $('#emailRow').on('click', 'i.fa-pen-to-square, i.fa-solid.fa-pen-to-square', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const $editIcon = $(this);
+            const contactid = $editIcon.parent().siblings('.contactEmail').data('contactid');
+            const contactValue = $editIcon.parent().siblings('.contactEmail').children('.contactEmailVal').html();
+            let contactNote = $editIcon.parent().siblings('.contactEmail').children('.contactEmailNote').html();
+            if (typeof contactNote === "undefined" || contactNote === null) {
+                contactNote = '';
+            }
+
+            $editIcon.hide();
+            $editIcon.siblings('.fa-check').show();
+
+            $editIcon.parent().siblings('.contactEmail').html(`
+                <input type="text" id="updatedEmail" name="updatedEmail" value="${self.escapeHtml(contactValue)}" data-contactid="${contactid}">
+                <input type="text" id="updatedEmailNote" name="updatedEmailNote" placeholder="Notes" value="${self.escapeHtml(contactNote)}">
+            `);
+        });
+
+        // Email save handler
+        $('#emailRow').on('click', '.fa-check', function() {
+            const updatedEmailValue = $('#updatedEmail').val();
+            const emailNote = $('#updatedEmailNote').val();
+            const contactid = $('#updatedEmail').data('contactid');
+
+            $.ajax({
+                url: `/entitycontact/update/${contactid}`,
+                method: 'POST',
+                data: {
+                    value: updatedEmailValue,
+                    company_id: self.companyId,
+                    type: 'email',
+                    entity: 'company',
+                    note: emailNote
+                },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).done((response) => {
+                if (response.success || response) {
+                    window.location.reload();
+                } else {
+                    if (showError && typeof showError === 'function') {
+                        showError(response.error || 'Failed to update email');
+                    }
+                }
+            }).fail((xhr) => {
+                if (showError && typeof showError === 'function') {
+                    showError(xhr.responseJSON?.error || 'Failed to update email');
+                }
+            });
+        });
+    }
+
+    /**
+     * Initialize address editor
+     */
+    initAddressEditor() {
+        const self = this;
+        
+        // Address edit handler
+        $('#addressRow').on('click', 'i.fa-pen-to-square, i.fa-solid.fa-pen-to-square', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const $editIcon = $(this);
+            const contactid = $editIcon.parent().siblings('.contactAddress').data('contactid');
+            const sibling = $editIcon.parent().siblings('.contactAddress');
+            const street = sibling.find('.addressStreet').html() || '';
+            const city = sibling.find('.addressCity').html() || '';
+            const zip = sibling.find('.addressZip').html() || '';
+            const country = sibling.find('.addressCountry').html() || '';
+            let addressNote = sibling.find('.addressNote').html() || '';
+            if (typeof addressNote === "undefined" || addressNote === null) {
+                addressNote = '';
+            }
+
+            $editIcon.hide();
+            $editIcon.siblings('.fa-check').show();
+
+            $editIcon.parent().siblings('.contactAddress').html(`
+                <tr id="newEntityAddressRow">
+                <td style="border-top: 0px!important;padding:0;" data-contactid="${contactid}">
+                    <input type="text" id="editAddressStreet" value="${self.escapeHtml(street)}"><br>
+                    <input type="text" id="editAddressCity" value="${self.escapeHtml(city)}"><br>
+                    <input type="text" id="editAddressZip" value="${self.escapeHtml(zip)}"><br>
+                    <select id="editAddressDropdown">${generateCountryOptions(country)}</select>
+                    <input type="text" id="editAddressNote" placeholder="Notes" value="${self.escapeHtml(addressNote)}"><br>
+                </td><td style="border-top: 0px!important;padding:0;">
+                </td>`);
+
+            $("#editAddressDropdown").val(country);
+        });
+
+        // Address save handler
+        $('#addressRow').on('click', '.fa-check', function() {
+            const contactid = $(this).closest('#newEntityAddressRow').find('td').data('contactid') || 
+                             $(this).parent().siblings('.contactAddress').data('contactid');
+            const street = $('#editAddressStreet').val();
+            const city = $('#editAddressCity').val();
+            const zip = $('#editAddressZip').val();
+            const country = $('#editAddressDropdown').val();
+            const addressNote = $('#editAddressNote').val();
+
+            $.ajax({
+                url: `/entityaddress/update/${contactid}`,
+                method: 'POST',
+                data: {
+                    street: street,
+                    city: city,
+                    zip: zip,
+                    country: country,
+                    entity: 'company',
+                    address_note: addressNote,
+                    company_id: self.companyId
+                },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).done((response) => {
+                if (response.success || response) {
+                    window.location.reload();
+                } else {
+                    if (showError && typeof showError === 'function') {
+                        showError(response.error || 'Failed to update address');
+                    }
+                }
+            }).fail((xhr) => {
+                if (showError && typeof showError === 'function') {
+                    showError(xhr.responseJSON?.error || 'Failed to update address');
+                }
+            });
+        });
+    }
+
+    /**
+     * Initialize contact management (add/delete phone, email, address)
+     */
+    initContactManagement() {
+        const self = this;
+        
+        // Add new phone
+        $('#phoneRow').on('click', '.fa-plus', function() {
+            $(this).parent().parent().parent().append(`
+                <tr id="newEntityContactRow">
+                    <td style="border-top: 0px!important;padding:0;">
+                        <input type="text" id="newEntityContactValue" placeholder="Phone">
+                        <br><input type="text" id="newEntityContactNote" placeholder="notes">
+                    </td>
+                    <td style="border-top: 0px!important;">
+                        <i class="fa-solid fa-check"></i>
+                    </td>
+                </tr>
+            `);
+            $(this).hide();
+        });
+
+        // Add new email
+        $('#emailRow').on('click', '.fa-plus', function() {
+            $(this).parent().parent().parent().append(`
+                <tr id="newEntityContactRow">
+                    <td style="border-top: 0px!important;padding:0;">
+                        <input type="text" id="newEntityContactValue" placeholder="E-mail">
+                        <br><input type="text" id="newEntityContactNote" placeholder="notes">
+                    </td>
+                    <td style="border-top: 0px!important;">
+                        <i class="fa-solid fa-check"></i>
+                    </td>
+                </tr>
+            `);
+            $(this).hide();
+        });
+
+        // Add new address
+        $('#addressRow').on('click', '.fa-plus', function() {
+            $(this).parent().parent().parent().append(`
+                <tr id="newEntityAddressRow">
+                    <td style="border-top: 0px!important;padding:0;">
+                        <input type="text" id="insertedAddressStreet" placeholder="Street Address"><br>
+                        <input type="text" id="insertedAddressCity" placeholder="City"><br>
+                        <input type="text" id="insertedAddressZip" placeholder="ZIP"><br>
+                        <select id="insertedAddressDropdown">${generateCountryOptions()}</select>
+                        <input type="text" id="insertedAddressNote" placeholder="Notes"><br>
+                    </td>
+                    <td style="border-top: 0px!important;padding:0;">
+                        <i class="fa-solid fa-check" id="saveAddressNew"></i>
+                    </td>
+                </tr>
+            `);
+            $(this).hide();
+        });
+
+        // Save new phone
+        $('#phoneRow').on('click', '#newEntityContactRow .fa-check', function() {
+            const newPhoneValue = $('#newEntityContactValue').val();
+            const newPhoneNote = $('#newEntityContactNote').val();
+
+            $.ajax({
+                url: `/entitycontact/new/${self.companyId}`,
+                method: 'POST',
+                data: {
+                    value: newPhoneValue,
+                    type: 'phone',
+                    entity: 'company',
+                    note: newPhoneNote
+                },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).done((response) => {
+                if (response.success || response) {
+                    window.location.reload();
+                } else {
+                    if (showError && typeof showError === 'function') {
+                        showError(response.error || 'Failed to add phone');
+                    }
+                }
+            }).fail((xhr) => {
+                if (showError && typeof showError === 'function') {
+                    showError(xhr.responseJSON?.error || 'Failed to add phone');
+                }
+            });
+        });
+
+        // Save new email
+        $('#emailRow').on('click', '#newEntityContactRow .fa-check', function() {
+            const newEmailValue = $('#newEntityContactValue').val();
+            const newEmailNote = $('#newEntityContactNote').val();
+
+            $.ajax({
+                url: `/entitycontact/new/${self.companyId}`,
+                method: 'POST',
+                data: {
+                    value: newEmailValue,
+                    type: 'email',
+                    entity: 'company',
+                    note: newEmailNote
+                },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).done((response) => {
+                if (response.success || response) {
+                    window.location.reload();
+                } else {
+                    if (showError && typeof showError === 'function') {
+                        showError(response.error || 'Failed to add email');
+                    }
+                }
+            }).fail((xhr) => {
+                if (showError && typeof showError === 'function') {
+                    showError(xhr.responseJSON?.error || 'Failed to add email');
+                }
+            });
+        });
+
+        // Save new address
+        $('#addressRow').on('click', '#newEntityAddressRow .fa-check, #saveAddressNew', function() {
+            const street = $('#insertedAddressStreet').val();
+            const city = $('#insertedAddressCity').val();
+            const zip = $('#insertedAddressZip').val();
+            const country = $('#insertedAddressDropdown').val();
+            const addressNote = $('#insertedAddressNote').val();
+
+            $.ajax({
+                url: `/entityaddress/new/${self.companyId}`,
+                method: 'POST',
+                data: {
+                    company_id: self.companyId,
+                    street: street,
+                    city: city,
+                    zip: zip,
+                    country: country,
+                    entity: 'company',
+                    address_note: addressNote
+                },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).done((response) => {
+                if (response.success || response) {
+                    window.location.reload();
+                } else {
+                    if (showError && typeof showError === 'function') {
+                        showError(response.error || 'Failed to add address');
+                    }
+                }
+            }).fail((xhr) => {
+                if (showError && typeof showError === 'function') {
+                    showError(xhr.responseJSON?.error || 'Failed to add address');
+                }
+            });
+        });
+
+        // Delete phone
+        $('#phoneRow').on('click', '.fa-trash', function(e) {
+            e.preventDefault();
+            const contactid = $(this).data('contactid');
+            if (window.confirm("Remove Person Phone?")) {
+                $.ajax({
+                    url: `/entitycontact/delete/${contactid}`,
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).done((response) => {
+                    if (response.success || response) {
+                        window.location.reload();
+                    } else {
+                        if (showError && typeof showError === 'function') {
+                            showError(response.error || 'Failed to delete phone');
+                        }
+                    }
+                }).fail((xhr) => {
+                    if (showError && typeof showError === 'function') {
+                        showError(xhr.responseJSON?.error || 'Failed to delete phone');
+                    }
+                });
+            }
+        });
+
+        // Delete email
+        $('#emailRow').on('click', '.fa-trash', function(e) {
+            e.preventDefault();
+            const contactid = $(this).data('contactid');
+            if (window.confirm("Remove Person Email?")) {
+                $.ajax({
+                    url: `/entitycontact/delete/${contactid}`,
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).done((response) => {
+                    if (response.success || response) {
+                        window.location.reload();
+                    } else {
+                        if (showError && typeof showError === 'function') {
+                            showError(response.error || 'Failed to delete email');
+                        }
+                    }
+                }).fail((xhr) => {
+                    if (showError && typeof showError === 'function') {
+                        showError(xhr.responseJSON?.error || 'Failed to delete email');
+                    }
+                });
+            }
+        });
+
+        // Delete address
+        $('#addressRow').on('click', '.fa-trash', function(e) {
+            e.preventDefault();
+            const contactid = $(this).data('contactid');
+            if (window.confirm("Remove Company Address?")) {
+                $.ajax({
+                    url: `/entityaddress/delete/${contactid}`,
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).done((response) => {
+                    if (response.success || response) {
+                        window.location.reload();
+                    } else {
+                        if (showError && typeof showError === 'function') {
+                            showError(response.error || 'Failed to delete address');
+                        }
+                    }
+                }).fail((xhr) => {
+                    if (showError && typeof showError === 'function') {
+                        showError(xhr.responseJSON?.error || 'Failed to delete address');
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Initialize document management
+     */
+    initDocumentManagement() {
+        const self = this;
+        
+        $(document).on('click', '.deleteDocument', function(e) {
+            e.preventDefault();
+            const fileName = $(this).data('filename');
+            
+            if (window.confirm("Delete Document?")) {
+                $.ajax({
+                    type: 'DELETE',
+                    url: `/file/delete/company/${self.companyId}/${fileName}`,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).done((response) => {
+                    if (response.success || $.isEmptyObject(response.error)) {
+                        window.location.reload();
+                    } else {
+                        if (showError && typeof showError === 'function') {
+                            showError(response.error || 'Failed to delete document');
+                        } else {
+                            // Fallback to alert if showError not available
+                            alert('Error: ' + (response.error || 'Failed to delete document'));
+                        }
+                    }
+                }).fail((xhr) => {
+                    if (showError && typeof showError === 'function') {
+                        showError(xhr.responseJSON?.error || 'Failed to delete document');
+                    } else {
+                        alert('Error deleting document');
+                    }
+                });
+            }
+        });
+    }
+
+    /**
      * Initialize related entities management
      */
     initRelatedEntities() {
@@ -682,4 +1190,5 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Make available globally
 window.CompanyEditor = CompanyEditor;
+window.generateCountryOptions = generateCountryOptions;
 
