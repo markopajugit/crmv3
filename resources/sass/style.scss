@@ -541,6 +541,66 @@ footer.footer {
 // ============================================================================
 // Form Styles
 // ============================================================================
+
+// Modern styling for ALL input elements (not just .form-control)
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="month"],
+input[type="week"] {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: $border-radius-md;
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: $text-primary;
+    font-family: $font-family-sans-serif;
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: middle;
+    
+    // Full width in form contexts (can be overridden by inline styles)
+    form &,
+    .form-group &,
+    .panel-body &,
+    .modal-body & {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    &::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+        opacity: 1;
+    }
+
+    &:focus {
+        border-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+        outline: none;
+        background-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+    }
+
+    &:hover:not(:disabled):not(:focus) {
+        border-color: rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+}
+
 .form-control {
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: $border-radius-md;
@@ -551,14 +611,67 @@ footer.footer {
     color: $text-primary;
 
     &:focus {
-        border-color: rgba(255, 255, 255, 0.5);
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
         outline: none;
         background-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+    }
+
+    &:hover:not(:disabled):not(:focus) {
+        border-color: rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.12);
     }
 
     &::placeholder {
         color: rgba(255, 255, 255, 0.7);
+        opacity: 1;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+}
+
+// Modern styling for textarea elements
+textarea {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: $border-radius-md;
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: $text-primary;
+    font-family: $font-family-sans-serif;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 100px;
+
+    &::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+        opacity: 1;
+    }
+
+    &:focus {
+        border-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+        outline: none;
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    &:hover:not(:disabled):not(:focus) {
+        border-color: rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: rgba(255, 255, 255, 0.05);
     }
 }
 
@@ -566,6 +679,47 @@ footer.footer {
     color: $text-primary;
     font-weight: $font-weight-medium;
     margin-bottom: 0.5rem;
+}
+
+// Modern styling for ALL select elements
+select {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: $border-radius-md;
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: $text-primary;
+    font-family: $font-family-sans-serif;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.5rem;
+
+    &:focus {
+        border-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+        outline: none;
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    &:hover:not(:disabled):not(:focus) {
+        border-color: rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    option {
+        background-color: $body-bg;
+        color: $text-primary;
+    }
 }
 
 select.form-control {
@@ -747,6 +901,11 @@ select.form-control {
 // Search Results
 // ============================================================================
 #searchResults {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     background: $body-bg;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: $border-radius-md;

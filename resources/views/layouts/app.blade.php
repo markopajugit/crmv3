@@ -20,7 +20,7 @@
         <div class="container-fluid">
             <form action="/search/" class="header-search">
                 <input id="search" class="form-control" type="search" autocomplete="off" placeholder="Search..." name="s" aria-label="Search" value="{{ request()->get('s') }}" data-autocomplete-route="{{ route('autocomplete') }}">
-                <div id="searchResults"></div>
+                <div id="searchResults" style="display: none;"></div>
                 <select name="category" id="categoryName" class="form-control">
                     <option value="all" @if(request()->get('category') == 'all') selected @endif>All</option>
                     <option value="companies" @if(request()->get('category') == 'companies') selected @endif>Companies</option>

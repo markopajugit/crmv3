@@ -43,16 +43,26 @@ export default function initSearch() {
                         category: $categorySelect.val()
                     },
                     success: function(data) {
-                        $searchResults.fadeIn();
-                        $searchResults.html(data);
+                        if (data && data.trim() !== '' && data.trim() !== '<ul></ul>') {
+                            $searchResults.fadeIn();
+                            $searchResults.html(data);
+                        } else {
+                            $searchResults.hide();
+                        }
                     },
                     error: function(xhr, status, error) {
                         console.error('Search error:', error);
+                        $searchResults.hide();
                     }
                 });
             } else {
                 $searchResults.hide();
             }
+        });
+
+        // Close search results when clicking on a result link
+        $(document).on('click', '#searchResults a', function() {
+            $searchResults.fadeOut();
         });
     };
 

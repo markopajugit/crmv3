@@ -246,7 +246,7 @@ class SearchController extends Controller
             ];
         }
 
-        $output = '';
+        $output = '<ul>';
         foreach($data as $class => $classData)
         {
             $icon = '';
