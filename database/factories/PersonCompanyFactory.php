@@ -26,7 +26,8 @@ class PersonCompanyFactory extends Factory
         return [
             'person_id' => $this->faker->numberBetween(1, Person::count()),
             'company_id' => $this->faker->numberBetween(1, Company::count()),
-            'relation' => $this->faker->randomElement(['Board Memeber', 'Shareholder', 'Agent'])
+            'relation' => $this->faker->randomElement(['Board Memeber', 'Shareholder', 'Agent']),
+            'selected_email' => $this->faker->safeEmail()
         ];
     }
 }

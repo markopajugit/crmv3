@@ -25,8 +25,7 @@ class CompanyOrderFactory extends Factory
     {
         return [
             'company_id' => $this->faker->numberBetween(1, Company::count()),
-            'order_id' => $this->faker->unique()->numberBetween(1, Order::count()),
-            'responsible_user_id' => $this->faker->numberBetween(1, 2)
+            'order_id' => $this->faker->unique()->numberBetween(1, Order::count())
         ];
     }
 }

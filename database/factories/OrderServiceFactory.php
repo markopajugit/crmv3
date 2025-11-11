@@ -26,6 +26,8 @@ class OrderServiceFactory extends Factory
         return [
             'order_id' => $this->faker->numberBetween(1, Order::count()),
             'service_id' => $this->faker->numberBetween(1, Service::count()),
+            'name' => $this->faker->words(3, true),
+            'cost' => $this->faker->randomFloat(2, 10, 1000)
         ];
     }
 }

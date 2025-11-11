@@ -19,7 +19,8 @@ class InvoiceFactory extends Factory
             //'status' => $this->faker->randomElement(['paid', 'not paid']),
             'issue_date' => $this->faker->date('Y-m-d'),
             'payment_date' => $this->faker->date('Y-m-d'),
-            'vat' => $this->faker->randomElement(['0', '21'])
+            'vat' => $this->faker->randomElement(['0', '21']),
+            'number' => $this->faker->numerify('INV-####')
         ];
     }
 }
