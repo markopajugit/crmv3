@@ -442,6 +442,12 @@ footer.footer {
         }
     }
 
+    // Ensure table-light headers are also white
+    &.table-light thead th,
+    thead.table-light th {
+        color: white !important;
+    }
+
     tbody {
         tr {
             transition: all 0.15s ease;
