@@ -9,15 +9,22 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
-    <!-- Stylesheets -->
-    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+
+    <script src="{{ asset('js/app.js') }}" defer></script>
+
+
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+
+
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body class="login">
 <div id="app">
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="{{ url('/') }}">
-                <img src="{{ asset('images/logo.svg') }}" style="height: 100px;">
+                <!--<img src="{{ asset('images/logo.png') }}" style="height: 100px;">-->
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -71,10 +78,5 @@
         @yield('content')
     </main>
 </div>
-
-<!-- Scripts -->
-<script src="{{ mix('js/vendor.js') }}"></script>
-<script src="{{ mix('js/app.js') }}"></script>
-
 </body>
 </html>

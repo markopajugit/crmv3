@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+
+@include('partials.success-alert')
+
 <div id="loading" style="display:none;
     width: 500px;
     z-index: 10;
@@ -14,116 +17,75 @@
     right: 0;
     text-align: center;
     top: 400px;">Uploading files...</div>
-    <script>
-        // Wait for jQuery to be loaded
-        (function() {
-            function initPersonShowFirst() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initPersonShowFirst, 50);
-                    return;
-                }
 
-                var $ = window.jQuery;
-
-                $(document).ready(function () {
-
-                    //Change Company name
-                    var h1 = $('h1').html();
-                    var dob = $('h5').html();
-
-                    $('h1').on('click', 'i', function () {
-                        $('h5').empty();
-                        $(this).parent().html(`
-                            <form action="{{ route('persons.update',$person->id) }}" method="POST">@csrf @method('PUT')
-                            <i class="fa-solid fa-building"></i>
-                            <input type="text" name="name" value="{{ $person->name }}" style="font-size:26px;"><br>
-                            <input type="text" id="date_of_birth" name="date_of_birth" value="{{ $person->date_of_birth }}" style="font-size:18px;">
-                            <button style="margin-right: 5px;" class="cancelEdit btn">Cancel</button>
-                            <button type="submit" class="saveEdit btn">Save</button></form>
-                        `);
-
-                        $( "#date_of_birth" ).datepicker({
-                            changeMonth: true,
-                            changeYear: true,
-                            yearRange: "-100:+0",
-                            dateFormat: "dd.mm.yy",
-                            constrainInput: false
-                        });
-                    });
-
-                    $('h1').on('click', '.btn.cancelEdit', function () {
-                        $('h1').html(h1);
-                        $('h5').html(dob);
-                    });
-
-                });
-            }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initPersonShowFirst);
-            } else {
-                initPersonShowFirst();
-            }
-        })();
-    </script>
-    <style>
-        table.formattedtable {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        .formattedtable td, th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        .formattedtable tr:nth-child(even) {
-            background-color: #dddddd;
-        }
-
-        td .fa-plus {
-            color:green;
-        }
-    </style>
-    <a style="float:right;background: darkred!important;" target="_blank" class="btn btn-primary" data-personid="{{$person->id}}" id="deletePerson"><i class="fa-solid fa-trash"></i>Delete Person</a>
-    <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12">
-            <h1><i class="fa-solid fa-user"></i>{{ $person->name }}<i class="fa-solid fa-pen-to-square"
-                                                                      style="vertical-align: middle; margin-left: 10px;font-size: 20px;"></i>
-            </h1>
-            <!--<a class="btn btn-primary" href="{{ route('persons.edit',$person->id) }}">Edit</a>-->
-            <h6>{{ $person->date_of_birth }}<br>
-            {{ $person->id_code }} @if($person->country) - {{$person->country}}@endif
-                @if($person->id_code_est)
-                    <br>{{$person->id_code_est}} - Estonia
-                @endif</h6>
+<!-- Header Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h1 style="font-size: 2rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">
+                    <i class="fa-solid fa-user" style="color: #DC2626; margin-right: 0.5rem;"></i> 
+                    <span id="personNameDisplay">{{ $person->name }}</span>
+                    <i class="fa-solid fa-pen-to-square editPersonName" style="vertical-align: middle; margin-left: 10px; font-size: 1.25rem; cursor: pointer; color: #6B7280;"></i>
+                </h1>
+                <div id="personInfoDisplay" style="font-size: 1rem; color: #6B7280; margin-bottom: 0;">
+                    @if($person->date_of_birth)
+                        <p style="margin-bottom: 0.25rem;">
+                            <i class="fa-solid fa-calendar" style="margin-right: 0.5rem;"></i> {{ $person->date_of_birth }}
+                        </p>
+                    @endif
+                    <p style="margin-bottom: 0.25rem;">
+                        <i class="fa-solid fa-id-card" style="margin-right: 0.5rem;"></i> 
+                        {{ $person->id_code }}@if($person->country) - {{$person->country}}@endif
+                    </p>
+                    @if($person->id_code_est)
+                        <p style="margin-bottom: 0;">
+                            <i class="fa-solid fa-id-card" style="margin-right: 0.5rem;"></i> {{$person->id_code_est}} - Estonia
+                        </p>
+                    @endif
+                </div>
+            </div>
+            <div>
+                <a href="{{ route('persons.index') }}" class="btn btn-secondary" style="margin-right: 0.5rem; padding: 0.625rem 1.5rem; font-weight: 600; border-radius: 6px; background-color: #6B7280; border-color: #6B7280;">
+                    <i class="fa-solid fa-arrow-left" style="margin-right: 0.5rem;"></i> Back to Persons
+                </a>
+                <button type="button" class="btn btn-danger" data-personid="{{$person->id}}" id="deletePerson" style="background-color: #EF4444; border-color: #EF4444; padding: 0.625rem 1.5rem; font-weight: 600; border-radius: 6px;">
+                    <i class="fa-solid fa-trash" style="margin-right: 0.5rem;"></i> Delete Person
+                </button>
+            </div>
         </div>
     </div>
+</div>
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-details">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Details</div>
-                    <div class="panel-heading__button">
-                        <button type="button" class="btn saveDetails" style="display: none;">
-                            <i class="fa-solid fa-check"></i>Save
-                        </button>
-                    </div>
+<!-- Details and KYC Section -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                        <i class="fa-solid fa-info-circle" style="color: #DC2626; margin-right: 0.5rem;"></i> Details
+                    </h3>
+                    <button type="button" class="btn btn-sm btn-primary saveDetails" style="display: none; background-color: #DC2626; border-color: #DC2626;">
+                        <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Save
+                    </button>
                 </div>
-                <div class="panel-body">
-                    <table class="table">
-                        <tr id="idRow">
-                            <td style="width:50%"><strong>ID code:</strong></td>
-                            <td><div id="idcode">{{ $person->id_code }}@if($person->country) - {{$person->country}}@endif</div>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <table class="table" style="margin-bottom: 0;">
+                        <tr id="idRow" style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-id-card" style="color: #DC2626; margin-right: 0.5rem;"></i> ID Code
+                            </td>
+                            <td style="width: 50%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                                <div id="idcode">{{ $person->id_code }}@if($person->country) - {{$person->country}}@endif</div>
                                 @if($person->id_code_est)
                                     <div id="idcodeEst">{{$person->id_code_est}} - Estonia</div>
                                 @endif
                             </td>
-                            <td><i class="fa-solid fa-pen-to-square" data-idcode="{{$person->id_code}}" data-country="{{$person->country}}" data-estid="{{$person->id_code_est}}"></i></td>
-                            <td></td>
+                            <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;">
+                                <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" data-idcode="{{$person->id_code}}" data-country="{{$person->country}}" data-estid="{{$person->id_code_est}}" title="Edit"></i>
+                            </td>
                         </tr>
                         <!--<tr id="addressRow">
                             <td style="width:50%"><strong>Address:</strong></td>
@@ -146,82 +108,166 @@
                             <td><i class="fa-solid fa-pen-to-square editDetails"></i></td>
                             <td></td>
                         </tr>-->
-                        <tr id="addressRow">
-                            <td style="width:50%"><strong>Address:</strong></td>
-                            <td colspan="3">
-                                <table width="100%">
+                        <tr id="addressRow" style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-map-marker-alt" style="color: #DC2626; margin-right: 0.5rem;"></i> Address
+                            </td>
+                            <td colspan="2" style="width: 50%; padding: 1rem 0; vertical-align: middle;">
+                                <table width="100%" style="table-layout: fixed;">
+                                    <colgroup>
+                                        <col style="width: auto;">
+                                        <col style="width: 50px;">
+                                        <col style="width: 50px;">
+                                    </colgroup>
                                     <tr>
-                                        <td style="min-width:200px;border-top: 0!important;padding:0;" class="contactAddress" data-contactid="0"><span class="addressStreet">{{ $person->address_street }}</span>@if($person->address_city), <span class="addressCity">{{ $person->address_city }}</span>@endif <br>
-                                            <span class="addressZip">{{ $person->address_zip }}</span>@if($person->address_dropdown), <span class="addressCountry">{{ $person->address_dropdown }}</span>@endif
-                                            @if($person->address_note)<br> <i class="fa-regular fa-comment"></i> <span class="addressNote">{{ $person->address_note }}</span>@endif</td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;"><i class="fa-solid fa-plus"></i></td>
+                                        <td style="border-top: 0!important;padding:0.5rem;vertical-align: top;word-wrap: break-word;" class="contactAddress" data-contactid="0">
+                                            <div style="min-height: 40px;">
+                                                <span class="addressStreet">{{ $person->address_street }}</span>@if($person->address_city), <span class="addressCity">{{ $person->address_city }}</span>@endif <br>
+                                                <span class="addressZip">{{ $person->address_zip }}</span>@if($person->address_dropdown), <span class="addressCountry">{{ $person->address_dropdown }}</span>@endif
+                                                @if($person->address_note)<br> <i class="fa-regular fa-comment"></i> <span class="addressNote">{{ $person->address_note }}</span>@endif
+                                            </div>
+                                        </td>
+                                        <td style="border-top: 0!important;padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                            <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                            <i style="display: none;" class="fa-solid fa-check" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
+                                        </td>
+                                        <td style="border-top: 0!important;padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                            <i class="fa-solid fa-plus" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Add"></i>
+                                        </td>
                                     </tr>
                                     @foreach($person->getAddresses as $address)
                                     <tr>
-                                        <td style="border-top: 0!important; padding:0;" class="contactAddress" data-contactid="{{$address->id}}"><span class="addressStreet">{{ $address->street }}</span>@if($address->city), <span class="addressCity">{{ $address->city }}</span>@endif <br>
-                                            <span class="addressZip">{{ $address->zip }}</span>@if($address->country), <span class="addressCountry">{{ $address->country }}</span>@endif
-                                            @if($address->note)<br> <i class="fa-regular fa-comment"></i> <span class="addressNote">{{ $address->note }}</span>@endif</td>
-                                        <td style="border-top: 0!important; padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
-                                        <td style="border-top: 0!important; padding:0;text-align: center;"><i style="color:darkred;" class="fa-solid fa-trash" data-contactid="{{$address->id}}"></i></td>
+                                        <td style="border-top: 0!important; padding:0.5rem;vertical-align: top;word-wrap: break-word;" class="contactAddress" data-contactid="{{$address->id}}">
+                                            <div style="min-height: 40px;">
+                                                <span class="addressStreet">{{ $address->street }}</span>@if($address->city), <span class="addressCity">{{ $address->city }}</span>@endif <br>
+                                                <span class="addressZip">{{ $address->zip }}</span>@if($address->country), <span class="addressCountry">{{ $address->country }}</span>@endif
+                                                @if($address->note)<br> <i class="fa-regular fa-comment"></i> <span class="addressNote">{{ $address->note }}</span>@endif
+                                            </div>
+                                        </td>
+                                        <td style="border-top: 0!important; padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                            <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                            <i style="display: none;" class="fa-solid fa-check" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
+                                        </td>
+                                        <td style="border-top: 0!important; padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                            <i class="fa-solid fa-trash" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;" data-contactid="{{$address->id}}" title="Delete"></i>
+                                        </td>
                                     </tr>
                                     @endforeach
                                 </table>
                             </td>
+                            <td style="width: 10%; padding: 1rem 0; vertical-align: middle;"></td>
                         </tr>
-                        <tr id="emailRow">
-                            <td style="width:50%"><strong>E-mail:</strong></td>
-                            <td colspan="3">
-                                <table width="100%">
+                        <tr id="emailRow" style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-envelope" style="color: #DC2626; margin-right: 0.5rem;"></i> E-mail
+                            </td>
+                            <td colspan="2" style="width: 50%; padding: 1rem 0; vertical-align: middle;">
+                                <table width="100%" style="table-layout: fixed;">
+                                    <colgroup>
+                                        <col style="width: auto;">
+                                        <col style="width: 50px;">
+                                        <col style="width: 50px;">
+                                    </colgroup>
                                     <tr>
-                                        <td style="min-width:200px;border-top: 0!important;padding:0;" class="contactEmail" data-contactid="0"><span class="contactEmailVal">{{ $person->email }}</span>
-                                            @if($person->email_note)<br> <i class="fa-regular fa-comment"></i> <span class="contactEmailNote">{{ $person->email_note }}</span>@endif</td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;"><i class="fa-solid fa-plus"></i></td>
+                                        <td style="border-top: 0!important;padding:0.5rem;vertical-align: top;word-wrap: break-word;" class="contactEmail" data-contactid="0">
+                                            <div style="min-height: 30px;">
+                                                <span class="contactEmailVal">{{ $person->email }}</span>
+                                                @if($person->email_note)<br> <i class="fa-regular fa-comment"></i> <span class="contactEmailNote">{{ $person->email_note }}</span>@endif
+                                            </div>
+                                        </td>
+                                        <td style="border-top: 0!important;padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                            <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                            <i style="display: none;" class="fa-solid fa-check" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
+                                        </td>
+                                        <td style="border-top: 0!important;padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                            <i class="fa-solid fa-plus" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Add"></i>
+                                        </td>
                                     </tr>
                                     @foreach($person->getContacts as $contact)
                                         @if($contact->type == 'email')
                                             <tr>
-                                                <td style="border-top: 0!important; padding:0;" class="contactEmail" data-contactid="{{$contact->id}}"><span class="contactEmailVal">{{ $contact->value }}</span>
-                                                    @if($contact->note)<br> <i class="fa-regular fa-comment"></i> <span class="contactEmailNote">{{ $contact->note }}</span>@endif</td>
-                                                <td style="border-top: 0!important; padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
-                                                <td style="border-top: 0!important; padding:0;text-align: center;"><i style="color:darkred;" class="fa-solid fa-trash" data-contactid="{{$contact->id}}"></i></td>
+                                                <td style="border-top: 0!important; padding:0.5rem;vertical-align: top;word-wrap: break-word;" class="contactEmail" data-contactid="{{$contact->id}}">
+                                                    <div style="min-height: 30px;">
+                                                        <span class="contactEmailVal">{{ $contact->value }}</span>
+                                                        @if($contact->note)<br> <i class="fa-regular fa-comment"></i> <span class="contactEmailNote">{{ $contact->note }}</span>@endif
+                                                    </div>
+                                                </td>
+                                                <td style="border-top: 0!important; padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                                    <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                                    <i style="display: none;" class="fa-solid fa-check" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
+                                                </td>
+                                                <td style="border-top: 0!important; padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                                    <i class="fa-solid fa-trash" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;" data-contactid="{{$contact->id}}" title="Delete"></i>
+                                                </td>
                                             </tr>
                                         @endif
                                     @endforeach
                                 </table>
                             </td>
+                            <td style="width: 10%; padding: 1rem 0; vertical-align: middle;"></td>
                         </tr>
-                        <tr id="phoneRow">
-                            <td style="width:50%"><strong>Phone:</strong></td>
-                            <td colspan="3">
-                            <table width="100%">
+                        <tr id="phoneRow" style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-phone" style="color: #DC2626; margin-right: 0.5rem;"></i> Phone
+                            </td>
+                            <td colspan="2" style="width: 50%; padding: 1rem 0; vertical-align: middle;">
+                            <table width="100%" style="table-layout: fixed;">
+                                <colgroup>
+                                    <col style="width: auto;">
+                                    <col style="width: 50px;">
+                                    <col style="width: 50px;">
+                                </colgroup>
                                 <tr>
-                                    <td style="min-width:200px;border-top: 0!important;padding:0;" class="contactPhone" data-contactid="0"><span class="contactPhoneVal">{{ $person->phone }}</span>
-                                        @if($person->phone_note)<br> <i class="fa-regular fa-comment"></i> <span class="contactPhoneNote">{{ $person->phone_note }}</span>@endif
+                                    <td style="border-top: 0!important;padding:0.5rem;vertical-align: top;word-wrap: break-word;" class="contactPhone" data-contactid="0">
+                                        <div style="min-height: 30px;">
+                                            <span class="contactPhoneVal">{{ $person->phone }}</span>
+                                            @if($person->phone_note)<br> <i class="fa-regular fa-comment"></i> <span class="contactPhoneNote">{{ $person->phone_note }}</span>@endif
+                                        </div>
                                     </td>
-                                    <td style="border-top: 0!important;padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
-                                    <td style="border-top: 0!important;padding:0;text-align: center;"><i class="fa-solid fa-plus"></i></td>
+                                    <td style="border-top: 0!important;padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                        <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                        <i style="display: none;" class="fa-solid fa-check" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
+                                    </td>
+                                    <td style="border-top: 0!important;padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                        <i class="fa-solid fa-plus" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Add"></i>
+                                    </td>
                                 </tr>
                             @foreach($person->getContacts as $contact)
                                 @if($contact->type == 'phone')
                                     <tr>
-                                        <td style="border-top: 0!important; padding:0;" class="contactPhone" data-contactid="{{$contact->id}}"><span class="contactPhoneVal">{{ $contact->value }}</span>
-                                            @if($contact->note)<br> <i class="fa-regular fa-comment"></i> <span class="contactPhoneNote">{{ $contact->note }}</span>@endif</td>
-                                    <td style="border-top: 0!important; padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
-                                    <td style="border-top: 0!important; padding:0;text-align: center;"><i style="color:darkred;" class="fa-solid fa-trash" data-contactid="{{$contact->id}}"></i></td>
+                                        <td style="border-top: 0!important; padding:0.5rem;vertical-align: top;word-wrap: break-word;" class="contactPhone" data-contactid="{{$contact->id}}">
+                                            <div style="min-height: 30px;">
+                                                <span class="contactPhoneVal">{{ $contact->value }}</span>
+                                                @if($contact->note)<br> <i class="fa-regular fa-comment"></i> <span class="contactPhoneNote">{{ $contact->note }}</span>@endif
+                                            </div>
+                                        </td>
+                                    <td style="border-top: 0!important; padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                        <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                        <i style="display: none;" class="fa-solid fa-check" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
+                                    </td>
+                                    <td style="border-top: 0!important; padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                        <i class="fa-solid fa-trash" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;" data-contactid="{{$contact->id}}" title="Delete"></i>
+                                    </td>
                                     </tr>
                                 @endif
                             @endforeach
                             </table>
                             </td>
+                            <td style="width: 10%; padding: 1rem 0; vertical-align: middle;"></td>
                         </tr>
-                        <tr id="taxResidencyRow">
-                            <td style="width:50%"><strong>Tax Residencies:</strong></td>
-                            <td colspan="3">
-                                <table width="100%">
+                        <tr id="taxResidencyRow" style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-globe" style="color: #DC2626; margin-right: 0.5rem;"></i> Tax Residencies
+                            </td>
+                            <td colspan="2" style="width: 50%; padding: 1rem 0; vertical-align: middle;">
+                                <table width="100%" style="table-layout: fixed;">
+                                    <colgroup>
+                                        <col style="width: auto;">
+                                        <col style="width: 50px;">
+                                        <col style="width: 50px;">
+                                    </colgroup>
                                     <tr>
-                                        <td style="min-width:200px;border-top: 0!important;padding:0;">
+                                        <td style="min-width:200px;border-top: 0!important;padding:0.5rem;vertical-align: top;">
                                             @if($person->taxResidencies->count() > 0)
                                                 @foreach($person->taxResidencies as $taxResidency)
                                                     <div class="tax-residency-item" style="border-bottom: 1px solid #ddd; padding: 5px 0; margin-bottom: 5px;">
@@ -243,9 +289,8 @@
                                                                         <small style="color: #666; font-style: italic;">{{ $taxResidency->notes }}</small>
                                                                     @endif
                                                                 </td>
-                                                                <td style="border: none; padding: 2px; text-align: center; width: 80px; vertical-align: top;">
-                                                                    
-                                                                    <i class="fa-solid fa-trash delete-tax-residency" data-id="{{ $taxResidency->id }}" style="cursor: pointer; color: #dc3545;"></i>
+                                                                <td style="border: none; padding: 2px; text-align: center; width: 50px; vertical-align: top;">
+                                                                    <i class="fa-solid fa-trash delete-tax-residency" data-id="{{ $taxResidency->id }}" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;" title="Delete"></i>
                                                                 </td>
                                                             </tr>
                                                         </table>
@@ -255,12 +300,10 @@
                                                 <div id="noTaxResidencies" style="color: #999; font-style: italic;">No tax residencies added</div>
                                             @endif
                                         </td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;">
-                                            
-                                                <i class="fa-solid fa-plus" id="addTaxResidencyBtn"></i>
-                                            
+                                        <td style="border-top: 0!important;padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;">
+                                            <i class="fa-solid fa-plus" id="addTaxResidencyBtn" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Add"></i>
                                         </td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;"></td>
+                                        <td style="border-top: 0!important;padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;"></td>
                                     </tr>
                                     <!-- New Tax Residency Form Row -->
                                     <tr id="newTaxResidencyRow" style="display: none;">
@@ -493,13 +536,20 @@
                                     </tr>
                                 </table>
                             </td>
+                            <td style="width: 10%; padding: 1rem 0; vertical-align: middle;"></td>
                         </tr>
-                        <tr id="riskRow">
-                            <td style="width:50%"><strong>Risk:</strong></td>
-                            <td colspan="3">
-                                <table width="100%">
+                        <tr id="riskRow" style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-exclamation-triangle" style="color: #DC2626; margin-right: 0.5rem;"></i> Risk
+                            </td>
+                            <td colspan="2" style="width: 50%; padding: 1rem 0; vertical-align: middle;">
+                                <table width="100%" style="table-layout: fixed;">
+                                    <colgroup>
+                                        <col style="width: auto;">
+                                        <col style="width: 50px;">
+                                    </colgroup>
                                     <tr>
-                                        <td style="min-width: 200px; border-top: 0!important; padding:0;" class="currentCompanyRisk">
+                                        <td style="min-width: 200px; border-top: 0!important; padding:0.5rem;vertical-align: middle;" class="currentCompanyRisk">
                                             @if($person->getCurrentRisk)
                                                 @if($person->getCurrentRisk->risk_level == 1)
                                                     <span style="color: green;">LOW</span>
@@ -512,7 +562,11 @@
                                                 <span>-</span>
                                             @endif
                                         </td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;" id="riskEdit"><i class="fa-solid fa-pen-to-square"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
+                                        <td style="border-top: 0!important;padding:0.5rem;text-align: center;vertical-align: middle;width: 50px;" id="riskEdit">
+                                            <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                            <i style="display: none;" class="fa-solid fa-check" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
+                                            <i style="display: none;" class="fa-solid fa-times" style="cursor: pointer; color: #EF4444; font-size: 0.875rem; margin-left: 0.5rem;" title="Cancel"></i>
+                                        </td>
                                         <!--<td style="border-top: 0!important;padding:0;text-align: center; cursor: pointer;" id="showRiskHistory">Show history</td>-->
                                     </tr>
                                     @foreach($person->getRisksHistory as $risk)
@@ -520,7 +574,7 @@
                                             $user = \App\Models\User::find($risk->user_id);
                                         @endphp
                                         <tr style="display:none;" class="riskHistoryRows">
-                                            <td style="min-width: 200px; border-top: 0!important; padding:0;" class="companyRisk" data-contactid="{{$risk->id}}">
+                                            <td style="min-width: 200px; border-top: 0!important; padding:0.5rem;vertical-align: middle;" class="companyRisk" data-contactid="{{$risk->id}}">
                                                 @if($risk->risk_level == 1)
                                                     <span style="color: green;">LOW</span>  - <i class="fa-solid fa-user"></i>{{$user->name}} - {{$risk->updated_at}}
                                                 @elseif($risk->risk_level == 2)
@@ -535,41 +589,47 @@
                                     @endforeach
                                 </table>
                             </td>
+                            <td style="width: 10%; padding: 1rem 0; vertical-align: middle;"></td>
                         </tr>
-                        <tr id="birthplaceCountryRow">
-                            <td style="width:50%"><strong>Birthplace Country:</strong></td>
-                            <td colspan="3">
-                                <table width="100%">
-                                    <tbody><tr>
-                                        <td style="min-width:200px;border-top: 0!important;padding:0;" class="birthplaceCountry"><span class="birthplaceCountryVal">@if($person->birthplace_country) {{$person->birthplace_country}} @endif</span>
-                                        </td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;"></td>
-                                    </tr>
-                                    </tbody></table>
+                        <tr id="birthplaceCountryRow" style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-globe" style="color: #DC2626; margin-right: 0.5rem;"></i> Birthplace Country
+                            </td>
+                            <td style="width: 50%; padding: 1rem 0; vertical-align: middle;" class="birthplaceCountry">
+                                <span class="birthplaceCountryVal">@if($person->birthplace_country) {{$person->birthplace_country}} @endif</span>
+                            </td>
+                            <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;">
+                                <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                <i style="display: none;" class="fa-solid fa-check" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
                             </td>
                         </tr>
-                        <tr id="birthplaceCityRow">
-                            <td style="width:50%"><strong>Birthplace City:</strong></td>
-                            <td id="currentBirthplaceCity">{{ $person->birthplace_city }}</td>
-                            <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editBirthplaceCity"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
+                        <tr id="birthplaceCityRow" style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-map-marker-alt" style="color: #DC2626; margin-right: 0.5rem;"></i> Birthplace City
+                            </td>
+                            <td style="width: 50%; padding: 1rem 0; vertical-align: middle;" id="currentBirthplaceCity">{{ $person->birthplace_city }}</td>
+                            <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;">
+                                <i class="fa-solid fa-pen-to-square editBirthplaceCity" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                <i style="display: none;" class="fa-solid fa-check" id="saveBirthplaceCity" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
+                            </td>
                         </tr>
-                        <tr id="citizenshipRow">
-                            <td style="width:50%"><strong>Citizenship:</strong></td>
-                            <td colspan="3">
-                                <table width="100%">
-                                    <tbody><tr>
-                                        <td style="min-width:200px;border-top: 0!important;padding:0;" class="citizenship"><span class="citizenshipVal">@if($person->citizenship) {{$person->citizenship}} @endif</span>
-                                        </td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
-                                        <td style="border-top: 0!important;padding:0;text-align: center;"></td>
-                                    </tr>
-                                    </tbody></table>
+                        <tr id="citizenshipRow" style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-passport" style="color: #DC2626; margin-right: 0.5rem;"></i> Citizenship
+                            </td>
+                            <td style="width: 50%; padding: 1rem 0; vertical-align: middle;" class="citizenship">
+                                <span class="citizenshipVal">@if($person->citizenship) {{$person->citizenship}} @endif</span>
+                            </td>
+                            <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;">
+                                <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                <i style="display: none;" class="fa-solid fa-check" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
                             </td>
                         </tr>
                         <tr id="pepRow">
-                            <td style="width:50%"><strong>PEP (Politically Exposed Person):</strong></td>
-                            <td id="currentPep">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-user-shield" style="color: #DC2626; margin-right: 0.5rem;"></i> PEP (Politically Exposed Person)
+                            </td>
+                            <td style="width: 50%; padding: 1rem 0; vertical-align: middle;" id="currentPep">
                                 @if($person->pep == 1)
                                     <span style="color: red;">Yes</span>
                                 @elseif($person->pep == 0)
@@ -578,155 +638,197 @@
                                     <span>-</span>
                                 @endif
                             </td>
-                            <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square editPep"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
+                            <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;">
+                                <i class="fa-solid fa-pen-to-square editPep" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" title="Edit"></i>
+                                <i style="display: none;" class="fa-solid fa-check" id="savePep" style="cursor: pointer; color: #10B981; font-size: 0.875rem; margin-left: 0.5rem;" title="Save"></i>
+                            </td>
                         </tr>
                     </table>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="panel panel-default panel-kyc">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">KYC Monitoring</div>
-                    <div class="panel-heading__button">
-                        <button type="button" class="btn btn-success" data-coreui-toggle="modal"
-                                data-coreui-target="#addKycModal">
-                            <i class="fa fa-plus" aria-hidden="true"></i>Add monitoring info
+        <div class="col-md-4">
+            <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                            <i class="fa-solid fa-shield-halved" style="color: #DC2626; margin-right: 0.5rem;"></i> KYC Monitoring
+                        </h3>
+                        <button type="button" class="btn btn-sm btn-success" data-coreui-toggle="modal"
+                                data-coreui-target="#addKycModal" style="background-color: #10B981; border-color: #10B981;">
+                            <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0.5rem;"></i>Add
                         </button>
                     </div>
                 </div>
-                <div class="panel-body">
+                <div class="card-body" style="padding: 1.5rem; max-height: 600px; overflow-y: auto;">
                     @foreach($person->kycs()->latest()->get() as $kyc)
-                        <div style="border-bottom: 1px solid black; padding: 5px 0;" class="kyc-record">
-                            <b>{{ $kyc->responsibleUser ? $kyc->responsibleUser->name : 'N/A' }} ({{ $kyc->created_at->format('d.m.Y') }})</b>
-                            <i class="fa-solid fa-pen-to-square kyc-edit" style="vertical-align: middle; margin-left: 10px;font-size: 20px;cursor: pointer;" data-kycid="{{ $kyc->id }}"></i>
-                            <i class="fa-solid fa-trash kyc-delete" style="vertical-align: middle; margin-left: 10px;font-size: 20px;cursor: pointer;" data-kycid="{{ $kyc->id }}"></i>
-                            <br>
-                            <div class="kyc-details">
+                        <div style="border-bottom: 1px solid #e5e7eb; padding: 1rem 0; margin-bottom: 1rem;" class="kyc-record">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong style="color: #1f2937; font-size: 0.875rem;">{{ $kyc->responsibleUser ? $kyc->responsibleUser->name : 'N/A' }}</strong>
+                                    <span style="color: #6B7280; font-size: 0.75rem; margin-left: 0.5rem;">{{ $kyc->created_at->format('d.m.Y') }}</span>
+                                </div>
+                                <div>
+                                    <i class="fa-solid fa-pen-to-square kyc-edit" style="cursor: pointer; color: #6B7280; margin-right: 0.75rem; font-size: 0.875rem;" data-kycid="{{ $kyc->id }}" title="Edit"></i>
+                                    <i class="fa-solid fa-trash kyc-delete" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;" data-kycid="{{ $kyc->id }}" title="Delete"></i>
+                                </div>
+                            </div>
+                            <div class="kyc-details" style="font-size: 0.875rem; color: #374151;">
                                 @if($kyc->start_date || $kyc->end_date)
-                                    Monitoring date: {{ $kyc->start_date }}, next monitoring date: {{ $kyc->end_date }}<br>
+                                    <p style="margin-bottom: 0.5rem;">
+                                        <i class="fa-solid fa-calendar" style="color: #DC2626; margin-right: 0.5rem;"></i>
+                                        Monitoring: {{ $kyc->start_date }}, Next: {{ $kyc->end_date }}
+                                    </p>
                                 @endif
                                 @if($kyc->risk)
-                                    <strong>Risk:</strong> {{ $kyc->risk }}<br>
+                                    <p style="margin-bottom: 0.5rem;">
+                                        <i class="fa-solid fa-exclamation-triangle" style="color: #DC2626; margin-right: 0.5rem;"></i>
+                                        <strong>Risk:</strong> {{ $kyc->risk }}
+                                    </p>
                                 @endif
                                 @if($kyc->documents)
-                                    <strong>Documents:</strong> {{ $kyc->documents }}<br>
+                                    <p style="margin-bottom: 0.5rem;">
+                                        <i class="fa-solid fa-file" style="color: #DC2626; margin-right: 0.5rem;"></i>
+                                        <strong>Documents:</strong> {{ $kyc->documents }}
+                                    </p>
                                 @endif
                                 @if($kyc->comments)
-                                    <strong>Comments:</strong> {!! nl2br(e($kyc->comments)) !!}
+                                    <p style="margin-bottom: 0;">
+                                        <i class="fa-solid fa-comment" style="color: #DC2626; margin-right: 0.5rem;"></i>
+                                        <strong>Comments:</strong> {!! nl2br(e($kyc->comments)) !!}
+                                    </p>
                                 @endif
                             </div>
                         </div>
                     @endforeach
                     @if($person->kycs()->count() == 0)
-                        <p>No KYC monitoring records found.</p>
+                        <p style="color: #9CA3AF; font-style: italic; text-align: center; padding: 2rem 0;">No KYC monitoring records found.</p>
                     @endif
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-notes">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Notes</div>
-                    <div class="panel-heading__button">
-
-
-                        <!--<button type="button" class="btn editNotes">
-                            <i class="fa-solid fa-pen-to-square"></i>Edit
-                        </button>-->
-
-                        <button type="button" class="btn btn-success" data-coreui-toggle="modal"
-                                data-coreui-target="#addNote">
-                            <i class="fa fa-plus" aria-hidden="true"></i>Add Note
+<!-- Notes Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                        <i class="fa-solid fa-sticky-note" style="color: #DC2626; margin-right: 0.5rem;"></i> Notes
+                    </h3>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-success" data-coreui-toggle="modal"
+                                data-coreui-target="#addNote" style="background-color: #10B981; border-color: #10B981; margin-right: 0.5rem;">
+                            <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0.5rem;"></i>Add Note
                         </button>
-
-                        <button type="button" class="btn saveNotes" style="display: none;">
-                            <i class="fa-solid fa-check"></i>Save
+                        <button type="button" class="btn btn-sm btn-primary saveNotes" style="display: none; background-color: #DC2626; border-color: #DC2626;">
+                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i>Save
                         </button>
                     </div>
                 </div>
-                <div class="panel-body">
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
                     @if($person->notes)
-                        <div>Vana note: {{$person->notes}}</div>
+                        <div style="background-color: #FEF3C7; border-left: 4px solid #F59E0B; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px;">
+                            <strong style="color: #92400E;">Legacy Note:</strong> {{$person->notes}}
+                        </div>
                     @endif
                     @foreach($person->getNotes as $note)
-                        <div style="border-bottom: 1px solid black; padding: 5px 0;" class="note"><b>{{$note->responsible_user($note->user_id)->name}} ({{$note->created_at}})</b><i class="fa-solid fa-pen-to-square" style="vertical-align: middle; margin-left: 10px;font-size: 20px;" data-noteid="{{$note->id}}"></i><i class="fa-solid fa-check" style="display:none;vertical-align: middle; margin-left: 10px;font-size: 20px;" data-noteid="{{$note->id}}"></i><i class="fa-solid fa-trash" style="vertical-align: middle; margin-left: 10px;font-size: 20px;" data-noteid="{{$note->id}}"></i><br>
-                            <div class="noteContent" data-content="{{$note->content}}">{!! nl2br(e($note->content)) !!}</div></div>
+                        <div style="border-bottom: 1px solid #e5e7eb; padding: 1rem 0; margin-bottom: 1rem;" class="note">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong style="color: #1f2937; font-size: 0.875rem;">{{$note->responsible_user($note->user_id)->name}}</strong>
+                                    <span style="color: #6B7280; font-size: 0.75rem; margin-left: 0.5rem;">{{$note->created_at->format('d.m.Y H:i')}}</span>
+                                </div>
+                                <div>
+                                    <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; margin-right: 0.75rem; font-size: 0.875rem;" data-noteid="{{$note->id}}" title="Edit"></i>
+                                    <i class="fa-solid fa-check" style="display:none; cursor: pointer; color: #10B981; margin-right: 0.75rem; font-size: 0.875rem;" data-noteid="{{$note->id}}" title="Save"></i>
+                                    <i class="fa-solid fa-trash" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;" data-noteid="{{$note->id}}" title="Delete"></i>
+                                </div>
+                            </div>
+                            <div class="noteContent" data-content="{{$note->content}}" style="font-size: 0.875rem; color: #374151;">{!! nl2br(e($note->content)) !!}</div>
+                        </div>
                     @endforeach
+                    @if($person->getNotes->count() == 0 && !$person->notes)
+                        <p style="color: #9CA3AF; font-style: italic; text-align: center; padding: 2rem 0;">No notes found.</p>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Relations</div>
-                    <div class="panel-heading__button">
-
-                        <!--<button type="button" class="btn editRelatedPersons">
-                            <i class="fa-solid fa-pen-to-square"></i>Edit Related Person
-                        </button>-->
-                        <button type="button" class="btn btn-success" data-coreui-toggle="modal"
-                                data-coreui-target="#relatedCompany">
-                            <i class="fa fa-plus" aria-hidden="true"></i>Add Relation
-                        </button>
-                    </div>
+<!-- Relations and Orders Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                        <i class="fa-solid fa-users" style="color: #DC2626; margin-right: 0.5rem;"></i> Relations
+                    </h3>
+                    <button type="button" class="btn btn-sm btn-success" data-coreui-toggle="modal"
+                            data-coreui-target="#relatedCompany" style="background-color: #10B981; border-color: #10B981;">
+                        <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0.5rem;"></i>Add Relation
+                    </button>
                 </div>
-                <div class="panel-body">
-                    <table class="table relatedPersons">
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                    <table class="table relatedPersons" style="margin-bottom: 0;">
+                        <tbody>
                         @if(!$person->companies->isEmpty())
                             @foreach ($person->companies as $company)
-                                <tr>
-                                    <td style="width:50%"><i class="fa-solid fa-building" style="margin-right: 5px;"></i><a
-                                            href="/companies/{{$company->id}}">{{$company->name}}</a></td>
-                                    <td>
+                                <tr style="border-bottom: 1px solid #f3f4f6;">
+                                    <td style="padding: 0.75rem 0; vertical-align: middle;">
+                                        <i class="fa-solid fa-building" style="color: #DC2626; margin-right: 0.5rem;"></i>
+                                        <a href="/companies/{{$company->id}}" style="color: #DC2626; text-decoration: none; font-weight: 500;">{{$company->name}}</a>
+                                    </td>
+                                    <td style="padding: 0.75rem 0; vertical-align: middle; color: #374151;">
                                         @if($company->pivot->relation == 'Main Contact')
-                                            <b>{{ $company->pivot->relation }}</b>
+                                            <span class="badge" style="background-color: #DC2626; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">{{ $company->pivot->relation }}</span>
                                         @else
                                             {{ $company->pivot->relation }}
                                         @endif
                                     </td>
-                                    <td>
-                                        <i class="fa-solid fa-pen-to-square"
-                                           style="vertical-align: middle; margin-left: 10px;font-size: 20px;"
-                                           data-companyID="{{$company->id}}" data-relation="{{ $company->pivot->relation }}" data-companyName="{{$company->name}}"></i>
+                                    <td style="padding: 0.75rem 0; text-align: center; vertical-align: middle; width: 10%;">
+                                        <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;" 
+                                           data-companyID="{{$company->id}}" data-relation="{{ $company->pivot->relation }}" data-companyName="{{$company->name}}" title="Edit"></i>
                                     </td>
-                                    <td>
-                                        <i class="fa-solid fa-xmark"
-                                           style="vertical-align: middle; margin-left: 10px;font-size: 20px;"
-                                           data-companyID="{{$company->id}}" data-relation="{{ $company->pivot->relation }}"></i>
+                                    <td style="padding: 0.75rem 0; text-align: center; vertical-align: middle; width: 10%;">
+                                        <i class="fa-solid fa-xmark" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;"
+                                           data-companyID="{{$company->id}}" data-relation="{{ $company->pivot->relation }}" title="Remove"></i>
                                     </td>
                                 </tr>
                             @endforeach
                         @endif
 
                         @forelse ($relatedPersons as $relatedPerson)
-                            <tr>
-                                <td style="width:50%"><i class="fa-solid fa-user" style="margin-right: 5px;"></i><a
-                                        href="/persons/{{$relatedPerson['person_id']}}">{{$relatedPerson['name']}}</a></td>
-
-                                <td>
+                            <tr style="border-bottom: 1px solid #f3f4f6;">
+                                <td style="padding: 0.75rem 0; vertical-align: middle;">
+                                    <i class="fa-solid fa-user" style="color: #DC2626; margin-right: 0.5rem;"></i>
+                                    <a href="/persons/{{$relatedPerson['person_id']}}" style="color: #DC2626; text-decoration: none; font-weight: 500;">{{$relatedPerson['name']}}</a>
+                                </td>
+                                <td style="padding: 0.75rem 0; vertical-align: middle; color: #374151;">
                                     {{ $relatedPerson['relation'] }}
                                 </td>
-                                <td>
-                                    <i class="fa-solid fa-pen-to-square"
-                                       style="vertical-align: middle; margin-left: 10px;font-size: 20px;"
-                                       data-personID="{{ $relatedPerson['person_id'] }}" data-relation="{{ $relatedPerson['relation'] }}" data-personName="{{$relatedPerson['name']}}"></i>
+                                <td style="padding: 0.75rem 0; text-align: center; vertical-align: middle; width: 10%;">
+                                    <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem;"
+                                       data-personID="{{ $relatedPerson['person_id'] }}" data-relation="{{ $relatedPerson['relation'] }}" data-personName="{{$relatedPerson['name']}}" title="Edit"></i>
                                 </td>
-                                <td>
-                                    <i class="fa-solid fa-xmark"
-                                       style="vertical-align: middle; margin-left: 10px;font-size: 20px;"
-                                       data-personID="{{ $relatedPerson['person_id'] }}" data-relation="{{ $relatedPerson['relation'] }}"></i>
+                                <td style="padding: 0.75rem 0; text-align: center; vertical-align: middle; width: 10%;">
+                                    <i class="fa-solid fa-xmark" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;"
+                                       data-personID="{{ $relatedPerson['person_id'] }}" data-relation="{{ $relatedPerson['relation'] }}" title="Remove"></i>
                                 </td>
                             </tr>
                         @empty
                         @endforelse
-
+                        @if($person->companies->isEmpty() && empty($relatedPersons))
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem 0; color: #9CA3AF; font-style: italic;">No relations found.</td>
+                            </tr>
+                        @endif
+                        </tbody>
                     </table>
                     <table class="table relatedCompaniesEdit" style="display:none;">
                         <form id="updateRelatedCompany" action="{{ route('persons.update',$person->id) }}"
@@ -758,141 +860,200 @@
             </div>
 
         </div>
-        <div class="col">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Orders</div>
-                    <div class="panel-heading__button">
-                        <!--<button type="button" class="btn btn-success" data-coreui-toggle="modal"
-                                data-coreui-target="#addOrderModal">
-                            <i class="fa fa-plus" aria-hidden="true"></i>Add Order
-                        </button>-->
+        <div class="col-md-6">
+            <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                            <i class="fa-solid fa-file-invoice" style="color: #DC2626; margin-right: 0.5rem;"></i> Orders
+                        </h3>
+                        <span class="badge" style="background-color: #DC2626; color: white; padding: 0.375rem 0.75rem; border-radius: 4px; font-weight: 600;">
+                            {{ $person->orders->count() }}
+                        </span>
                     </div>
                 </div>
-                <div class="panel-body">
-                    <table class="table relatedPersons">
+                <div class="card-body" style="padding: 1.5rem;">
+                    <table class="table" style="margin-bottom: 0;">
+                        <tbody>
                         @foreach ($person->orders as $order)
-                            <tr>
-                                <td style="width:50%"><i class="fa-solid fa-file" style="margin-right: 5px;"></i><a
-                                        href="/orders/{{$order->id}}"><b>{{$order->number}}</b> {{$order->name}}</a></td>
+                            <tr style="border-bottom: 1px solid #f3f4f6;">
+                                <td style="padding: 0.75rem 0; vertical-align: middle;">
+                                    <i class="fa-solid fa-file-invoice" style="color: #DC2626; margin-right: 0.5rem;"></i>
+                                    <a href="/orders/{{$order->id}}" style="color: #DC2626; text-decoration: none; font-weight: 500;">
+                                        <strong>{{$order->number}}</strong> {{$order->name}}
+                                    </a>
+                                </td>
                             </tr>
                         @endforeach
+                        @if($person->orders->count() == 0)
+                            <tr>
+                                <td style="text-align: center; padding: 2rem 0; color: #9CA3AF; font-style: italic;">No orders found.</td>
+                            </tr>
+                        @endif
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-documents regularDocuments">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Documents <span id="documentsCount"></span></div>
-
-                </div>
-                <div class="panel-body">
-                    <table class="table">
-                        @foreach ($person->files as $file)
-                            @if(!$file->virtual_office)
+<!-- Documents Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                    <i class="fa-solid fa-file" style="color: #DC2626; margin-right: 0.5rem;"></i> Documents <span id="documentsCount"></span>
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <div class="table-responsive">
+                    <table class="table" style="margin-bottom: 0;">
+                        <thead style="background-color: #f9fafb;">
                             <tr>
-                                <td><i class="fa-solid fa-file-arrow-up"></i>
-                                    <b id="orderArchiveNumber-{{$file->id}}" data-fileid="{{$file->id}}">{{$file->archive_nr}}</b>    {{$file->name}}
+                                <th style="padding: 0.75rem; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">File Name</th>
+                                <th style="padding: 0.75rem; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">Date</th>
+                                <th style="padding: 0.75rem; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">Archive Number</th>
+                                <th style="padding: 0.75rem; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @php
+                            $regularFiles = $person->files->where('virtual_office', false);
+                        @endphp
+                        @foreach ($regularFiles as $file)
+                            <tr style="border-bottom: 1px solid #f3f4f6;">
+                                <td style="padding: 0.75rem; vertical-align: middle;">
+                                    <i class="fa-solid fa-file" style="color: #DC2626; margin-right: 0.5rem;"></i>
+                                    <strong>{{$file->name}}</strong>
                                 </td>
-                                <td>{{$file->created_at->format('d.m.Y H:i:s')}}</td>
-                                <td>
-                                    <button type="button" class="btn editArchiveNumber" data-fileid="{{$file->id}}">
-                                        <i class="fa-solid fa-pen-to-square"></i>Edit Archive number
-                                    </button>
-                                    @if(!$file->archive_nr)
-                                        <button type="button" class="btn generateArchiveNumber" data-fileid="{{$file->id}}">
-                                            Generate Archive number
+                                <td style="padding: 0.75rem; vertical-align: middle; color: #6B7280; font-size: 0.875rem;">
+                                    {{$file->created_at->format('d.m.Y H:i:s')}}
+                                </td>
+                                <td style="padding: 0.75rem; vertical-align: middle;">
+                                    <span id="orderArchiveNumber-{{$file->id}}" data-fileid="{{$file->id}}" style="font-weight: 600; color: #1f2937;">{{$file->archive_nr ?: '-'}}</span>
+                                    <div style="margin-top: 0.5rem;">
+                                        <button type="button" class="btn btn-sm btn-secondary editArchiveNumber" data-fileid="{{$file->id}}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                            <i class="fa-solid fa-pen-to-square" style="margin-right: 0.25rem;"></i>Edit
                                         </button>
-                                    @endif
-                                    <button style="display:none;" type="button" class="btn saveArchiveNumber" data-fileid="{{$file->id}}">
-                                        <i class="fa-solid fa-check"></i>Save Archive number
-                                    </button>
+                                        @if(!$file->archive_nr)
+                                            <button type="button" class="btn btn-sm btn-primary generateArchiveNumber" data-fileid="{{$file->id}}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background-color: #DC2626; border-color: #DC2626;">
+                                                Generate
+                                            </button>
+                                        @endif
+                                        <button style="display:none;" type="button" class="btn btn-sm btn-success saveArchiveNumber" data-fileid="{{$file->id}}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                            <i class="fa-solid fa-check" style="margin-right: 0.25rem;"></i>Save
+                                        </button>
+                                    </div>
                                 </td>
-                                <td><a href="/file/person/{{ $person->id }}/{{$file->name}}" target="_blank">VIEW</a></td>
-                                <td><a href="/file/download/person/{{ $person->id }}/{{$file->name}}"target="_blank">DOWNLOAD</a></td>
-                                <td><a class="deleteDocument" href="/file/delete/person/{{ $person->id }}/{{$file->name}}" data-filename="{{$file->name}}">DELETE</a></td>
+                                <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                    <a href="/file/person/{{ $person->id }}/{{$file->name}}" target="_blank" class="btn btn-sm btn-outline-primary" style="margin-right: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
+                                    <a href="/file/download/person/{{ $person->id }}/{{$file->name}}" target="_blank" class="btn btn-sm btn-outline-secondary" style="margin-right: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Download</a>
+                                    <a class="deleteDocument btn btn-sm btn-outline-danger" href="/file/delete/person/{{ $person->id }}/{{$file->name}}" data-filename="{{$file->name}}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Delete</a>
+                                </td>
                             </tr>
-                            @endif
                         @endforeach
+                        @if($regularFiles->count() == 0)
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem 0; color: #9CA3AF; font-style: italic;">No documents found.</td>
+                            </tr>
+                        @endif
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
-
     </div>
+</div>
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-documents VOdocuments">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Virtual Office Documents <span id="VOdocumentsCount"></span></div>
-
-                </div>
-                <div class="panel-body">
-                    <table class="table">
-                        @foreach ($person->files as $file)
-                            @if($file->virtual_office)
-                                <tr>
-                                    <td><!--<i class="fa-solid fa-file-arrow-up"></i>
-                                    <b id="orderArchiveNumber-{{$file->id}}" data-fileid="{{$file->id}}">{{$file->archive_nr}}</b>-->    {{$file->name}}
-                                    </td>
-                                    <td>
-                                        <!--<button type="button" class="btn editArchiveNumber" data-fileid="{{$file->id}}">
-                                        <i class="fa-solid fa-pen-to-square"></i>Edit Archive number
-                                    </button>
-                                    <button style="display:none;" type="button" class="btn saveArchiveNumber" data-fileid="{{$file->id}}">
-                                        <i class="fa-solid fa-check"></i>Save Archive number
-                                    </button>-->
-                                    </td>
-                                    <td>{{$file->created_at->format('d.m.Y H:i:s')}}</td>
-                                    <td><a href="/file/person/{{ $person->id }}/{{$file->name}}" target="_blank">VIEW</a></td>
-                                    <td><a href="/file/download/person/{{ $person->id }}/{{$file->name}}"target="_blank">DOWNLOAD</a></td>
-                                    <td><a class="deleteDocument" href="/file/delete/person/{{ $person->id }}/{{$file->name}}" data-filename="{{$file->name}}">DELETE</a></td>
-                                </tr>
-                            @endif
+<!-- Virtual Office Documents Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                    <i class="fa-solid fa-building" style="color: #DC2626; margin-right: 0.5rem;"></i> Virtual Office Documents <span id="VOdocumentsCount"></span>
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <div class="table-responsive">
+                    <table class="table" style="margin-bottom: 0;">
+                        <thead style="background-color: #f9fafb;">
+                            <tr>
+                                <th style="padding: 0.75rem; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">File Name</th>
+                                <th style="padding: 0.75rem; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">Date</th>
+                                <th style="padding: 0.75rem; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @php
+                            $voFiles = $person->files->where('virtual_office', true);
+                        @endphp
+                        @foreach ($voFiles as $file)
+                            <tr style="border-bottom: 1px solid #f3f4f6;">
+                                <td style="padding: 0.75rem; vertical-align: middle;">
+                                    <i class="fa-solid fa-file" style="color: #DC2626; margin-right: 0.5rem;"></i>
+                                    <strong>{{$file->name}}</strong>
+                                </td>
+                                <td style="padding: 0.75rem; vertical-align: middle; color: #6B7280; font-size: 0.875rem;">
+                                    {{$file->created_at->format('d.m.Y H:i:s')}}
+                                </td>
+                                <td style="padding: 0.75rem; vertical-align: middle; text-align: center;">
+                                    <a href="/file/person/{{ $person->id }}/{{$file->name}}" target="_blank" class="btn btn-sm btn-outline-primary" style="margin-right: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">View</a>
+                                    <a href="/file/download/person/{{ $person->id }}/{{$file->name}}" target="_blank" class="btn btn-sm btn-outline-secondary" style="margin-right: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Download</a>
+                                    <a class="deleteDocument btn btn-sm btn-outline-danger" href="/file/delete/person/{{ $person->id }}/{{$file->name}}" data-filename="{{$file->name}}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Delete</a>
+                                </td>
+                            </tr>
                         @endforeach
+                        @if($voFiles->count() == 0)
+                            <tr>
+                                <td colspan="3" style="text-align: center; padding: 2rem 0; color: #9CA3AF; font-style: italic;">No virtual office documents found.</td>
+                            </tr>
+                        @endif
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
-
     </div>
+</div>
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-documents-dropzone">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Upload Documents</div>
-                </div>
-                <div class="panel-body">
-                    <form id="dropzoneForm" class="dropzone" action="{{ route('dropzone.upload') }}">
-                        @csrf
-                    </form>
-                    <div align="center">
-                        <button type="button" class="btn btn-info" id="submit-all">Upload</button>
-                    </div>
+<!-- Upload Documents Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                    <i class="fa-solid fa-upload" style="color: #DC2626; margin-right: 0.5rem;"></i> Upload Documents
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <form id="dropzoneForm" class="dropzone" action="{{ route('dropzone.upload') }}">
+                    @csrf
+                </form>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="btn btn-primary" id="submit-all" style="background-color: #DC2626; border-color: #DC2626;">
+                        <i class="fa-solid fa-upload" style="margin-right: 0.5rem;"></i>Upload
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-documents-dropzone">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Upload Virtual Office Documents</div>
-                </div>
-                <div class="panel-body">
-                    <form id="dropzoneForm" class="dropzone" action="{{ route('dropzone.upload-virtual-document') }}">
-                        @csrf
-                    </form>
-                    <div align="center">
-                        <button type="button" class="btn btn-info" id="submit-all">Upload</button>
-                    </div>
+    <div class="col-md-6">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                    <i class="fa-solid fa-upload" style="color: #DC2626; margin-right: 0.5rem;"></i> Upload Virtual Office Documents
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <form id="dropzoneForm" class="dropzone" action="{{ route('dropzone.upload-virtual-document') }}">
+                    @csrf
+                </form>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="btn btn-primary" id="submit-all" style="background-color: #DC2626; border-color: #DC2626;">
+                        <i class="fa-solid fa-upload" style="margin-right: 0.5rem;"></i>Upload
+                    </button>
                 </div>
             </div>
         </div>
@@ -1164,15 +1325,142 @@ list-style: none;">
     </div>
 
     <script type="text/javascript">
-        // Wait for jQuery to be loaded
-        (function() {
-            function initPersonShowMain() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initPersonShowMain, 50);
+        $(document).ready(function () {
+            // Edit Person Name
+            var originalName = $('#personNameDisplay').html();
+            var originalInfo = $('#personInfoDisplay').html();
+            var isEditingPersonName = false;
+
+            $('.editPersonName').on('click', function () {
+                if (isEditingPersonName) return;
+                isEditingPersonName = true;
+                
+                var currentName = $('#personNameDisplay').text().trim();
+                var currentDateOfBirth = "{{ $person->date_of_birth }}";
+                
+                $('#personNameDisplay').html(`
+                    <form id="editPersonNameForm" style="display: inline;">
+                        <input type="text" id="editPersonNameInput" name="name" value="${currentName}" style="font-size: 1.5rem; padding: 0.5rem; border: 2px solid #DC2626; border-radius: 6px; width: 300px; font-weight: 600;" autofocus>
+                        <br>
+                        <input type="text" id="date_of_birth" name="date_of_birth" value="${currentDateOfBirth}" style="font-size: 0.875rem; padding: 0.5rem; border: 2px solid #d1d5db; border-radius: 6px; margin-top: 0.5rem; width: 200px;">
+                        <br>
+                        <div style="margin-top: 0.75rem;">
+                            <button type="button" class="btn btn-sm btn-secondary cancelEditPerson" style="margin-right: 0.5rem; padding: 0.375rem 0.75rem;">
+                                <i class="fa-solid fa-times" style="margin-right: 0.25rem;"></i>Cancel
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary saveEditPerson" style="background-color: #DC2626; border-color: #DC2626; padding: 0.375rem 0.75rem;">
+                                <i class="fa-solid fa-check" style="margin-right: 0.25rem;"></i>Save
+                            </button>
+                        </div>
+                        <div class="editPersonNameError" style="display: none; color: #EF4444; font-size: 0.875rem; margin-top: 0.5rem;"></div>
+                        <div class="editPersonNameLoading" style="display: none; color: #6B7280; font-size: 0.875rem; margin-top: 0.5rem;">
+                            <i class="fa-solid fa-spinner fa-spin" style="margin-right: 0.5rem;"></i>Saving...
+                        </div>
+                    </form>
+                `);
+                
+                $(this).hide();
+                
+                // Focus on name input
+                setTimeout(function() {
+                    $('#editPersonNameInput').focus().select();
+                }, 100);
+
+                $("#date_of_birth").datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: "-100:+0",
+                    dateFormat: "dd.mm.yy",
+                    constrainInput: false
+                });
+            });
+
+            $(document).on('click', '.cancelEditPerson', function () {
+                isEditingPersonName = false;
+                $('#personNameDisplay').html(originalName);
+                $('#personInfoDisplay').html(originalInfo);
+                $('.editPersonName').show();
+            });
+
+            $(document).on('click', '.saveEditPerson', function (e) {
+                e.preventDefault();
+                var $form = $(this).closest('form');
+                var $errorDiv = $form.find('.editPersonNameError');
+                var $loadingDiv = $form.find('.editPersonNameLoading');
+                var $saveBtn = $(this);
+                var $cancelBtn = $form.find('.cancelEditPerson');
+                
+                var name = $('#editPersonNameInput').val().trim();
+                var dateOfBirth = $('#date_of_birth').val();
+                
+                if (!name) {
+                    $errorDiv.text('Name is required').show();
+                    $('#editPersonNameInput').focus();
                     return;
                 }
+                
+                $errorDiv.hide();
+                $loadingDiv.show();
+                $saveBtn.prop('disabled', true);
+                $cancelBtn.prop('disabled', true);
+                
+                $.ajax({
+                    type: 'PUT',
+                    url: "{{ route('persons.update',$person->id) }}",
+                    data: {
+                        name: name,
+                        date_of_birth: dateOfBirth,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        if (response.success || !response.error) {
+                            // Update display without reload
+                            $('#personNameDisplay').html(`<span>${name}</span><i class="fa-solid fa-pen-to-square editPersonName" style="vertical-align: middle; margin-left: 10px; font-size: 1.25rem; cursor: pointer; color: #6B7280;"></i>`);
+                            if (dateOfBirth) {
+                                $('#personInfoDisplay').find('p').first().html(`<i class="fa-solid fa-calendar" style="margin-right: 0.5rem;"></i> ${dateOfBirth}`);
+                            }
+                            originalName = $('#personNameDisplay').html();
+                            originalInfo = $('#personInfoDisplay').html();
+                            isEditingPersonName = false;
+                            
+                            // Show success message
+                            if (typeof showSuccessMessage === 'function') {
+                                showSuccessMessage('Person name updated successfully');
+                            }
+                        } else {
+                            $errorDiv.text(response.error || 'Error updating person name').show();
+                            $loadingDiv.hide();
+                            $saveBtn.prop('disabled', false);
+                            $cancelBtn.prop('disabled', false);
+                        }
+                    },
+                    error: function (xhr) {
+                        var errorMsg = 'Error updating person name';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMsg = xhr.responseJSON.error;
+                        }
+                        $errorDiv.text(errorMsg).show();
+                        $loadingDiv.hide();
+                        $saveBtn.prop('disabled', false);
+                        $cancelBtn.prop('disabled', false);
+                    }
+                });
+            });
 
-                var $ = window.jQuery;
+            // Allow Enter key to save
+            $(document).on('keydown', '#editPersonNameInput, #date_of_birth', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    $('.saveEditPerson').click();
+                }
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    $('.cancelEditPerson').click();
+                }
+            });
+        });
 
         $( "#authorised_person_deadline" ).datepicker({
             changeMonth: true,
@@ -1188,21 +1476,71 @@ list-style: none;">
             }
         });
 
+        var originalRiskValue = null;
+        var isEditingRisk = false;
+
         $('#riskEdit .fa-pen-to-square').on('click', function(){
-            var companyRiskValue = $(this).parent().siblings('.currentCompanyRisk').children('span').html();
-            $(this).parent().siblings('.currentCompanyRisk').children('span').html(`
-                <select name="riskOptions" id="riskOptions">
-                  <option value="1">Low</option>
-                  <option value="2">Medium</option>
-                  <option value="3">High</option>
+            if (isEditingRisk) return;
+            isEditingRisk = true;
+            
+            var $riskCell = $(this).parent().siblings('.currentCompanyRisk').children('span');
+            originalRiskValue = $riskCell.html().trim();
+            
+            // Get current risk value (1, 2, or 3)
+            var currentRisk = 1;
+            if (originalRiskValue.toLowerCase().includes('medium')) {
+                currentRisk = 2;
+            } else if (originalRiskValue.toLowerCase().includes('high')) {
+                currentRisk = 3;
+            }
+            
+            $riskCell.html(`
+                <select name="riskOptions" id="riskOptions" style="padding: 0.375rem 0.75rem; border: 2px solid #DC2626; border-radius: 6px; font-size: 0.875rem; min-width: 120px;">
+                  <option value="1" ${currentRisk == 1 ? 'selected' : ''}>Low</option>
+                  <option value="2" ${currentRisk == 2 ? 'selected' : ''}>Medium</option>
+                  <option value="3" ${currentRisk == 3 ? 'selected' : ''}>High</option>
                 </select>
+                <div class="riskEditError" style="display: none; color: #EF4444; font-size: 0.75rem; margin-top: 0.25rem;"></div>
+                <div class="riskEditLoading" style="display: none; color: #6B7280; font-size: 0.75rem; margin-top: 0.25rem;">
+                    <i class="fa-solid fa-spinner fa-spin" style="margin-right: 0.25rem;"></i>Saving...
+                </div>
             `);
             $(this).hide();
             $(this).siblings('.fa-check').show();
+            $(this).siblings('.fa-times').show();
+            
+            // Focus on select
+            setTimeout(function() {
+                $('#riskOptions').focus();
+            }, 100);
+        });
+
+        $('#riskEdit .fa-times').on('click', function(){
+            if (!isEditingRisk) return;
+            
+            var $riskCell = $(this).parent().siblings('.currentCompanyRisk').children('span');
+            $riskCell.html(originalRiskValue);
+            $(this).siblings('.fa-pen-to-square').show();
+            $(this).siblings('.fa-check').hide();
+            $(this).hide();
+            isEditingRisk = false;
         });
 
         $('#riskEdit .fa-check').on('click', function(){
+            if (!isEditingRisk) return;
+            
             var risk = $('#riskOptions').val();
+            var $riskCell = $(this).parent().siblings('.currentCompanyRisk').children('span');
+            var $errorDiv = $riskCell.find('.riskEditError');
+            var $loadingDiv = $riskCell.find('.riskEditLoading');
+            var $checkBtn = $(this);
+            var $cancelBtn = $(this).siblings('.fa-times');
+            
+            $errorDiv.hide();
+            $loadingDiv.show();
+            $checkBtn.css('opacity', '0.5').css('cursor', 'not-allowed');
+            $cancelBtn.css('opacity', '0.5').css('cursor', 'not-allowed');
+            $('#riskOptions').prop('disabled', true);
 
             $.ajax({
                 type: 'POST',
@@ -1210,10 +1548,40 @@ list-style: none;">
                 data: {person_id: {{$person->id}}, risk_level: risk},
                 success: function (data) {
                     if ($.isEmptyObject(data.error)) {
-                        window.location.reload()
+                        // Update display without reload
+                        var riskText = risk == 1 ? 'Low' : (risk == 2 ? 'Medium' : 'High');
+                        var riskColor = risk == 1 ? '#10B981' : (risk == 2 ? '#F59E0B' : '#EF4444');
+                        $riskCell.html(`<span style="color: ${riskColor}; font-weight: 600;">${riskText}</span>`);
+                        originalRiskValue = $riskCell.html();
+                        $checkBtn.hide();
+                        $cancelBtn.hide();
+                        $checkBtn.siblings('.fa-pen-to-square').show();
+                        isEditingRisk = false;
+                        
+                        // Show success message
+                        if (typeof showSuccessMessage === 'function') {
+                            showSuccessMessage('Risk level updated successfully');
+                        }
                     } else {
-                        printErrorMsg(data.error);
+                        $errorDiv.text(data.error || 'Error updating risk level').show();
+                        $loadingDiv.hide();
+                        $checkBtn.css('opacity', '1').css('cursor', 'pointer');
+                        $cancelBtn.css('opacity', '1').css('cursor', 'pointer');
+                        $('#riskOptions').prop('disabled', false);
                     }
+                },
+                error: function(xhr) {
+                    var errorMsg = 'Error updating risk level';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg = xhr.responseJSON.error;
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    $errorDiv.text(errorMsg).show();
+                    $loadingDiv.hide();
+                    $checkBtn.css('opacity', '1').css('cursor', 'pointer');
+                    $cancelBtn.css('opacity', '1').css('cursor', 'pointer');
+                    $('#riskOptions').prop('disabled', false);
                 }
             });
         });
@@ -1618,19 +1986,22 @@ list-style: none;">
         });
 
         $('#phoneRow .fa-pen-to-square').on('click', function(){
-            var contactid = $(this).parent().siblings('.contactPhone').data('contactid');
-            var contactValue = $(this).parent().siblings('.contactPhone').children('.contactPhoneVal').html();
-            var contactNote = $(this).parent().siblings('.contactPhone').children('.contactPhoneNote').html();
-            if (typeof contactNote === "undefined") {
-                var contactNote = '';
+            var contactid = $(this).closest('tr').find('.contactPhone').data('contactid');
+            var $contactCell = $(this).closest('tr').find('.contactPhone');
+            var contactValue = $contactCell.find('.contactPhoneVal').text().trim();
+            var contactNote = $contactCell.find('.contactPhoneNote').text().trim();
+            if (typeof contactNote === "undefined" || contactNote === '') {
+                contactNote = '';
             }
 
-            $(this).hide()
+            $(this).hide();
             $(this).siblings('.fa-check').show();
 
-            $(this).parent().siblings('.contactPhone').html(`
-                <input type="text" id="updatedPhone" name="updatedPhone" value="`+contactValue+`" data-contactid="`+contactid+`">
-                <input type="text" id="updatedPhoneNote" name="updatedPhoneNote" placeholder="Notes" value="`+contactNote+`">
+            $contactCell.html(`
+                <div style="min-height: 30px;">
+                    <input type="text" id="updatedPhone" name="updatedPhone" value="`+contactValue+`" data-contactid="`+contactid+`" style="width: 100%; padding: 0.375rem; border: 2px solid #DC2626; border-radius: 4px; margin-bottom: 0.5rem; box-sizing: border-box;">
+                    <input type="text" id="updatedPhoneNote" name="updatedPhoneNote" placeholder="Notes" value="`+contactNote+`" style="width: 100%; padding: 0.375rem; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;">
+                </div>
             `);
         });
 
@@ -1905,44 +2276,46 @@ list-style: none;">
         });
 
         $('#emailRow .fa-pen-to-square').on('click', function(){
-            var contactid = $(this).parent().siblings('.contactEmail').data('contactid');
-            var contactValue = $(this).parent().siblings('.contactEmail').children('.contactEmailVal').html();
-            var contactNote = $(this).parent().siblings('.contactEmail').children('.contactEmailNote').html();
-            if (typeof contactNote === "undefined") {
-                var contactNote = '';
-            }
-
-            $(this).hide()
-            $(this).siblings('.fa-check').show();
-
-            $(this).parent().siblings('.contactEmail').html(`
-                <input type="text" id="updatedEmail" name="updatedEmail" value="`+contactValue+`" data-contactid="`+contactid+`" data-oldemail="`+contactValue+`">
-                <input type="text" id="updatedEmailNote" name="updatedEmailNote" placeholder="Notes" value="`+contactNote+`">
-            `);
-        });
-
-        $('#addressRow .fa-pen-to-square').on('click', function(){
-            var contactid = $(this).parent().siblings('.contactAddress').data('contactid');
-            var sibling = $(this).parent().siblings('.contactAddress');
-            var street = sibling.find('.addressStreet').html();
-            var city = sibling.find('.addressCity').html();
-            var zip = sibling.find('.addressZip').html();
-            var country = sibling.find('.addressCountry').html();
-            var addressNote = sibling.find('.addressNote').html();
-            if (typeof addressNote === "undefined") {
-                var addressNote = '';
+            var $contactCell = $(this).closest('tr').find('.contactEmail');
+            var contactid = $contactCell.data('contactid');
+            var contactValue = $contactCell.find('.contactEmailVal').text().trim();
+            var contactNote = $contactCell.find('.contactEmailNote').text().trim();
+            if (typeof contactNote === "undefined" || contactNote === '') {
+                contactNote = '';
             }
 
             $(this).hide();
             $(this).siblings('.fa-check').show();
 
-            $(this).parent().siblings('.contactAddress').html(`
-                <tr id="newEntityAddressRow">
-                <td style="border-top: 0px!important;padding:0;" data-contactid="`+contactid+`">
-                                <input type="text" id="editAddressStreet" value="`+street+`"><br>
-                                <input type="text" id="editAddressCity" value="`+city+`"><br>
-                                <input type="text" id="editAddressZip" value="`+zip+`"><br>
-                                <select id="editAddressDropdown">
+            $contactCell.html(`
+                <div style="min-height: 30px;">
+                    <input type="text" id="updatedEmail" name="updatedEmail" value="`+contactValue+`" data-contactid="`+contactid+`" data-oldemail="`+contactValue+`" style="width: 100%; padding: 0.375rem; border: 2px solid #DC2626; border-radius: 4px; margin-bottom: 0.5rem; box-sizing: border-box;">
+                    <input type="text" id="updatedEmailNote" name="updatedEmailNote" placeholder="Notes" value="`+contactNote+`" style="width: 100%; padding: 0.375rem; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;">
+                </div>
+            `);
+        });
+
+        $('#addressRow .fa-pen-to-square').on('click', function(){
+            var $contactCell = $(this).closest('tr').find('.contactAddress');
+            var contactid = $contactCell.data('contactid');
+            var street = $contactCell.find('.addressStreet').text().trim();
+            var city = $contactCell.find('.addressCity').text().trim();
+            var zip = $contactCell.find('.addressZip').text().trim();
+            var country = $contactCell.find('.addressCountry').text().trim();
+            var addressNote = $contactCell.find('.addressNote').text().trim();
+            if (typeof addressNote === "undefined" || addressNote === '') {
+                addressNote = '';
+            }
+
+            $(this).hide();
+            $(this).siblings('.fa-check').show();
+
+            $contactCell.html(`
+                <div style="min-height: 40px;">
+                    <input type="text" id="editAddressStreet" value="`+street+`" style="width: 100%; padding: 0.375rem; border: 2px solid #DC2626; border-radius: 4px; margin-bottom: 0.5rem; box-sizing: border-box;" placeholder="Street Address"><br>
+                    <input type="text" id="editAddressCity" value="`+city+`" style="width: 100%; padding: 0.375rem; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 0.5rem; box-sizing: border-box;" placeholder="City"><br>
+                    <input type="text" id="editAddressZip" value="`+zip+`" style="width: 100%; padding: 0.375rem; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 0.5rem; box-sizing: border-box;" placeholder="ZIP"><br>
+                    <select id="editAddressDropdown" style="width: 100%; padding: 0.375rem; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 0.5rem; box-sizing: border-box;">
                                     <option value="">country</option>
                                     <option value="Afghanistan">Afghanistan</option>
                                     <option value="Aland Islands">Aland Islands</option>
@@ -2197,9 +2570,9 @@ list-style: none;">
                                     <option value="Zambia">Zambia</option>
                                     <option value="Zimbabwe">Zimbabwe</option>
                                 </select>
-                                <input type="text" id="editAddressNote" placeholder="Notes" value="`+addressNote+`"><br>
-                            </td><td style="border-top: 0px!important;padding:0;">
-                </td>`);
+                    <input type="text" id="editAddressNote" placeholder="Notes" value="`+addressNote+`" style="width: 100%; padding: 0.375rem; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;">
+                </div>
+            `);
 
             $("#editAddressDropdown").val(country);
         });
@@ -2250,7 +2623,7 @@ list-style: none;">
         });
 
         $('#addressRow .fa-check').on('click', function(){
-            var contactid = $(this).parent().siblings('.contactAddress').data('contactid');
+            var contactid = $(this).closest('tr').find('.contactAddress').data('contactid');
             var street = $('#editAddressStreet').val();
             var city = $('#editAddressCity').val();
             var zip = $('#editAddressZip').val();
@@ -2919,18 +3292,64 @@ list-style: none;">
         });
 
 
+        var originalNotes = null;
+        var isEditingNotes = false;
+
         $('.editNotes').on('click', function(){
-            $(this).html('<i class="fa-solid fa-pen-to-square"></i>Save');
+            if (isEditingNotes) return;
+            isEditingNotes = true;
+            
+            var $notesBody = $('.panel-notes .panel-body');
+            originalNotes = $notesBody.html().trim();
+            
+            $notesBody.html(`
+                <textarea id="notes" name="notes" style="width: 100%; padding: 0.75rem; border: 2px solid #DC2626; border-radius: 6px; font-size: 0.875rem; min-height: 150px; resize: vertical;" autofocus>${$.trim(originalNotes)}</textarea>
+                <div class="notesError" style="display: none; color: #EF4444; font-size: 0.875rem; margin-top: 0.5rem;"></div>
+                <div class="notesLoading" style="display: none; color: #6B7280; font-size: 0.875rem; margin-top: 0.5rem;">
+                    <i class="fa-solid fa-spinner fa-spin" style="margin-right: 0.5rem;"></i>Saving...
+                </div>
+                <div style="margin-top: 0.75rem;">
+                    <button type="button" class="btn btn-sm btn-secondary cancelNotes" style="margin-right: 0.5rem;">
+                        <i class="fa-solid fa-times" style="margin-right: 0.25rem;"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary saveNotes" style="background-color: #DC2626; border-color: #DC2626;">
+                        <i class="fa-solid fa-check" style="margin-right: 0.25rem;"></i>Save
+                    </button>
+                </div>
+            `);
+            
             $(this).hide();
             $('.saveNotes').show();
-            var currentNotes = $('.panel-notes .panel-body').html();
-            $('.panel-notes .panel-body').html('<textarea cols="60" rows="5" id="notes" name="notes">' + $.trim(currentNotes) + '</textarea>');
-
+            
+            setTimeout(function() {
+                $('#notes').focus();
+            }, 100);
         });
 
-        $('.panel-notes').on('click', '.panel-heading__button .saveNotes', function(){
+        $(document).on('click', '.cancelNotes', function(){
+            if (!isEditingNotes) return;
+            
+            $('.panel-notes .panel-body').html(originalNotes || '');
+            $('.editNotes').show();
+            $('.saveNotes').hide();
+            isEditingNotes = false;
+        });
+
+        $('.panel-notes').on('click', '.panel-heading__button .saveNotes, .saveNotes', function(){
+            if (!isEditingNotes) return;
+            
             var notesVal = $('#notes').val();
             var person_id = $("#personID").val();
+            var $errorDiv = $('.notesError');
+            var $loadingDiv = $('.notesLoading');
+            var $saveBtn = $(this);
+            var $cancelBtn = $('.cancelNotes');
+            
+            $errorDiv.hide();
+            $loadingDiv.show();
+            $saveBtn.prop('disabled', true);
+            $cancelBtn.prop('disabled', true);
+            $('#notes').prop('disabled', true);
 
             $.ajax({
                 type: 'PUT',
@@ -2938,12 +3357,48 @@ list-style: none;">
                 data: {person_id: person_id, notes: notesVal},
                 success: function (data) {
                     if ($.isEmptyObject(data.error)) {
-                        window.location.reload();
+                        // Update display without reload
+                        $('.panel-notes .panel-body').html(notesVal || '');
+                        originalNotes = notesVal || '';
+                        $saveBtn.hide();
+                        $cancelBtn.hide();
+                        $('.editNotes').show();
+                        isEditingNotes = false;
+                        
+                        // Show success message
+                        if (typeof showSuccessMessage === 'function') {
+                            showSuccessMessage('Notes updated successfully');
+                        }
                     } else {
-                        printErrorMsg(data.error);
+                        $errorDiv.text(data.error || 'Error updating notes').show();
+                        $loadingDiv.hide();
+                        $saveBtn.prop('disabled', false);
+                        $cancelBtn.prop('disabled', false);
+                        $('#notes').prop('disabled', false);
                     }
+                },
+                error: function(xhr) {
+                    var errorMsg = 'Error updating notes';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg = xhr.responseJSON.error;
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    $errorDiv.text(errorMsg).show();
+                    $loadingDiv.hide();
+                    $saveBtn.prop('disabled', false);
+                    $cancelBtn.prop('disabled', false);
+                    $('#notes').prop('disabled', false);
                 }
             });
+        });
+
+        // Allow Escape key to cancel notes editing
+        $(document).on('keydown', '#notes', function(e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                $('.cancelNotes').click();
+            }
         });
 
 
@@ -3567,14 +4022,59 @@ list-style: none;">
             });
         });
 
-        $('.editBirthplaceCity').on('click', function() {
-            $(this).hide();
+        var originalBirthplaceCity = null;
+        var isEditingBirthplaceCity = false;
 
-            $('#birthplaceCityRow').html(`<td><b>Birthplace City:</b></td><td><input type="text" value="{{ $person->birthplace_city }}" id="updatedBirthplaceCity"></td><td><i class="fa-solid fa-check" id="saveBirthplaceCity"></i></td>`);
+        $('.editBirthplaceCity').on('click', function() {
+            if (isEditingBirthplaceCity) return;
+            isEditingBirthplaceCity = true;
+            
+            var currentValue = $('#currentBirthplaceCity').text().trim();
+            originalBirthplaceCity = currentValue;
+            
+            $('#currentBirthplaceCity').html(`
+                <input type="text" id="updatedBirthplaceCity" value="${currentValue}" style="padding: 0.5rem; border: 2px solid #DC2626; border-radius: 6px; width: 100%; max-width: 300px; font-size: 0.875rem;" autofocus>
+                <div class="birthplaceCityError" style="display: none; color: #EF4444; font-size: 0.75rem; margin-top: 0.25rem;"></div>
+                <div class="birthplaceCityLoading" style="display: none; color: #6B7280; font-size: 0.75rem; margin-top: 0.25rem;">
+                    <i class="fa-solid fa-spinner fa-spin" style="margin-right: 0.25rem;"></i>Saving...
+                </div>
+            `);
+            $(this).hide();
+            $(this).siblings('.fa-check').show();
+            $(this).siblings('.fa-times').show();
+            
+            setTimeout(function() {
+                $('#updatedBirthplaceCity').focus().select();
+            }, 100);
+        });
+
+        // Add cancel button for birthplace city editing
+        $('.editBirthplaceCity').parent().append('<i style="display: none;" class="fa-solid fa-times cancelBirthplaceCity" title="Cancel" style="cursor: pointer; color: #EF4444; margin-left: 0.5rem;"></i>');
+
+        $(document).on('click', '.cancelBirthplaceCity', function(){
+            if (!isEditingBirthplaceCity) return;
+            
+            $('#currentBirthplaceCity').text(originalBirthplaceCity || '-');
+            $(this).siblings('.editBirthplaceCity').show();
+            $(this).siblings('.fa-check').hide();
+            $(this).hide();
+            isEditingBirthplaceCity = false;
         });
 
         $('.panel-details').on('click', '#saveBirthplaceCity', function(){
-            var updatedBirthplaceCity = $("#updatedBirthplaceCity").val();
+            if (!isEditingBirthplaceCity) return;
+            
+            var updatedBirthplaceCity = $("#updatedBirthplaceCity").val().trim();
+            var $errorDiv = $('.birthplaceCityError');
+            var $loadingDiv = $('.birthplaceCityLoading');
+            var $checkBtn = $(this);
+            var $cancelBtn = $('.cancelBirthplaceCity');
+            
+            $errorDiv.hide();
+            $loadingDiv.show();
+            $checkBtn.css('opacity', '0.5').css('cursor', 'not-allowed');
+            $cancelBtn.css('opacity', '0.5').css('cursor', 'not-allowed');
+            $('#updatedBirthplaceCity').prop('disabled', true);
 
             $.ajax({
                 type: 'PUT',
@@ -3582,12 +4082,52 @@ list-style: none;">
                 data: {birthplace_city: updatedBirthplaceCity},
                 success: function (data) {
                     if ($.isEmptyObject(data.error)) {
-                        window.location.reload();
+                        // Update display without reload
+                        $('#currentBirthplaceCity').text(updatedBirthplaceCity || '-');
+                        originalBirthplaceCity = updatedBirthplaceCity || '-';
+                        $checkBtn.hide();
+                        $cancelBtn.hide();
+                        $checkBtn.siblings('.editBirthplaceCity').show();
+                        isEditingBirthplaceCity = false;
+                        
+                        // Show success message
+                        if (typeof showSuccessMessage === 'function') {
+                            showSuccessMessage('Birthplace city updated successfully');
+                        }
                     } else {
-                        printErrorMsg(data.error);
+                        $errorDiv.text(data.error || 'Error updating birthplace city').show();
+                        $loadingDiv.hide();
+                        $checkBtn.css('opacity', '1').css('cursor', 'pointer');
+                        $cancelBtn.css('opacity', '1').css('cursor', 'pointer');
+                        $('#updatedBirthplaceCity').prop('disabled', false);
                     }
+                },
+                error: function(xhr) {
+                    var errorMsg = 'Error updating birthplace city';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg = xhr.responseJSON.error;
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    $errorDiv.text(errorMsg).show();
+                    $loadingDiv.hide();
+                    $checkBtn.css('opacity', '1').css('cursor', 'pointer');
+                    $cancelBtn.css('opacity', '1').css('cursor', 'pointer');
+                    $('#updatedBirthplaceCity').prop('disabled', false);
                 }
             });
+        });
+
+        // Allow Enter key to save and Escape to cancel
+        $(document).on('keydown', '#updatedBirthplaceCity', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                $('#saveBirthplaceCity').click();
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                $('.cancelBirthplaceCity').click();
+            }
         });
 
         $('#citizenshipRow .fa-pen-to-square').on('click', function(){
@@ -3877,16 +4417,72 @@ list-style: none;">
             });
         });
 
-        $('.editPep').on('click', function() {
-            $(this).hide();
+        var originalPepValue = null;
+        var isEditingPep = false;
 
-            $('#pepRow').html(`<td><b>PEP (Politically Exposed Person):</b></td><td><select id="updatedPep"><option value="">Select</option><option value="0">No</option><option value="1">Yes</option></select></td><td><i class="fa-solid fa-check" id="savePep"></i></td>`);
+        $('.editPep').on('click', function() {
+            if (isEditingPep) return;
+            isEditingPep = true;
             
-            $("#updatedPep").val("{{ $person->pep }}");
+            var currentPep = "{{ $person->pep }}";
+            originalPepValue = currentPep;
+            
+            var $pepCell = $('#currentPep');
+            $pepCell.html(`
+                <select id="updatedPep" style="padding: 0.5rem; border: 2px solid #DC2626; border-radius: 6px; font-size: 0.875rem; min-width: 150px;">
+                    <option value="">Select</option>
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+                <div class="pepError" style="display: none; color: #EF4444; font-size: 0.75rem; margin-top: 0.25rem;"></div>
+                <div class="pepLoading" style="display: none; color: #6B7280; font-size: 0.75rem; margin-top: 0.25rem;">
+                    <i class="fa-solid fa-spinner fa-spin" style="margin-right: 0.25rem;"></i>Saving...
+                </div>
+            `);
+            $("#updatedPep").val(currentPep);
+            
+            $(this).hide();
+            $(this).siblings('.fa-check').show();
+            $(this).siblings('.fa-times').show();
+            
+            setTimeout(function() {
+                $('#updatedPep').focus();
+            }, 100);
+        });
+
+        // Add cancel button for PEP editing
+        $('.editPep').parent().append('<i style="display: none;" class="fa-solid fa-times cancelPep" title="Cancel" style="cursor: pointer; color: #EF4444; margin-left: 0.5rem;"></i>');
+
+        $(document).on('click', '.cancelPep', function(){
+            if (!isEditingPep) return;
+            
+            var pepText = '-';
+            if (originalPepValue == '1') {
+                pepText = '<span style="color: red;">Yes</span>';
+            } else if (originalPepValue == '0') {
+                pepText = '<span style="color: green;">No</span>';
+            }
+            $('#currentPep').html(pepText);
+            $(this).siblings('.editPep').show();
+            $(this).siblings('.fa-check').hide();
+            $(this).hide();
+            isEditingPep = false;
         });
 
         $('.panel-details').on('click', '#savePep', function(){
+            if (!isEditingPep) return;
+            
             var updatedPep = $("#updatedPep").val();
+            var $errorDiv = $('.pepError');
+            var $loadingDiv = $('.pepLoading');
+            var $checkBtn = $(this);
+            var $cancelBtn = $('.cancelPep');
+            
+            $errorDiv.hide();
+            $loadingDiv.show();
+            $checkBtn.css('opacity', '0.5').css('cursor', 'not-allowed');
+            $cancelBtn.css('opacity', '0.5').css('cursor', 'not-allowed');
+            $('#updatedPep').prop('disabled', true);
 
             $.ajax({
                 type: 'PUT',
@@ -3894,10 +4490,44 @@ list-style: none;">
                 data: {pep: updatedPep},
                 success: function (data) {
                     if ($.isEmptyObject(data.error)) {
-                        window.location.reload();
+                        // Update display without reload
+                        var pepText = '-';
+                        if (updatedPep == '1') {
+                            pepText = '<span style="color: red;">Yes</span>';
+                        } else if (updatedPep == '0') {
+                            pepText = '<span style="color: green;">No</span>';
+                        }
+                        $('#currentPep').html(pepText);
+                        originalPepValue = updatedPep;
+                        $checkBtn.hide();
+                        $cancelBtn.hide();
+                        $checkBtn.siblings('.editPep').show();
+                        isEditingPep = false;
+                        
+                        // Show success message
+                        if (typeof showSuccessMessage === 'function') {
+                            showSuccessMessage('PEP status updated successfully');
+                        }
                     } else {
-                        printErrorMsg(data.error);
+                        $errorDiv.text(data.error || 'Error updating PEP status').show();
+                        $loadingDiv.hide();
+                        $checkBtn.css('opacity', '1').css('cursor', 'pointer');
+                        $cancelBtn.css('opacity', '1').css('cursor', 'pointer');
+                        $('#updatedPep').prop('disabled', false);
                     }
+                },
+                error: function(xhr) {
+                    var errorMsg = 'Error updating PEP status';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg = xhr.responseJSON.error;
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    $errorDiv.text(errorMsg).show();
+                    $loadingDiv.hide();
+                    $checkBtn.css('opacity', '1').css('cursor', 'pointer');
+                    $cancelBtn.css('opacity', '1').css('cursor', 'pointer');
+                    $('#updatedPep').prop('disabled', false);
                 }
             });
         });
@@ -4298,29 +4928,11 @@ list-style: none;">
             }
         });
 
-            } // end initPersonShowMain
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initPersonShowMain);
-            } else {
-                initPersonShowMain();
-            }
-        })();
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/dropzone.js"></script>
 
     <script type="text/javascript">
-        // Wait for jQuery to be loaded
-        (function() {
-            function initPersonShowDropzone() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initPersonShowDropzone, 50);
-                    return;
-                }
-
-                var $ = window.jQuery;
 
         Dropzone.options.dropzoneForm = {
             autoProcessQueue : true,
@@ -4376,28 +4988,9 @@ list-style: none;">
             }
         });
 
-            } // end initPersonShowDropzone
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initPersonShowDropzone);
-            } else {
-                initPersonShowDropzone();
-            }
-        })();
     </script>
 
     <script>
-        // Wait for jQuery to be loaded
-        (function() {
-            function initPersonShowKYC() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initPersonShowKYC, 50);
-                    return;
-                }
-
-                var $ = window.jQuery;
-
         // KYC Functionality
         $(document).ready(function () {
             // Initialize date pickers for KYC dates
@@ -4618,15 +5211,5 @@ list-style: none;">
                 $('#editKycResponsibleUserResults').hide();
             });
         });
-
-            } // end initPersonShowKYC
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initPersonShowKYC);
-            } else {
-                initPersonShowKYC();
-            }
-        })();
     </script>
 @endsection

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Service;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class ServiceSeeder extends Seeder
 {
@@ -14,19 +14,19 @@ class ServiceSeeder extends Seeder
      */
     public function run()
     {
-        Service::create([
-            'name' => 'Law',
+        DB::table('services')->insert([
+            'name' => 'Law stuff',
             'cost' => '0',
             'type' => 'regular',
         ]);
 
-        Service::create([
+        DB::table('services')->insert([
             'name' => 'IT',
             'cost' => '0',
             'type' => 'regular',
         ]);
 
-        Service::create([
+        DB::table('services')->insert([
             'name' => 'Consultation',
             'cost' => '0',
             'type' => 'regular',

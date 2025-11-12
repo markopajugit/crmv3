@@ -1,4 +1,3 @@
-# Laravel specific files to ignore
 /node_modules
 /public/hot
 /public/storage
@@ -6,23 +5,34 @@
 /vendor
 .env
 .env.backup
-.env.local
 .env.production
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
-HomesteadVagrantfile
+auth.json
 npm-debug.log
 yarn-error.log
-
-# IDE and Editor files
+/.fleet
 /.idea
 /.vscode
-*.swp
-*.swo
-*~
 
-# OS generated files
+# Laravel specific
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/storage/app/*
+!/storage/app/.gitignore
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+
+# OS specific
 .DS_Store
 .DS_Store?
 ._*
@@ -30,55 +40,28 @@ yarn-error.log
 .Trashes
 ehthumbs.db
 Thumbs.db
+*~
 
-# Logs
-*.log
-/storage/logs/*.log
+# IDE specific
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
 
-# Cache
-/bootstrap/cache/*.php
-!/bootstrap/cache/.gitignore
-/storage/framework/cache/*
-!/storage/framework/cache/.gitignore
-/storage/framework/sessions/*
-!/storage/framework/sessions/.gitignore
-/storage/framework/views/*
-!/storage/framework/views/.gitignore
-/storage/framework/testing/*
-!/storage/framework/testing/.gitignore
-
-# Compiled assets (source files are tracked)
-/public/css
-/public/js
+# Build artifacts
 /public/mix-manifest.json
-/public/hot
-
-# Exclude uploaded files from resources folder
-/resources/files/*
-!/resources/files/.gitkeep
-/resources/uploads/*
-!/resources/uploads/.gitkeep
-
-# Exclude compiled assets from resources (source files are tracked)
-/resources/css/app.css
-/resources/js/app.js
-
-# Temporary files
-*.tmp
-*.temp
-
-# Docker
-docker-compose.override.yml
-.dockerignore
+/public/js
+/public/css
+/public/build
 
 # Testing
 /coverage
-/.phpunit.cache
+.phpunit.cache
 
-# Backup files
-*.bak
-*.backup
+# Misc
+*.log
+*.cache
 
-# Build artifacts
-/dist
-/build

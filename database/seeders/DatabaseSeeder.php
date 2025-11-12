@@ -21,15 +21,10 @@ class DatabaseSeeder extends Seeder
             PersonCompanySeeder::class,
             InvoiceSeeder::class,
             ServiceSeeder::class,
-            //OrderServiceSeeder::class,
+            //OrderServiceSeeder::class, // Uncomment to attach services to orders. Can also run separately: php artisan db:seed --class=OrderServiceSeeder
             SettingsSeeder::class,
             //CompanyOrderSeeder::class,
-            //PersonOrderSeeder::class,
-            NoteSeeder::class,
-            PaymentSeeder::class,
-            EntityContactSeeder::class,
-            EntityAddressSeeder::class,
-            EntityRiskSeeder::class,
+            //PersonOrderSeeder::class
         ]);
         $this->command->info('Tables seeded!');
     }

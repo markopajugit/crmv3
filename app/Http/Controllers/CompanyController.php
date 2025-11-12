@@ -20,9 +20,36 @@ class CompanyController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $companies = Company::latest()->paginate(10);
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            $search = $request->get('search', '');
+            
+            $query = Company::query();
+            
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'LIKE', '%' . $search . '%')
+                      ->orWhere('registry_code', 'LIKE', '%' . $search . '%')
+                      ->orWhere('registration_country', 'LIKE', '%' . $search . '%')
+                      ->orWhere('vat', 'LIKE', '%' . $search . '%')
+                      ->orWhere('email', 'LIKE', '%' . $search . '%')
+                      ->orWhere('address_street', 'LIKE', '%' . $search . '%')
+                      ->orWhere('address_city', 'LIKE', '%' . $search . '%');
+                });
+            }
+            
+            $companies = $query->latest()->paginate(10);
+            
+            return response()->json([
+                'html' => view('companies.partials.table', compact('companies'))->render(),
+                'pagination' => view('companies.partials.pagination', compact('companies'))->render(),
+                'total' => $companies->total()
+            ]);
+        }
 
         return view('companies.index',compact('companies'))
             ->with('i', (request()->input('page', 1) - 1) * 10);
@@ -61,7 +88,14 @@ class CompanyController extends BaseController
             $companyNo->save();
         }
 
-        $company = Company::create($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $companyData = $request->only([
+            'name', 'number', 'registry_code', 'registration_country', 'registration_date', 
+            'vat', 'notes', 'address_street', 'address_city', 'address_zip', 'address_dropdown', 
+            'email', 'phone', 'address_note', 'email_note', 'phone_note', 'deleted', 
+            'kyc_start', 'kyc_end', 'kyc_reason', 'tax_residency', 'activity_code', 'activity_code_description'
+        ]);
+        $company = Company::create($companyData);
 
         $company->persons()->sync($request->persons);
 
@@ -143,48 +177,18 @@ class CompanyController extends BaseController
             //Check if inserted company number is unique
             $companyCheck = Company::where('number', $request->number)->first();
             if ($companyCheck && $companyCheck->id != $company->id) {
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => ['number' => ['Company with that number already exists']]
-                    ], 422);
-                }
                 return Redirect::back()->withErrors('Company with that number already exists');
             }
         }
 
-        try {
-            $company->update($request->all());
-            $company->refresh();
-
-            // If AJAX request, return JSON response
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Company updated successfully',
-                    'data' => [
-                        'id' => $company->id,
-                        'name' => $company->name,
-                        'number' => $company->number,
-                        'registry_code' => $company->registry_code,
-                        'registration_date' => $company->registration_date,
-                        'registration_country' => $company->registration_country,
-                        'vat' => $company->vat,
-                        'notes' => $company->notes,
-                        'activity_code' => $company->activity_code,
-                        'activity_code_description' => $company->activity_code_description,
-                    ]
-                ]);
-            }
-        } catch (\Exception $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => ['general' => [$e->getMessage()]]
-                ], 422);
-            }
-            throw $e;
-        }
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $companyData = $request->only([
+            'name', 'number', 'registry_code', 'registration_country', 'registration_date', 
+            'vat', 'notes', 'address_street', 'address_city', 'address_zip', 'address_dropdown', 
+            'email', 'phone', 'address_note', 'email_note', 'phone_note', 'deleted', 
+            'kyc_start', 'kyc_end', 'kyc_reason', 'tax_residency', 'activity_code', 'activity_code_description'
+        ]);
+        $company->update($companyData);
 
         $relatedCompaniesQuery = PersonCompany::where('company_id', $company->id)->whereNull('person_id')->get();
         $relatedCompanies = array();
@@ -412,50 +416,10 @@ class CompanyController extends BaseController
     }
 
     public function updateCompanyRisk(Request $request){
-        try {
-            $entityRisk = new EntityRisk();
-            $entityRisk->company_id = $request->company_id;
-            $entityRisk->risk_level = $request->risk_level;
-            $entityRisk->user_id = Auth::id();
-            $entityRisk->save();
-
-            $company = Company::find($request->company_id);
-            $currentRisk = $company->getCurrentRisk();
-
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Risk level updated successfully',
-                    'data' => [
-                        'risk_level' => $request->risk_level,
-                        'risk_level_text' => $this->getRiskLevelText($request->risk_level),
-                        'user_id' => Auth::id(),
-                        'user_name' => Auth::user()->name,
-                        'created_at' => $entityRisk->created_at->format('Y-m-d H:i:s'),
-                    ]
-                ]);
-            }
-        } catch (\Exception $e) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => ['general' => [$e->getMessage()]]
-                ], 422);
-            }
-            throw $e;
-        }
-    }
-
-    /**
-     * Get risk level text from numeric value
-     */
-    private function getRiskLevelText($level)
-    {
-        $levels = [
-            1 => 'Low',
-            2 => 'Medium',
-            3 => 'High'
-        ];
-        return $levels[$level] ?? 'Unknown';
+        $entityRisk = new EntityRisk();
+        $entityRisk->company_id = $request->company_id;
+        $entityRisk->risk_level = $request->risk_level;
+        $entityRisk->user_id = Auth::id();
+        $entityRisk->save();
     }
 }

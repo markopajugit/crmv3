@@ -24,10 +24,23 @@ class OrderServiceFactory extends Factory
     public function definition()
     {
         return [
-            'order_id' => $this->faker->numberBetween(1, Order::count()),
-            'service_id' => $this->faker->numberBetween(1, Service::count()),
+            'order_id' => function () {
+                return Order::inRandomOrder()->first()?->id ?? Order::factory()->create()->id;
+            },
+            'service_id' => function () {
+                $service = Service::inRandomOrder()->first();
+                if (!$service) {
+                    // If no services exist, create one manually
+                    $service = Service::create([
+                        'name' => 'Default Service',
+                        'cost' => '0',
+                        'type' => 'regular',
+                    ]);
+                }
+                return $service->id;
+            },
             'name' => $this->faker->words(3, true),
-            'cost' => $this->faker->randomFloat(2, 10, 1000)
+            'cost' => $this->faker->randomFloat(2, 10, 1000),
         ];
     }
 }

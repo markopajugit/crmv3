@@ -18,12 +18,51 @@ class ServiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $services = Service::all();
-        $service_categories = ServiceCategory::all();
+        // Services query
+        $servicesQuery = Service::with('service_category');
 
-        return view('services.index',compact('services', 'service_categories'));
+        // Service categories query
+        $categoriesQuery = ServiceCategory::withCount('services');
+
+        // Text search for services
+        $serviceSearch = $request->get('service_search', '');
+        if (!empty($serviceSearch)) {
+            $servicesQuery->where(function($q) use ($serviceSearch) {
+                $q->where('name', 'LIKE', '%' . $serviceSearch . '%')
+                  ->orWhere('cost', 'LIKE', '%' . $serviceSearch . '%')
+                  ->orWhere('type', 'LIKE', '%' . $serviceSearch . '%')
+                  ->orWhereHas('service_category', function($q) use ($serviceSearch) {
+                      $q->where('name', 'LIKE', '%' . $serviceSearch . '%');
+                  });
+            });
+        }
+
+        // Text search for categories
+        $categorySearch = $request->get('category_search', '');
+        if (!empty($categorySearch)) {
+            $categoriesQuery->where('name', 'LIKE', '%' . $categorySearch . '%');
+        }
+
+        // Paginate both
+        $services = $servicesQuery->latest()->paginate(10, ['*'], 'services_page')->appends(request()->query());
+        $service_categories = $categoriesQuery->latest()->paginate(10, ['*'], 'categories_page')->appends(request()->query());
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            return response()->json([
+                'services_html' => view('services.partials.services-table', compact('services'))->render(),
+                'services_pagination' => view('services.partials.services-pagination', compact('services'))->render(),
+                'services_total' => $services->total(),
+                'categories_html' => view('services.partials.categories-table', compact('service_categories'))->render(),
+                'categories_pagination' => view('services.partials.categories-pagination', compact('service_categories'))->render(),
+                'categories_total' => $service_categories->total()
+            ]);
+        }
+
+        return view('services.index', compact('services', 'service_categories'))
+            ->with('i', (request()->input('services_page', 1) - 1) * 10);
     }
 
     /**
@@ -55,7 +94,9 @@ class ServiceController extends Controller
      */
     public function store(Request $request)
     {
-        $service = Service::create($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $serviceData = $request->only(['name', 'cost', 'type', 'service_category_id', 'reaccuring_frequency']);
+        $service = Service::create($serviceData);
 
         return redirect()->route('services.index')
             ->with('success','Service created successfully.');
@@ -69,7 +110,9 @@ class ServiceController extends Controller
      */
     public function storeCategory(Request $request)
     {
-        $service = ServiceCategory::create($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $categoryData = $request->only(['name']);
+        $service = ServiceCategory::create($categoryData);
 
         return redirect()->route('services.index')
             ->with('success','Service Category created successfully.');
@@ -119,13 +162,21 @@ class ServiceController extends Controller
      */
     public function update(Request $request, Service $service)
     {
-        $service->update($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $serviceData = $request->only(['name', 'cost', 'type', 'service_category_id', 'reaccuring_frequency']);
+        $service->update($serviceData);
+        
+        return response()->json(['success' => true, 'message' => 'Service updated successfully']);
     }
 
     public function updateCategory(Request $request, $id)
     {
-        $serviceCategory = ServiceCategory::find($id);
-        $serviceCategory->update($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $categoryData = $request->only(['name']);
+        $serviceCategory = ServiceCategory::findOrFail($id);
+        $serviceCategory->update($categoryData);
+        
+        return response()->json(['success' => true, 'message' => 'Category updated successfully']);
     }
 
     /**

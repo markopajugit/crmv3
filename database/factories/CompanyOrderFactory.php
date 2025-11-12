@@ -24,8 +24,12 @@ class CompanyOrderFactory extends Factory
     public function definition()
     {
         return [
-            'company_id' => $this->faker->numberBetween(1, Company::count()),
-            'order_id' => $this->faker->unique()->numberBetween(1, Order::count())
+            'company_id' => function () {
+                return Company::inRandomOrder()->first()?->id ?? Company::factory()->create()->id;
+            },
+            'order_id' => function () {
+                return Order::inRandomOrder()->first()?->id ?? Order::factory()->create()->id;
+            },
         ];
     }
 }

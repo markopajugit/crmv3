@@ -21,9 +21,37 @@ class PersonController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $persons = Person::latest()->paginate(10);
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            $search = $request->get('search', '');
+            
+            $query = Person::query();
+            
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'LIKE', '%' . $search . '%')
+                      ->orWhere('id_code', 'LIKE', '%' . $search . '%')
+                      ->orWhere('id_code_est', 'LIKE', '%' . $search . '%')
+                      ->orWhere('email', 'LIKE', '%' . $search . '%')
+                      ->orWhere('phone', 'LIKE', '%' . $search . '%')
+                      ->orWhere('address_street', 'LIKE', '%' . $search . '%')
+                      ->orWhere('address_city', 'LIKE', '%' . $search . '%')
+                      ->orWhere('country', 'LIKE', '%' . $search . '%');
+                });
+            }
+            
+            $persons = $query->latest()->paginate(10);
+            
+            return response()->json([
+                'html' => view('persons.partials.table', compact('persons'))->render(),
+                'pagination' => view('persons.partials.pagination', compact('persons'))->render(),
+                'total' => $persons->total()
+            ]);
+        }
 
         return view('persons.index',compact('persons'))
             ->with('i', (request()->input('page', 1) - 1) * 10);
@@ -55,7 +83,14 @@ class PersonController extends Controller
             'name' => 'required'
         ]);
 
-        $person = Person::create($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $personData = $request->only([
+            'name', 'address_street', 'address_city', 'address_zip', 'address_dropdown', 
+            'id_code', 'id_code_est', 'email', 'phone', 'tax_residency', 'notes', 
+            'date_of_birth', 'country', 'address_note', 'email_note', 'phone_note', 
+            'birthplace_country', 'birthplace_city', 'citizenship', 'pep'
+        ]);
+        $person = Person::create($personData);
 
         $person->companies()->sync($request->companies);
 
@@ -106,7 +141,14 @@ class PersonController extends Controller
      */
     public function update(Request $request, Person $person)
     {
-        $person->update($request->all());
+        // Only allow fillable fields to prevent mass assignment vulnerability
+        $personData = $request->only([
+            'name', 'address_street', 'address_city', 'address_zip', 'address_dropdown', 
+            'id_code', 'id_code_est', 'email', 'phone', 'tax_residency', 'notes', 
+            'date_of_birth', 'country', 'address_note', 'email_note', 'phone_note', 
+            'birthplace_country', 'birthplace_city', 'citizenship', 'pep'
+        ]);
+        $person->update($personData);
         $relatedPersonsFromDB = PersonCompany::where('person_id', $person->id)->where('company_id', null)->get();
         $relatedPersons = array();
         foreach($relatedPersonsFromDB as $relatedPerson){

@@ -1,46 +1,82 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="row mb-4">
-        <div class="col-6 col-sm-3"><h1>Renewals</h1></div>
-        <!--<div class="col-6 col-sm-3 m-2"><a class="btn btn-success" href="{{ route('companies.create') }}" style="color:white;"> Create New Company</a></div>-->
-    </div>
 
-    @if ($message = Session::get('success'))
-        <div class="alert alert-success">
-            <p>{{ $message }}</p>
+@include('partials.index-header', [
+    'title' => 'Renewals',
+    'icon' => 'fa-sync-alt',
+    'count' => $renewedOrders->total(),
+    'countId' => 'renewalsCount',
+    'singular' => 'renewal',
+    'plural' => 'renewals',
+    'createRoute' => null,
+    'createButtonText' => null
+])
+
+@include('partials.success-alert')
+
+@include('partials.search-bar', [
+    'searchInputId' => 'renewalSearch',
+    'placeholder' => 'Search by order number, name, company, person...'
+])
+
+<!-- Renewals Table -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0" style="width: 100%; margin-bottom: 0;">
+                    <thead style="background-color: #f9fafb;">
+                        <tr>
+                            <th style="width: 10%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-hashtag" style="color: #DC2626; margin-right: 0.5rem;"></i> No
+                            </th>
+                            <th style="width: 20%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-building" style="color: #DC2626; margin-right: 0.5rem;"></i> Company
+                            </th>
+                            <th style="width: 20%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-file-invoice" style="color: #DC2626; margin-right: 0.5rem;"></i> Name
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-info-circle" style="color: #DC2626; margin-right: 0.5rem;"></i> Status
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-credit-card" style="color: #DC2626; margin-right: 0.5rem;"></i> Payment Status
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-user-tie" style="color: #DC2626; margin-right: 0.5rem;"></i> Responsible
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="renewalsTableBody" style="background-color: #ffffff;">
+                        @include('renewals.partials.table')
+                    </tbody>
+                </table>
+            </div>
         </div>
-    @endif
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th>No</th>
-            <th>Company</th>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Payment status</th>
-            <th>Awaiting status</th>
-            <th>Responsible</th>
-            <th>Description</th>
-        </tr>
-        </thead>
-        <tbody>
-        @if(!empty($orders))
-            @foreach ($orders as $order)
-                @if($order)
-                    <tr class="clickable" onclick="window.location='/orders/{{ $order->id }}';">
-                        <td>{{ $order->number }}</td>
-                        <td>{{$order->company->name}}</td>
-                        <td>{{ $order->name }}</td>
-                        <td @if($order->status == 'In Progress') style="color: #ffd700; font-weight: bold;" @elseif($order->status == 'Not Active') style="color: #ffffff; font-weight: bold;" @elseif($order->status == 'Finished') style="color: #00ff88; font-weight: bold;" @endif>{{ $order->status }}</td>
-                        <td @if($order->payment_status == 'Partially Paid') style="color: #ffd700; font-weight: bold;" @elseif($order->payment_status == 'Not Paid') style="color: #ffffff; font-weight: bold;" @elseif($order->payment_status == 'Paid') style="color: #00ff88; font-weight: bold;" @endif>{{ $order->payment_status }}</td>
-                        <td @if($order->awaiting_status == 'Waiting action from us') style="color: #ffffff; font-weight: bold;" @elseif($order->awaiting_status == 'Waiting action from Client') style="color: #00ff88; font-weight: bold;" @else style="color: #ffd700; font-weight: bold;" @endif>{{ $order->awaiting_status }}</td>
-                        <td><i class="fa-solid fa-user-tie"></i>{{ $order->responsible_user->name }}</td>
-                        <td>{{ $order->description }}</td>
-                    </tr>
-                @endif
-            @endforeach
-        @endif
-        </tbody>
-    </table>
+    </div>
+</div>
+
+@include('partials.index-pagination', [
+    'paginator' => $renewedOrders,
+    'paginationId' => 'renewalsPagination'
+])
+
 @endsection
+
+@push('scripts')
+@include('partials.index-styles', [
+    'searchInputId' => 'renewalSearch',
+    'paginationId' => 'renewalsPagination'
+])
+
+@include('partials.index-scripts', [
+    'searchInputId' => 'renewalSearch',
+    'tableBodyId' => 'renewalsTableBody',
+    'paginationId' => 'renewalsPagination',
+    'indexRoute' => 'renewals.index',
+    'countId' => 'renewalsCount',
+    'singular' => 'renewal',
+    'plural' => 'renewals'
+])
+@endpush

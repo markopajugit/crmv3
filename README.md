@@ -1,39 +1,52 @@
-# WisorGroup Business Management System
+# CRMv3 - Laravel CRM Application
 
-A comprehensive Laravel-based business management system for managing companies, persons, orders, invoices, and related services. This application provides a complete solution for business operations including client management, order tracking, invoicing, document management, and KYC (Know Your Customer) compliance.
+A comprehensive Customer Relationship Management (CRM) system built with Laravel 11 for managing companies, persons, orders, invoices, services, and related business entities.
 
-## Features
+## Overview
 
-- **Company Management**: Complete company profiles with registration details, addresses, contacts, and risk assessment
-- **Person Management**: Individual client profiles with personal details, tax residency, and KYC information
-- **Order Management**: Order tracking with services, payments, and status management
-- **Invoice Management**: Invoice generation, PDF export, and payment tracking
-- **Service Management**: Service catalog with categories and pricing
-- **Document Management**: File upload, storage, and organization with archive numbering
-- **KYC Compliance**: Know Your Customer verification with expiration tracking and polymorphic relationships
-- **Tax Residency Management**: Multi-country tax residency tracking for individuals with date ranges
-- **Entity Management**: Flexible contact and address management for companies and persons
-- **Risk Assessment**: Comprehensive risk tracking and assessment history
-- **Notes System**: Centralized note-taking for companies, persons, and orders
-- **Search & Reporting**: Advanced search capabilities and business reporting
-- **User Management**: Role-based access control
-- **Public Client Portal**: External client access for information updates
+CRMv3 is a full-featured CRM application designed to handle complex business relationships and workflows. It provides tools for managing client information, orders, invoicing, document management, KYC compliance, and more. The system supports both company and individual person entities with extensive relationship mapping capabilities.
+
+## Technology Stack
+
+- **Framework**: Laravel 11
+- **PHP Version**: 8.2 or higher
+- **Database**: MySQL/PostgreSQL
+- **Frontend**: Blade templates, Bootstrap 5, CoreUI 4
+- **PDF Generation**: dompdf (barryvdh/laravel-dompdf)
+- **Authentication**: Laravel Sanctum, Laravel UI
+- **Asset Compilation**: Laravel Mix (Webpack)
+- **Code Style**: PSR-12 (enforced via Laravel Pint)
 
 ## Requirements
 
-- PHP 7.3 or higher (8.0+ recommended)
-- Composer
-- Node.js & NPM
-- MySQL 5.7+ or PostgreSQL 9.6+
-- Web server (Apache/Nginx)
+### Server Requirements
 
-## Installation
+- PHP >= 8.2
+- Composer
+- Node.js >= 14.x and npm
+- MySQL 5.7+ or PostgreSQL 10+
+- Web server (Apache/Nginx) or PHP built-in server
+- Required PHP extensions:
+  - BCMath
+  - Ctype
+  - cURL
+  - DOM
+  - Fileinfo
+  - JSON
+  - Mbstring
+  - OpenSSL
+  - PCRE
+  - PDO
+  - Tokenizer
+  - XML
+
+## Installation & Setup
 
 ### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
-cd wisorgroup
+cd crmv3
 ```
 
 ### 2. Install PHP Dependencies
@@ -42,7 +55,7 @@ cd wisorgroup
 composer install
 ```
 
-### 3. Install Node.js Dependencies
+### 3. Install Node Dependencies
 
 ```bash
 npm install
@@ -50,79 +63,84 @@ npm install
 
 ### 4. Environment Configuration
 
-Create a `.env` file from the example:
+Copy the `.env.example` file to `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Configure your environment variables in `.env`:
-
-```env
-APP_NAME="WisorGroup"
-APP_ENV=local
-APP_KEY=
-APP_DEBUG=true
-APP_URL=http://localhost
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=wisorgroup
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
-
-MAIL_MAILER=smtp
-MAIL_HOST=mailhog
-MAIL_PORT=1025
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS=hello@example.com
-MAIL_FROM_NAME="${APP_NAME}"
-```
-
-### 5. Generate Application Key
+Generate the application key:
 
 ```bash
 php artisan key:generate
 ```
 
-### 6. Database Setup
+Edit the `.env` file and configure your database connection:
 
-Create your database and run migrations:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database_name
+DB_USERNAME=your_database_user
+DB_PASSWORD=your_database_password
+```
+
+### 5. Run Database Migrations
 
 ```bash
 php artisan migrate
 ```
 
-### 7. Seed the Database (Optional)
+### 6. Seed the Database (Optional)
+
+To populate the database with sample data:
 
 ```bash
 php artisan db:seed
 ```
 
-### 8. Compile Assets
+### 7. Compile Frontend Assets
 
 For development:
+
 ```bash
 npm run dev
 ```
 
 For production:
+
 ```bash
 npm run production
 ```
 
+To watch for changes during development:
+
+```bash
+npm run watch
+```
+
+### 8. Create Storage Link
+
+Create a symbolic link from `public/storage` to `storage/app/public`:
+
+```bash
+php artisan storage:link
+```
+
 ### 9. Set Permissions
 
-Ensure the storage and bootstrap/cache directories are writable:
+Ensure the storage and cache directories are writable:
 
 ```bash
 chmod -R 775 storage bootstrap/cache
 ```
 
-### 10. Start the Application
+On Windows, you may need to adjust folder permissions through the file system.
+
+### 10. Run the Application
+
+Using PHP's built-in server:
 
 ```bash
 php artisan serve
@@ -130,55 +148,76 @@ php artisan serve
 
 The application will be available at `http://localhost:8000`.
 
-## Configuration
+For production, configure your web server (Apache/Nginx) to point to the `public` directory.
 
-### File Storage
+## Default Login
 
-The application stores uploaded files in the `storage/app/public` directory. Make sure to create a symbolic link:
+After seeding the database, you can log in with the default user credentials (check the `UserSeeder` for default credentials).
 
-```bash
-php artisan storage:link
-```
+**Note**: User registration is disabled by default. Users must be created by administrators.
 
-### Mail Configuration
+## Features
 
-Configure your mail settings in the `.env` file for email notifications and KYC expiration alerts.
+### Core Entities
 
-### PDF Generation
+- **Companies**: Manage company information, registration details, VAT numbers, addresses, and contacts
+- **Persons**: Manage individual person records with personal details, tax residency, and KYC information
+- **Orders**: Track orders with associated companies, persons, services, and payments
+- **Invoices**: Generate and manage invoices with PDF export capabilities
+- **Services**: Manage service offerings with categories and pricing
 
-The application uses DomPDF for invoice generation. Ensure your server has the necessary dependencies for PDF generation.
+### Document Management
 
-## Usage
+- File uploads for companies, persons, and orders
+- Archive number generation and tracking
+- Virtual office document management
+- Document download and viewing
+- File organization by entity type
 
-### Default Login
+### KYC (Know Your Customer) Compliance
 
-After seeding the database, you can log in with:
-- **Email**: admin@example.com
-- **Password**: password
+- KYC record management for companies and persons
+- KYC expiration tracking and notifications
+- Historical KYC records
+- Polymorphic relationship support
 
-### Key Functionality
+### Relationship Management
 
-1. **Dashboard**: Overview of companies, persons, orders, and payment status
-2. **Companies**: Manage company profiles, contacts, addresses, risk assessments, and KYC records
-3. **Persons**: Manage individual clients with personal details, tax residency, and KYC information
-4. **Orders**: Create and track orders with services, payments, and custom contact data
-5. **Invoices**: Generate invoices and track payments with proper foreign key relationships
-6. **Services**: Manage service catalog and categories with flexible pricing
-7. **Documents**: Upload and organize files with archive numbering and entity relationships
-8. **KYC Management**: Track KYC compliance with expiration dates and risk assessments
-9. **Tax Residency**: Manage multiple tax residencies with date ranges and primary status
-10. **Entity Management**: Flexible contact and address management for all entities
-11. **Notes System**: Centralized note-taking for companies, persons, and orders
-12. **Search**: Advanced search across all entities with improved data structure
-13. **Reports**: Business reporting and analytics
+- Company-to-Person relationships with role definitions
+- Company-to-Company relationships
+- Order-to-Service associations
+- Order contacts management
+- Multiple addresses and contacts per entity
 
-### Public Client Access
+### Financial Management
 
-Clients can access a public portal to update their information:
-- URL: `/public/client/{id}`
-- Allows clients to update their contact information without logging in
+- Invoice generation with PDF export
+- Payment tracking for orders
+- Proforma invoice support
+- Paid/unpaid invoice filtering
+- Payment history
+
+### Additional Features
+
+- **Notes System**: Add notes to companies, persons, and orders
+- **Risk Assessment**: Track and manage risk levels for entities
+- **Tax Residency**: Manage tax residency information for persons
+- **Search**: Global search with autocomplete functionality
+- **Dashboard**: Overview with statistics and filtering options
+- **Renewals**: Track and manage service renewals
+- **Settings**: Application-wide configuration
+- **User Management**: Admin user management
+- **Public Client Portal**: Allow clients to update their information
 
 ## Development
+
+### Code Style
+
+This project follows PSR-12 coding standards. Format your code using Laravel Pint:
+
+```bash
+./vendor/bin/pint
+```
 
 ### Running Tests
 
@@ -186,12 +225,24 @@ Clients can access a public portal to update their information:
 php artisan test
 ```
 
-### Code Style
+### Database Migrations
 
-The project follows PSR-12 coding standards. Use PHP CS Fixer to maintain code style:
+Create a new migration:
 
 ```bash
-./vendor/bin/php-cs-fixer fix
+php artisan make:migration migration_name
+```
+
+Run migrations:
+
+```bash
+php artisan migrate
+```
+
+Rollback migrations:
+
+```bash
+php artisan migrate:rollback
 ```
 
 ### Asset Compilation
@@ -202,99 +253,133 @@ Watch for changes during development:
 npm run watch
 ```
 
-## API Endpoints
-
-The application provides RESTful API endpoints for:
-- Companies (`/api/companies`)
-- Persons (`/api/persons`)
-- Orders (`/api/orders`)
-- Invoices (`/api/invoices`)
-- Services (`/api/services`)
-
-## Cron Jobs
-
-Set up the following cron jobs for automated tasks:
+Compile for production:
 
 ```bash
-# Check KYC expirations
-* * * * * php /path/to/artisan cron:check-kyc-expirations
+npm run production
+```
 
-# Update last modified orders
-* * * * * php /path/to/artisan cron:last-updated-orders
+## Project Structure
+
+```
+crmv3/
+├── app/
+│   ├── Http/Controllers/    # Application controllers
+│   ├── Models/              # Eloquent models
+│   └── Providers/           # Service providers
+├── database/
+│   ├── factories/           # Model factories
+│   ├── migrations/          # Database migrations
+│   └── seeders/             # Database seeders
+├── resources/
+│   ├── views/               # Blade templates
+│   ├── js/                  # JavaScript files
+│   └── sass/                # SCSS stylesheets
+├── routes/
+│   ├── web.php              # Web routes
+│   └── api.php              # API routes
+└── public/                  # Public assets
 ```
 
 ## Security
 
-- CSRF protection enabled
-- SQL injection protection through Eloquent ORM
-- XSS protection with Blade templating
-- File upload validation and secure storage
-- Role-based access control
+This application implements comprehensive security measures to protect against common vulnerabilities and attacks.
 
-## Database Schema
+### Authentication & Authorization
 
-The application uses a comprehensive database schema with the following key tables:
+- **Authentication Required**: All sensitive routes require user authentication via Laravel's auth middleware
+- **Authorization Policies**: Laravel Policies implemented for File, Company, Order, Invoice, and Person models
+- **User Registration**: Disabled by default - users must be created by administrators
+- **Session Security**: 
+  - HTTP-only cookies enabled
+  - Same-site cookie protection (Lax)
+  - Secure cookie configuration via environment variables
 
-### Core Tables
-- **users**: User authentication and management
-- **companies**: Company profiles with registration details
-- **persons**: Individual client profiles
-- **orders**: Order tracking and management
-- **invoices**: Invoice generation and payment tracking
-- **services**: Service catalog and pricing
-- **service_category**: Service categorization
+### Input Validation & Sanitization
 
-### Relationship Tables
-- **company_person**: Many-to-many relationship between companies and persons
-- **company_order**: Many-to-many relationship between companies and orders
-- **order_person**: Many-to-many relationship between orders and persons
-- **order_service**: Order-service relationships with custom pricing and dates
+- **Form Request Validation**: Custom Form Request classes for file uploads and other sensitive operations
+- **Mass Assignment Protection**: All controllers use `$request->only()` with explicit field lists to prevent unauthorized field modification
+- **Input Sanitization**: User input is sanitized and validated before database operations
+- **SQL Injection Prevention**: 
+  - All queries use Eloquent ORM with parameter binding
+  - Raw SQL queries replaced with parameterized alternatives
+  - No direct user input in raw SQL statements
 
-### Extended Features
-- **kycs**: KYC records with polymorphic relationships (companies/persons)
-- **person_tax_residencies**: Tax residency tracking with date ranges
-- **entity_contacts**: Polymorphic contact information (email, phone, etc.)
-- **entity_addresses**: Polymorphic address management
-- **entity_risks**: Risk assessment and tracking
-- **notes**: Centralized note-taking system
-- **files**: Document management and storage
+### File Upload Security
 
-### Data Integrity
-- All foreign keys have proper cascade behaviors
-- Polymorphic relationships for flexible entity management
-- Proper indexing for performance optimization
-- Data validation and constraints
+- **File Type Validation**: Strict whitelist of allowed file extensions (PDF, DOC, DOCX, XLS, XLSX, TXT, JPG, JPEG, PNG, GIF, CSV)
+- **File Size Limits**: Maximum file size of 10MB enforced
+- **MIME Type Verification**: File MIME types are validated
+- **Path Traversal Protection**: 
+  - File names sanitized using `basename()` and custom sanitization
+  - File paths validated to ensure they're within allowed directories
+  - Real path verification prevents directory traversal attacks
+- **Secure File Storage**: Files stored outside web root with controlled access
 
-## Troubleshooting
+### XSS (Cross-Site Scripting) Protection
 
-### Common Issues
+- **Output Escaping**: All user-generated content escaped using `htmlspecialchars()` with ENT_QUOTES
+- **Blade Auto-Escaping**: Blade templates automatically escape output using `{{ }}` syntax
+- **HTML Attribute Escaping**: All HTML attributes properly escaped in autocomplete and search results
+- **Content Security**: No direct `echo` of user input - all output goes through proper response methods
 
-1. **Permission Errors**: Ensure storage directories are writable
-2. **Database Connection**: Verify database credentials in `.env`
-3. **Asset Compilation**: Run `npm run dev` after pulling changes
-4. **PDF Generation**: Check DomPDF dependencies
-5. **Migration Issues**: If you encounter migration errors, ensure all migrations are properly ordered and dependencies are met
+### CSRF Protection
 
-### Logs
+- **CSRF Tokens**: All forms include CSRF tokens via `@csrf` directive
+- **Middleware**: CSRF protection enabled globally via middleware
+- **Token Verification**: Automatic token verification on all POST/PUT/DELETE requests
 
-Check application logs in `storage/logs/laravel.log` for debugging information.
+### Rate Limiting
 
-## Contributing
+Rate limiting implemented on sensitive endpoints to prevent abuse and DoS attacks:
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+- **File Uploads**: 10 requests per minute
+- **File Downloads/Views**: 30 requests per minute
+- **File Deletions**: 10 requests per minute
+- **Invoice Creation**: 10 requests per minute
+- **Search Operations**: 30 requests per minute
+- **Autocomplete**: 60 requests per minute
+
+### Error Handling
+
+- **Secure Error Messages**: Error messages don't expose sensitive system information
+- **Proper Exception Handling**: All exceptions caught and handled appropriately
+- **Logging**: Security-relevant events logged for audit purposes
+- **No Debug Code in Production**: Test routes protected by environment checks
+
+### Additional Security Measures
+
+- **Test Routes Protection**: Test/debug routes only accessible in non-production environments
+- **Hardcoded Data Removal**: Sensitive data (like email addresses) moved to environment variables
+- **Path Validation**: All file operations validate paths to prevent directory traversal
+- **Authorization Checks**: Delete operations verify user permissions
+- **Input Length Limits**: String inputs have maximum length validation
+- **Type Validation**: All IDs and numeric inputs validated as integers
+
+### Security Best Practices
+
+1. **Principle of Least Privilege**: Users should only access resources they're authorized for
+2. **Defense in Depth**: Multiple layers of security (validation, authorization, sanitization)
+3. **Input Validation**: Validate, sanitize, and escape all user inputs
+4. **Secure File Handling**: Validate file types, scan for malware, store outside web root
+5. **Error Handling**: Never expose sensitive information in error messages
+6. **Logging**: Log all security-relevant events (failed auth, file access, data modifications)
+
+### Security Recommendations
+
+For production deployment, consider implementing:
+
+- **Two-Factor Authentication (2FA)**: For admin users
+- **Security Headers**: Add middleware for CSP, HSTS, X-Frame-Options
+- **Audit Logging**: Comprehensive logging of all sensitive operations
+- **Role-Based Access Control (RBAC)**: Granular permissions beyond current policy implementation
+- **Regular Security Audits**: Periodic security reviews and dependency scanning
+- **Penetration Testing**: Regular security testing by qualified professionals
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is proprietary software. All rights reserved.
 
 ## Support
 
-For support and questions, please contact the development team or create an issue in the repository.
-
----
-
-**Note**: This is a business management system designed for internal use. Ensure proper security measures are in place when deploying to production.
+For issues, questions, or contributions, please contact the development team.

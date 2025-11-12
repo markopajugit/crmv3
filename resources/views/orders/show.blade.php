@@ -14,241 +14,275 @@
     right: 0;
     text-align: center;
     top: 400px;">Uploading files...</div>
-    <a style="background:darkred!important;float:right;" target="_blank" class="btn btn-primary" data-orderid="{{$order->id}}" id="deleteOrder"><i class="fa-solid fa-trash"></i>Delete Order</a>
-    <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12">
-            <h1><i class="fa-solid fa-file"></i>{{$order->number}} <span style="font-weight: 400;">{{ $order->name }}</span>
-                @if($order->company)
 
-                        <a href="/companies/{{ $order->company->id }}">{{ $order->company->name }}</a>
+@include('partials.success-alert')
 
-                @endif
-                @if($order->person)
-
-                        <a href="/persons/{{ $order->person->id }}">{{ $order->person->name }}</a>
-                @endif
-                <i class="fa-solid fa-pen-to-square"
-                   style="cursor: pointer;vertical-align: middle; margin-left: 10px;font-size: 20px;"></i>
-            </h1>
-            @if(!$order->number)
-                !!Order is missing Number!!
-            @endif
-            <br>
-            Last updated: {{ $order->updated_at->format('d.m.Y H:i') }}
-        </div>
-
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-details">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Details</div>
-                    <div class="panel-heading__button">
-                        <button type="button" class="btn editDetails">
-                            <i class="fa-solid fa-pen-to-square"></i>Edit
-                        </button>
-                        <button type="button" class="btn saveDetails" style="display: none;">
-                            <i class="fa-solid fa-check"></i>Save
-                        </button>
-
-                        <button type="button" class="btn btn-success" data-coreui-toggle="modal"
-                                data-coreui-target="#addNewPayment">
-                            <i class="fa fa-plus" aria-hidden="true"></i>Add new payment
-                        </button>
-
-                    </div>
-                </div>
-                <div class="panel-body">
-                    <table class="table">
-                        @if($order->company)
-                        <tr>
-                            <td style="width:50%"><strong>Company:</strong></td>
-                            <td id="currentCompany"><a href="/companies/{{ $order->company->id }}"><i class="fa-solid fa-building"></i>{{ $order->company->name }}</a></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        @endif
-                        @if($order->person)
-                        <tr>
-                            <td style="width:50%"><strong>Person:</strong></td>
-                            <td id="currentPerson"><a href="/persons/{{ $order->person->id }}"><i class="fa-solid fa-user"></i>{{ $order->person->name }}</a></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        @endif
-                        <tr>
-                            <td style="width:50%"><strong>Responsible User:</strong></td>
-                            <td id="currentUser" data-currentResponsibleUserId="{{ $order->responsible_user->id }}"><i class="fa-solid fa-user-tie"></i>{{ $order->responsible_user->name }}</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td style="width:50%"><strong>Status:</strong></td>
-                            <td id="currentStatus">{{ $order->status }}</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td style="width:50%"><strong>Payment status:</strong></td>
-                            <td id="currentPaymentStatus">{{ $order->payment_status }}</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        @if($order->awaiting_status)
-                        <!--<tr>
-                            <td style="width:50%"><strong>Awaiting status:</strong></td>
-                            <td id="currentAwaitingStatus">{{ $order->awaiting_status }}</td>
-                            <td></td>
-                            <td></td>
-                        </tr>-->
-                        @endif
-                        @if($order->paid_date && false)
-                            <tr>
-                                <td style="width:50%"><strong>Paid Date:</strong></td>
-                                <td id="currentPaidDate">{{ $order->paid_date->format('d-m-Y') }}</td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        @endif
-
-                        @if($order->payments)
-                            @foreach($order->payments as $payment)
-                                <tr class="paymentRow">
-                                    <td style="width:50%"><strong>Payment:</strong></td>
-                                    <td style="width:50%; word-break: break-word;">{{$payment->sum}}€<br>{{$payment->type}}<br>{{$payment->details}}<br>{{$payment->paid_date}}</td>
-                                    <td style="padding:0;text-align: center;"><i class="fa-solid fa-pen-to-square" data-coreui-toggle="modal" data-coreui-target="#editPayment" data-paymentid="{{$payment->id}}" data-paymentSum="{{$payment->sum}}" data-paymentType="{{$payment->type}}" data-paymentDetails="{{$payment->details}}" data-paymentPaidDate="{{$payment->paid_date}}"></i><i style="display: none;" class="fa-solid fa-check"></i></td>
-                                    <td style="padding:0;text-align: center;"><i style="color:darkred;" class="fa-solid fa-trash" data-paymentid="{{$payment->id}}"></i></td>
-                                </tr>
-                            @endforeach
-                        @endif
-
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="panel panel-default panel-notes">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Notes</div>
-                    <div class="panel-heading__button">
-
-                        <!--<button type="button" class="btn editNotes">
-                            <i class="fa-solid fa-pen-to-square"></i>Edit
-                        </button>-->
-
-                        <button type="button" class="btn btn-success" data-coreui-toggle="modal"
-                                data-coreui-target="#addNote">
-                            <i class="fa fa-plus" aria-hidden="true"></i>Add Note
-                        </button>
-
-                        <button type="button" class="btn saveNotes" style="display: none;">
-                            <i class="fa-solid fa-check"></i>Save
-                        </button>
-                    </div>
-                </div>
-                <div class="panel-body">
-                    @if($order->notes)
-                        <div>Vana note: {{$order->notes}}</div>
+<!-- Header Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h1 style="font-size: 2rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">
+                    <i class="fa-solid fa-file" style="color: #DC2626; margin-right: 0.5rem;"></i> 
+                    <i>{{$order->number}}</i> <span id="orderNameDisplay">{{ $order->name }}</span>
+                    <i class="fa-solid fa-pen-to-square editOrderName" style="vertical-align: middle; margin-left: 10px; font-size: 1.25rem; cursor: pointer; color: #6B7280;"></i>
+                    @if(!$order->number)
+                        <span style="color: #EF4444; font-size: 0.875rem; margin-left: 0.5rem;">!!Order is missing Number!!</span>
                     @endif
-                    @foreach($order->getNotes as $note)
-                        <div style="border-bottom: 1px solid black; padding: 5px 0;" class="note"><b>{{$note->responsible_user($note->user_id)->name}} ({{$note->created_at}})</b><i class="fa-solid fa-pen-to-square" style="vertical-align: middle; margin-left: 10px;font-size: 20px;" data-noteid="{{$note->id}}"></i><i class="fa-solid fa-check" style="display:none;vertical-align: middle; margin-left: 10px;font-size: 20px;" data-noteid="{{$note->id}}"></i><i class="fa-solid fa-trash" style="vertical-align: middle; margin-left: 10px;font-size: 20px;" data-noteid="{{$note->id}}"></i><br>
-                            <div class="noteContent" data-content="{{$note->content}}">{!! nl2br(e($note->content)) !!}</div></div>
-                    @endforeach
+                </h1>
+                <div id="orderInfoDisplay" style="font-size: 1rem; color: #6B7280; margin-bottom: 0;">
+                    @if($order->company)
+                        <p style="margin-bottom: 0.25rem;">
+                            <i class="fa-solid fa-building" style="margin-right: 0.5rem;"></i>
+                            <a href="/companies/{{ $order->company->id }}">{{ $order->company->name }}</a>
+                        </p>
+                    @endif
+                    @if($order->person)
+                        <p style="margin-bottom: 0.25rem;">
+                            <i class="fa-solid fa-user" style="margin-right: 0.5rem;"></i>
+                            <a href="/persons/{{ $order->person->id }}">{{ $order->person->name }}</a>
+                        </p>
+                    @endif
+                    <p style="margin-bottom: 0;">
+                        <i class="fa-solid fa-clock" style="margin-right: 0.5rem;"></i>
+                        Last updated: {{ $order->updated_at->format('d.m.Y H:i') }}
+                    </p>
                 </div>
+            </div>
+            <div>
+                <a href="{{ route('orders.index') }}" class="btn btn-secondary" style="margin-right: 0.5rem; padding: 0.625rem 1.5rem; font-weight: 600; border-radius: 6px; background-color: #6B7280; border-color: #6B7280;">
+                    <i class="fa-solid fa-arrow-left" style="margin-right: 0.5rem;"></i> Back to Orders
+                </a>
+                <button type="button" class="btn btn-danger" data-orderid="{{$order->id}}" id="deleteOrder" style="background-color: #EF4444; border-color: #EF4444; padding: 0.625rem 1.5rem; font-weight: 600; border-radius: 6px;">
+                    <i class="fa-solid fa-trash" style="margin-right: 0.5rem;"></i> Delete Order
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-contactpersons">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Order contacts</div>
-                    <div class="panel-heading__button">
-
-                        <!--<button type="button" class="btn editNotes">
-                            <i class="fa-solid fa-pen-to-square"></i>Edit
-                        </button>-->
-
-                        <button type="button" class="btn btn-success" data-coreui-toggle="modal"
-                                data-coreui-target="#addContactPerson">
-                            <i class="fa fa-plus" aria-hidden="true"></i>Add contact person
+<!-- Details and Notes Section -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                        <i class="fa-solid fa-info-circle" style="color: #DC2626; margin-right: 0.5rem;"></i> Details
+                    </h3>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-primary editDetails" style="margin-right: 0.5rem; background-color: #DC2626; border-color: #DC2626;">
+                            <i class="fa-solid fa-pen-to-square" style="margin-right: 0.5rem;"></i>Edit
                         </button>
-
-                        <button type="button" class="btn saveContactPerson" style="display: none;">
-                            <i class="fa-solid fa-check"></i>Save
+                        <button type="button" class="btn btn-sm btn-primary saveDetails" style="display: none; background-color: #DC2626; border-color: #DC2626;">
+                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i>Save
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success" data-coreui-toggle="modal"
+                                data-coreui-target="#addNewPayment" style="background-color: #10B981; border-color: #10B981;">
+                            <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0.5rem;"></i>Add Payment
                         </button>
                     </div>
                 </div>
-                <div class="panel-body">
-                    <table width="100%">
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <table class="table" style="margin-bottom: 0;">
+                    @if($order->company)
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                            <i class="fa-solid fa-building" style="color: #DC2626; margin-right: 0.5rem;"></i> Company
+                        </td>
+                        <td id="currentCompany" style="width: 50%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                            <a href="/companies/{{ $order->company->id }}">{{ $order->company->name }}</a>
+                        </td>
+                        <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;"></td>
+                    </tr>
+                    @endif
+                    @if($order->person)
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                            <i class="fa-solid fa-user" style="color: #DC2626; margin-right: 0.5rem;"></i> Person
+                        </td>
+                        <td id="currentPerson" style="width: 50%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                            <a href="/persons/{{ $order->person->id }}">{{ $order->person->name }}</a>
+                        </td>
+                        <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;"></td>
+                    </tr>
+                    @endif
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                            <i class="fa-solid fa-user-tie" style="color: #DC2626; margin-right: 0.5rem;"></i> Responsible User
+                        </td>
+                        <td id="currentUser" data-currentResponsibleUserId="{{ $order->responsible_user->id }}" style="width: 50%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                            {{ $order->responsible_user->name }}
+                        </td>
+                        <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;"></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                            <i class="fa-solid fa-tag" style="color: #DC2626; margin-right: 0.5rem;"></i> Status
+                        </td>
+                        <td id="currentStatus" style="width: 50%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                            {{ $order->status }}
+                        </td>
+                        <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;"></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                        <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                            <i class="fa-solid fa-credit-card" style="color: #DC2626; margin-right: 0.5rem;"></i> Payment Status
+                        </td>
+                        <td id="currentPaymentStatus" style="width: 50%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                            {{ $order->payment_status }}
+                        </td>
+                        <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;"></td>
+                    </tr>
+                    @if($order->payments)
+                        @foreach($order->payments as $payment)
+                            <tr class="paymentRow" style="border-bottom: 1px solid #f3f4f6;">
+                                <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                    <i class="fa-solid fa-money-bill" style="color: #DC2626; margin-right: 0.5rem;"></i> Payment
+                                </td>
+                                <td style="width: 50%; padding: 1rem 0; color: #1f2937; vertical-align: middle; word-break: break-word;">
+                                    <strong>{{$payment->sum}}€</strong><br>
+                                    <small style="color: #6B7280;">{{$payment->type}}</small><br>
+                                    @if($payment->details)
+                                        <small style="color: #6B7280;">{{$payment->details}}</small><br>
+                                    @endif
+                                    @if($payment->paid_date)
+                                        <small style="color: #6B7280;">{{$payment->paid_date}}</small>
+                                    @endif
+                                </td>
+                                <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;">
+                                    <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem; margin-right: 0.5rem;" data-coreui-toggle="modal" data-coreui-target="#editPayment" data-paymentid="{{$payment->id}}" data-paymentSum="{{$payment->sum}}" data-paymentType="{{$payment->type}}" data-paymentDetails="{{$payment->details}}" data-paymentPaidDate="{{$payment->paid_date}}" title="Edit"></i>
+                                    <i class="fa-solid fa-trash" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;" data-paymentid="{{$payment->id}}" title="Delete"></i>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @endif
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                        <i class="fa-solid fa-sticky-note" style="color: #DC2626; margin-right: 0.5rem;"></i> Notes
+                    </h3>
+                    <button type="button" class="btn btn-sm btn-success" data-coreui-toggle="modal"
+                            data-coreui-target="#addNote" style="background-color: #10B981; border-color: #10B981;">
+                        <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0.5rem;"></i>Add Note
+                    </button>
+                </div>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                @if($order->notes)
+                    <div style="border-bottom: 1px solid #e5e7eb; padding: 0.75rem 0; margin-bottom: 0.75rem; color: #6B7280; font-style: italic;">Vana note: {{$order->notes}}</div>
+                @endif
+                @foreach($order->getNotes as $note)
+                    <div style="border-bottom: 1px solid #e5e7eb; padding: 0.75rem 0;" class="note">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <div>
+                                <strong style="color: #1f2937;">{{$note->responsible_user($note->user_id)->name}}</strong>
+                                <small style="color: #6B7280; margin-left: 0.5rem;">{{$note->created_at}}</small>
+                            </div>
+                            <div>
+                                <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem; margin-right: 0.5rem;" data-noteid="{{$note->id}}" title="Edit"></i>
+                                <i class="fa-solid fa-check" style="display:none; cursor: pointer; color: #10B981; font-size: 0.875rem; margin-right: 0.5rem;" data-noteid="{{$note->id}}" title="Save"></i>
+                                <i class="fa-solid fa-trash" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;" data-noteid="{{$note->id}}" title="Delete"></i>
+                            </div>
+                        </div>
+                        <div class="noteContent" data-content="{{$note->content}}" style="color: #374151;">{!! nl2br(e($note->content)) !!}</div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Contacts Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                        <i class="fa-solid fa-address-book" style="color: #DC2626; margin-right: 0.5rem;"></i> Order Contacts
+                    </h3>
+                    <button type="button" class="btn btn-sm btn-success" data-coreui-toggle="modal"
+                            data-coreui-target="#addContactPerson" style="background-color: #10B981; border-color: #10B981;">
+                        <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0.5rem;"></i>Add Contact Person
+                    </button>
+                </div>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <table class="table" style="margin-bottom: 0;">
                     @foreach($order->getOrderContacts as $person)
-                        <tr>
-                            @if($person->person_id)
-                                <td class="person-name"><a href="/persons/{{$person->person_id}}">{{$person->name}}</a></td>
-                            @else
-                                <td class="person-name">{{$person->name}}</td>
-                            @endif
-                            <td class="person-email">{{$person->email}}</td>
-                            <td><i class="fa-solid fa-pen-to-square" style="vertical-align: middle; margin-left: 10px;font-size: 20px;" data-personid="{{$person->id}}"></i>
-                                <i class="fa-solid fa-check" style="display:none;vertical-align: middle; margin-left: 10px;font-size: 20px;" data-personid="{{$person->id}}"></i>
-                                <i class="fa-solid fa-trash" style="vertical-align: middle; margin-left: 10px;font-size: 20px;" data-personid="{{$person->id}}"></i></td>
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                                @if($person->person_id)
+                                    <a href="/persons/{{$person->person_id}}">{{$person->name}}</a>
+                                @else
+                                    <span class="person-name">{{$person->name}}</span>
+                                @endif
+                            </td>
+                            <td style="width: 50%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                                <span class="person-email">{{$person->email}}</span>
+                            </td>
+                            <td style="width: 10%; padding: 1rem 0; text-align: center; vertical-align: middle;">
+                                <i class="fa-solid fa-pen-to-square" style="cursor: pointer; color: #6B7280; font-size: 0.875rem; margin-right: 0.5rem;" data-personid="{{$person->id}}" title="Edit"></i>
+                                <i class="fa-solid fa-check" style="display:none; cursor: pointer; color: #10B981; font-size: 0.875rem; margin-right: 0.5rem;" data-personid="{{$person->id}}" title="Save"></i>
+                                <i class="fa-solid fa-trash" style="cursor: pointer; color: #EF4444; font-size: 0.875rem;" data-personid="{{$person->id}}" title="Delete"></i>
+                            </td>
                         </tr>
                     @endforeach
-                    </table>
-                </div>
+                </table>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-services">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Services</div>
-                    <div class="panel-heading__button">
-
-                        @if(!$order->services->isEmpty())
-                            <!--<button type="button" class="btn editServiceDetails">
-                                <i class="fa-solid fa-pen-to-square"></i>Edit
-                            </button>-->
-                        @endif
-                        @if($order->invoices->isEmpty())
-                            <button type="button" class="btn btn-success" data-coreui-toggle="modal" data-coreui-target="#servicesModal">
-                                <i class="fa fa-plus" aria-hidden="true"></i>Add Service
-                            </button>
-                        @endif
-                    </div>
+<!-- Services Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                        <i class="fa-solid fa-list" style="color: #DC2626; margin-right: 0.5rem;"></i> Services
+                    </h3>
+                    @if($order->invoices->isEmpty())
+                        <button type="button" class="btn btn-sm btn-success" data-coreui-toggle="modal" data-coreui-target="#servicesModal" style="background-color: #10B981; border-color: #10B981;">
+                            <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0.5rem;"></i>Add Service
+                        </button>
+                    @endif
                 </div>
-                <div class="panel-body">
-                    <table class="table">
-                        <tr>
-                            <th>Date From</th>
-                            <th>Date To</th>
-                            <th>Name</th>
-                            <th>Cost</th>
-                            <th>Type</th>
-                            <th></th>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <table class="table" style="margin-bottom: 0;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e5e7eb;">
+                            <th style="padding: 0.75rem 0; font-weight: 600; color: #374151;">Date From</th>
+                            <th style="padding: 0.75rem 0; font-weight: 600; color: #374151;">Date To</th>
+                            <th style="padding: 0.75rem 0; font-weight: 600; color: #374151;">Name</th>
+                            <th style="padding: 0.75rem 0; font-weight: 600; color: #374151;">Cost</th>
+                            <th style="padding: 0.75rem 0; font-weight: 600; color: #374151;">Type</th>
+                            <th style="padding: 0.75rem 0; font-weight: 600; color: #374151;"></th>
                         </tr>
+                    </thead>
+                    <tbody>
                         @if($order->company)
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td>{{ $order->company->name }}</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                            <tr style="border-bottom: 1px solid #f3f4f6;">
+                                <td colspan="2" style="padding: 0.75rem 0; color: #1f2937;"></td>
+                                <td style="padding: 0.75rem 0; color: #1f2937; font-weight: 600;">{{ $order->company->name }}</td>
+                                <td colspan="3" style="padding: 0.75rem 0; color: #1f2937;"></td>
                             </tr>
                         @endif
                         @if($order->person)
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td>{{ $order->person->name }}</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                            <tr style="border-bottom: 1px solid #f3f4f6;">
+                                <td colspan="2" style="padding: 0.75rem 0; color: #1f2937;"></td>
+                                <td style="padding: 0.75rem 0; color: #1f2937; font-weight: 600;">{{ $order->person->name }}</td>
+                                <td colspan="3" style="padding: 0.75rem 0; color: #1f2937;"></td>
                             </tr>
                         @endif
 
@@ -256,231 +290,279 @@
                             $sum = 0;
                         @endphp
                         @foreach ($order->services as $service)
-                            <tr class="addedService" data-orderServiceid="{{ $service->pivot->id }}">
-                                <td id="addedServiceFrom-{{ $service->pivot->id }}">{{$service->pivot->date_from}}</td>
-                                <td id="addedServiceTo-{{ $service->pivot->id }}">{{$service->pivot->date_to}}</td>
-                                <td id="addedServiceName-{{ $service->pivot->id }}" data-serviceName="{{ $service->pivot->name }}" style="width:50%"><strong>{{ $service->pivot->name }}</strong></td>
-                                <td id="addedServiceCost-{{ $service->pivot->id }}" data-serviceCost="{{ $service->pivot->cost }}">{{ $service->pivot->cost }}</td>
-                                <td id="addedServiceType-{{ $service->pivot->id }}" data-serviceType="{{ $service->type }}">
+                            <tr class="addedService" data-orderServiceid="{{ $service->pivot->id }}" style="border-bottom: 1px solid #f3f4f6;">
+                                <td id="addedServiceFrom-{{ $service->pivot->id }}" style="padding: 0.75rem 0; color: #1f2937;">{{$service->pivot->date_from}}</td>
+                                <td id="addedServiceTo-{{ $service->pivot->id }}" style="padding: 0.75rem 0; color: #1f2937;">{{$service->pivot->date_to}}</td>
+                                <td id="addedServiceName-{{ $service->pivot->id }}" data-serviceName="{{ $service->pivot->name }}" style="padding: 0.75rem 0; color: #1f2937; font-weight: 600;">{{ $service->pivot->name }}</td>
+                                <td id="addedServiceCost-{{ $service->pivot->id }}" data-serviceCost="{{ $service->pivot->cost }}" style="padding: 0.75rem 0; color: #1f2937;">{{ $service->pivot->cost }}</td>
+                                <td id="addedServiceType-{{ $service->pivot->id }}" data-serviceType="{{ $service->type }}" style="padding: 0.75rem 0; color: #6B7280;">
                                     {{ $service->type }}
-                                    <!--@if($service->type == 'Reaccuring')
-                                        ({{ $service->reaccuring_frequency }}mo)
-                                    @endif-->
                                 </td>
-                                <td>
+                                <td style="padding: 0.75rem 0; text-align: right;">
                                     @if($order->invoices->isEmpty())
-                                        <!--{{ $service->pivot }}-->
-                                        <button type="button" class="btn editServiceDetails" data-orderServiceid="{{ $service->pivot->id }}">
-                                            <i class="fa-solid fa-pen-to-square"></i>Edit
+                                        <button type="button" class="btn btn-sm btn-primary editServiceDetails" data-orderServiceid="{{ $service->pivot->id }}" style="margin-right: 0.5rem; background-color: #DC2626; border-color: #DC2626;">
+                                            <i class="fa-solid fa-pen-to-square" style="margin-right: 0.5rem;"></i>Edit
                                         </button>
-                                        <button type="button" class="btn deleteService" data-orderServiceid="{{ $service->pivot->id }}">
-                                            <i class="fa-solid fa-trash"></i>Delete
+                                        <button type="button" class="btn btn-sm btn-danger deleteService" data-orderServiceid="{{ $service->pivot->id }}">
+                                            <i class="fa-solid fa-trash" style="margin-right: 0.5rem;"></i>Delete
                                         </button>
                                     @endif
-                                    <button type="button" class="btn saveServiceDetails" style="display: none;" data-pivotid="{{ $service->pivot->id }}">
-                                        <i class="fa-solid fa-check"></i>Save
-                                    </button></td>
+                                    <button type="button" class="btn btn-sm btn-success saveServiceDetails" style="display: none; background-color: #10B981; border-color: #10B981;" data-pivotid="{{ $service->pivot->id }}">
+                                        <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i>Save
+                                    </button>
+                                </td>
                             </tr>
                             @php
                                 $sum = $sum + $service->pivot->cost;
                             @endphp
                         @endforeach
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>Net sum: </td>
-                            <td><span id="servicesSum">{{ $sum }}</span></td>
-                            <td></td>
+                        <tr style="border-top: 2px solid #e5e7eb; border-bottom: 1px solid #f3f4f6;">
+                            <td colspan="3" style="padding: 0.75rem 0;"></td>
+                            <td style="padding: 0.75rem 0; font-weight: 600; color: #374151;">Net sum:</td>
+                            <td style="padding: 0.75rem 0; font-weight: 600; color: #1f2937;"><span id="servicesSum">{{ $sum }}</span></td>
+                            <td style="padding: 0.75rem 0;"></td>
                         </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>VAT @foreach ($order->invoices as $invoice) {{ $invoice->vat }}%: @endforeach </td>
-                            <td><span id="servicesVAT">@foreach ($order->invoices as $invoice) {{ $invoice->vat * $sum / 100 }} @endforeach</span></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>Total: </td>
-                            <td><span id="servicesSum">@foreach ($order->invoices as $invoice) {{ $invoice->vat * $sum / 100 + $sum }} @endforeach</span></td>
-                            <td></td>
-                        </tr>
-                    </table>
-                </div>
+                        @if($order->invoices->count() > 0)
+                            <tr style="border-bottom: 1px solid #f3f4f6;">
+                                <td colspan="3" style="padding: 0.75rem 0;"></td>
+                                <td style="padding: 0.75rem 0; font-weight: 600; color: #374151;">VAT @foreach ($order->invoices as $invoice) {{ $invoice->vat }}%: @endforeach</td>
+                                <td style="padding: 0.75rem 0; font-weight: 600; color: #1f2937;"><span id="servicesVAT">@foreach ($order->invoices as $invoice) {{ $invoice->vat * $sum / 100 }} @endforeach</span></td>
+                                <td style="padding: 0.75rem 0;"></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f3f4f6;">
+                                <td colspan="3" style="padding: 0.75rem 0;"></td>
+                                <td style="padding: 0.75rem 0; font-weight: 600; color: #374151;">Total:</td>
+                                <td style="padding: 0.75rem 0; font-weight: 700; color: #1f2937; font-size: 1.125rem;"><span id="servicesTotal">@foreach ($order->invoices as $invoice) {{ $invoice->vat * $sum / 100 + $sum }} @endforeach</span></td>
+                                <td style="padding: 0.75rem 0;"></td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-    <button type="button" class="btn btn-success" data-coreui-toggle="modal"
-            data-coreui-target="#createInvoice" style="margin-top:10px;">
-        <i class="fa fa-plus" aria-hidden="true"></i>Create Price offer
-    </button>
-    @if($order->invoices->isEmpty())
-        <button type="button" class="btn btn-success" data-coreui-toggle="modal"
-                data-coreui-target="#invoiceModal" style="margin-top:10px;">
-            <i class="fa fa-plus" aria-hidden="true"></i>Create Invoice
-        </button>
-    @else
-        @foreach ($order->invoices as $invoice)
-        <div class="row">
-            <div class="col">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        @if($invoice->is_proforma)
-                        <div class="panel-heading__title">Price offer ID: {{$invoice->id}}</div>
-                        @elseif(!$invoice->is_proforma)
-                            <div class="panel-heading__title">Invoice ID: {{$invoice->id}}</div>
-                        @endif
-                        <div class="panel-heading__button">
+</div>
+<!-- Invoice Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success" data-coreui-toggle="modal"
+                    data-coreui-target="#createInvoice" style="background-color: #10B981; border-color: #10B981; padding: 0.625rem 1.5rem; font-weight: 600; border-radius: 6px;">
+                <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0.5rem;"></i>Create Price offer
+            </button>
+            @if($order->invoices->isEmpty())
+                <button type="button" class="btn btn-success" data-coreui-toggle="modal"
+                        data-coreui-target="#invoiceModal" style="background-color: #10B981; border-color: #10B981; padding: 0.625rem 1.5rem; font-weight: 600; border-radius: 6px;">
+                    <i class="fa fa-plus" aria-hidden="true" style="margin-right: 0.5rem;"></i>Create Invoice
+                </button>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Invoices Section -->
+@if($order->invoices->count() > 0)
+    @foreach ($order->invoices as $invoice)
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                            <i class="fa-solid fa-file-invoice" style="color: #DC2626; margin-right: 0.5rem;"></i>
                             @if($invoice->is_proforma)
-                                <a target="_blank" class="btn btn-primary deleteInvoice" data-invoiceid="{{$invoice->id}}"><i class="fa-solid fa-trash"></i>Delete Price offer</a>
-                            @elseif(!$invoice->is_proforma)
+                                Price offer ID: {{$invoice->id}}
+                            @else
+                                Invoice ID: {{$invoice->id}}
+                            @endif
+                        </h3>
+                        <div>
+                            @if($invoice->is_proforma)
+                                <button type="button" class="btn btn-sm btn-danger deleteInvoice" data-invoiceid="{{$invoice->id}}">
+                                    <i class="fa-solid fa-trash" style="margin-right: 0.5rem;"></i>Delete Price offer
+                                </button>
+                            @else
                                 <div id="invoice_exists"></div>
-                                <a target="_blank" class="btn btn-primary deleteInvoice" data-invoiceid="{{$invoice->id}}"><i class="fa-solid fa-trash"></i>Delete Invoice</a>
+                                <button type="button" class="btn btn-sm btn-danger deleteInvoice" data-invoiceid="{{$invoice->id}}">
+                                    <i class="fa-solid fa-trash" style="margin-right: 0.5rem;"></i>Delete Invoice
+                                </button>
                             @endif
                         </div>
                     </div>
-                    <div class="panel-body">
-                            <table class="table">
-                                <tr>
-                                    <td>Issue Date</td>
-                                    <td>{{ $invoice->issue_date }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Payment Date</td>
-                                    <td>{{ $invoice->payment_date }}</td>
-                                </tr>
-                                <tr>
-                                    <td>VAT</td>
-                                    <td><span id="invoiceVat">{{ $invoice->vat }}</span>%</td>
-                                </tr>
-                            </table>
-                    </div>
                 </div>
-            </div>
-        </div>
-        @endforeach
-    @endif
-
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-documents regularDocuments">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Documents <span id="documentsCount"></span></div>
-
-                </div>
-                <div class="panel-body">
-                    <table class="table">
-                        @foreach ($order->files as $file)
-                            @if(!$file->virtual_office)
-                            <tr>
-                                <td><i class="fa-solid fa-file-arrow-up"></i>
-                                    <b id="orderArchiveNumber-{{$file->id}}" data-fileid="{{$file->id}}">{{$file->archive_nr}}</b>    {{$file->name}}
-                                </td>
-                                <td>{{$file->created_at->format('d.m.Y H:i:s')}}</td>
-                                <td>
-                                    <button type="button" class="btn editArchiveNumber" data-fileid="{{$file->id}}">
-                                        <i class="fa-solid fa-pen-to-square"></i>Edit Archive number
-                                    </button>
-                                    @if(!$file->archive_nr)
-                                        <button type="button" class="btn generateArchiveNumber" data-fileid="{{$file->id}}">
-                                            Generate Archive number
-                                        </button>
-                                    @endif
-                                    <button style="display:none;" type="button" class="btn saveArchiveNumber" data-fileid="{{$file->id}}">
-                                        <i class="fa-solid fa-check"></i>Save Archive number
-                                    </button>
-                                </td>
-                                <td><a href="/file/order/{{ $order->id }}/{{$file->name}}" target="_blank">VIEW</a></td>
-                                <td><a href="/file/download/order/{{ $order->id }}/{{$file->name}}"target="_blank">DOWNLOAD</a></td>
-                                <td>
-                                    <a class="deleteDocument" href="/file/delete/order/{{ $order->id }}/{{$file->name}}" data-filename="{{$file->name}}">DELETE</a>
-                                </td>
-                            </tr>
-                            @endif
-                        @endforeach
+                <div class="card-body" style="padding: 1.5rem;">
+                    <table class="table" style="margin-bottom: 0;">
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-calendar" style="color: #DC2626; margin-right: 0.5rem;"></i> Issue Date
+                            </td>
+                            <td style="width: 60%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                                {{ $invoice->issue_date }}
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-calendar-check" style="color: #DC2626; margin-right: 0.5rem;"></i> Payment Date
+                            </td>
+                            <td style="width: 60%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                                {{ $invoice->payment_date }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 40%; padding: 1rem 0; font-weight: 600; color: #374151; vertical-align: middle;">
+                                <i class="fa-solid fa-percent" style="color: #DC2626; margin-right: 0.5rem;"></i> VAT
+                            </td>
+                            <td style="width: 60%; padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                                <span id="invoiceVat">{{ $invoice->vat }}</span>%
+                            </td>
+                        </tr>
                     </table>
                 </div>
             </div>
         </div>
-
     </div>
+    @endforeach
+@endif
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-documents VOdocuments">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Virtual Office Documents <span id="VOdocumentsCount"></span></div>
-
-                </div>
-                <div class="panel-body">
-                    <table class="table">
-                        @foreach ($order->files as $file)
-                            @if($file->virtual_office)
-                            <tr>
-                                <td><!--<i class="fa-solid fa-file-arrow-up"></i>
-                                    <b id="orderArchiveNumber-{{$file->id}}" data-fileid="{{$file->id}}">{{$file->archive_nr}}</b>-->    {{$file->name}}
-                                </td>
-                                <td>
-                                    <!--<button type="button" class="btn editArchiveNumber" data-fileid="{{$file->id}}">
-                                        <i class="fa-solid fa-pen-to-square"></i>Edit Archive number
+<!-- Documents Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                    <i class="fa-solid fa-file" style="color: #DC2626; margin-right: 0.5rem;"></i> Documents <span id="documentsCount"></span>
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <table class="table" style="margin-bottom: 0;">
+                    @foreach ($order->files as $file)
+                        @if(!$file->virtual_office)
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                                <i class="fa-solid fa-file-arrow-up" style="color: #DC2626; margin-right: 0.5rem;"></i>
+                                <b id="orderArchiveNumber-{{$file->id}}" data-fileid="{{$file->id}}">{{$file->archive_nr}}</b> {{$file->name}}
+                            </td>
+                            <td style="padding: 1rem 0; color: #6B7280; vertical-align: middle;">
+                                {{$file->created_at->format('d.m.Y H:i:s')}}
+                            </td>
+                            <td style="padding: 1rem 0; vertical-align: middle;">
+                                <button type="button" class="btn btn-sm btn-primary editArchiveNumber" data-fileid="{{$file->id}}" style="margin-right: 0.5rem; background-color: #DC2626; border-color: #DC2626;">
+                                    <i class="fa-solid fa-pen-to-square" style="margin-right: 0.5rem;"></i>Edit Archive number
+                                </button>
+                                @if(!$file->archive_nr)
+                                    <button type="button" class="btn btn-sm btn-secondary generateArchiveNumber" data-fileid="{{$file->id}}" style="margin-right: 0.5rem;">
+                                        Generate Archive number
                                     </button>
-                                    <button style="display:none;" type="button" class="btn saveArchiveNumber" data-fileid="{{$file->id}}">
-                                        <i class="fa-solid fa-check"></i>Save Archive number
-                                    </button>-->
-                                </td>
-                                <td>{{$file->created_at->format('d.m.Y H:i:s')}}</td>
-                                <td><a href="/file/order/{{ $order->id }}/{{$file->name}}" target="_blank">VIEW</a></td>
-                                <td><a href="/file/download/order/{{ $order->id }}/{{$file->name}}"target="_blank">DOWNLOAD</a></td>
-                                <td><a class="deleteDocument" href="/file/delete/order/{{ $order->id }}/{{$file->name}}" data-filename="{{$file->name}}">DELETE</a></td>
-                            </tr>
-                           @endif
-                        @endforeach
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-documents-dropzone">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Upload Documents</div>
-                </div>
-                <div class="panel-body">
-                    <form id="dropzoneForm" class="dropzone" action="{{ route('dropzone.upload') }}">
-                        @csrf
-                    </form>
-                    <div align="center">
-                        <button type="button" class="btn btn-info" id="submit-all">Upload</button>
-                    </div>
-                </div>
+                                @endif
+                                <button style="display:none;" type="button" class="btn btn-sm btn-success saveArchiveNumber" data-fileid="{{$file->id}}" style="background-color: #10B981; border-color: #10B981;">
+                                    <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i>Save Archive number
+                                </button>
+                            </td>
+                            <td style="padding: 1rem 0; vertical-align: middle;">
+                                <a href="/file/order/{{ $order->id }}/{{$file->name}}" target="_blank" class="btn btn-sm btn-outline-primary" style="margin-right: 0.5rem;">
+                                    <i class="fa-solid fa-eye" style="margin-right: 0.5rem;"></i>VIEW
+                                </a>
+                                <a href="/file/download/order/{{ $order->id }}/{{$file->name}}" target="_blank" class="btn btn-sm btn-outline-secondary" style="margin-right: 0.5rem;">
+                                    <i class="fa-solid fa-download" style="margin-right: 0.5rem;"></i>DOWNLOAD
+                                </a>
+                                <a class="btn btn-sm btn-outline-danger deleteDocument" href="/file/delete/order/{{ $order->id }}/{{$file->name}}" data-filename="{{$file->name}}">
+                                    <i class="fa-solid fa-trash" style="margin-right: 0.5rem;"></i>DELETE
+                                </a>
+                            </td>
+                        </tr>
+                        @endif
+                    @endforeach
+                </table>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-documents-dropzone">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Upload Virtual Office Documents</div>
-                </div>
-                <div class="panel-body">
-                    <form id="dropzoneForm" class="dropzone" action="{{ route('dropzone.upload-virtual-document') }}">
-                        @csrf
-                    </form>
-                    <div align="center">
-                        <button type="button" class="btn btn-info" id="submit-all">Upload</button>
-                    </div>
+<!-- Virtual Office Documents Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                    <i class="fa-solid fa-folder" style="color: #DC2626; margin-right: 0.5rem;"></i> Virtual Office Documents <span id="VOdocumentsCount"></span>
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <table class="table" style="margin-bottom: 0;">
+                    @foreach ($order->files as $file)
+                        @if($file->virtual_office)
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="padding: 1rem 0; color: #1f2937; vertical-align: middle;">
+                                {{$file->name}}
+                            </td>
+                            <td style="padding: 1rem 0; color: #6B7280; vertical-align: middle;">
+                                {{$file->created_at->format('d.m.Y H:i:s')}}
+                            </td>
+                            <td style="padding: 1rem 0; vertical-align: middle;">
+                                <a href="/file/order/{{ $order->id }}/{{$file->name}}" target="_blank" class="btn btn-sm btn-outline-primary" style="margin-right: 0.5rem;">
+                                    <i class="fa-solid fa-eye" style="margin-right: 0.5rem;"></i>VIEW
+                                </a>
+                                <a href="/file/download/order/{{ $order->id }}/{{$file->name}}" target="_blank" class="btn btn-sm btn-outline-secondary" style="margin-right: 0.5rem;">
+                                    <i class="fa-solid fa-download" style="margin-right: 0.5rem;"></i>DOWNLOAD
+                                </a>
+                                <a class="btn btn-sm btn-outline-danger deleteDocument" href="/file/delete/order/{{ $order->id }}/{{$file->name}}" data-filename="{{$file->name}}">
+                                    <i class="fa-solid fa-trash" style="margin-right: 0.5rem;"></i>DELETE
+                                </a>
+                            </td>
+                        </tr>
+                        @endif
+                    @endforeach
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Documents Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                    <i class="fa-solid fa-upload" style="color: #DC2626; margin-right: 0.5rem;"></i> Upload Documents
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <form id="dropzoneForm" class="dropzone" action="{{ route('dropzone.upload') }}">
+                    @csrf
+                </form>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="btn btn-primary" id="submit-all" style="background-color: #DC2626; border-color: #DC2626; padding: 0.625rem 1.5rem; font-weight: 600; border-radius: 6px;">
+                        <i class="fa-solid fa-upload" style="margin-right: 0.5rem;"></i>Upload
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Upload Virtual Office Documents Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                    <i class="fa-solid fa-upload" style="color: #DC2626; margin-right: 0.5rem;"></i> Upload Virtual Office Documents
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <form id="dropzoneForm" class="dropzone" action="{{ route('dropzone.upload-virtual-document') }}">
+                    @csrf
+                </form>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="btn btn-primary" id="submit-all" style="background-color: #DC2626; border-color: #DC2626; padding: 0.625rem 1.5rem; font-weight: 600; border-radius: 6px;">
+                        <i class="fa-solid fa-upload" style="margin-right: 0.5rem;"></i>Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Proforma MODAL -->
     <div class="modal fade" id="createInvoice" data-coreui-backdrop="static" data-coreui-keyboard="false" tabindex="-1"
@@ -1075,16 +1157,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/dropzone.js"></script>
 
     <script type="text/javascript">
-        // Wait for jQuery to be loaded
-        (function() {
-            function initOrderShowDropzone() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initOrderShowDropzone, 50);
-                    return;
-                }
-
-                var $ = window.jQuery;
-
         Dropzone.options.dropzoneForm = {
             autoProcessQueue : true,
 
@@ -1118,17 +1190,17 @@
 
         };
 
-        $('h1').on('click', 'i.fa-pen-to-square', function () {
-
+        $('h1').on('click', 'i.editOrderName', function () {
+            var orderName = $('#orderNameDisplay').html();
             $(this).parent().html(`
-                    <form action="{{ route('orders.update',$order->id) }}" method="POST">@csrf @method('PUT')
-                    <i class="fa-solid fa-file"></i>{{$order->number}}
-                    <input type="text" name="name" placeholder="Name" value="{{ $order->name }}" style="font-size:24px;">
-                    <button type="button" onClick="window.location.reload();" style="margin-right: 5px;" class="cancelEdit btn">Cancel</button>
-                    <button type="submit" class="saveEdit btn">Save</button></form>
-                `);
-
-            $('h5').hide();
+                <i class="fa-solid fa-file" style="color: #DC2626; margin-right: 0.5rem;"></i> 
+                <i>{{$order->number}}</i>
+                <form action="{{ route('orders.update',$order->id) }}" method="POST" style="display: inline;">@csrf @method('PUT')
+                    <input type="text" name="name" placeholder="Name" value="{{ $order->name }}" style="font-size: 2rem; font-weight: 700; color: #1f2937; border: 1px solid #e5e7eb; padding: 0.25rem 0.5rem; border-radius: 4px;">
+                    <button type="button" onClick="window.location.reload();" style="margin-left: 0.5rem; padding: 0.5rem 1rem; background-color: #6B7280; color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="margin-left: 0.5rem; padding: 0.5rem 1rem; background-color: #DC2626; color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
+                </form>
+            `);
         });
 
         $(document).on('click', '.deleteDocument', function(e){
@@ -1150,28 +1222,9 @@
                 });
             }
         });
-
-            } // end initOrderShowDropzone
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initOrderShowDropzone);
-            } else {
-                initOrderShowDropzone();
-            }
-        })();
     </script>
 
     <script type="text/javascript">
-        // Wait for jQuery to be loaded
-        (function() {
-            function initOrderShowMain() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(initOrderShowMain, 50);
-                    return;
-                }
-
-                var $ = window.jQuery;
 
         $( document ).ready(function() {
 
@@ -1302,7 +1355,7 @@
             });
         });
 
-        $('.panel-contactpersons').on('click', '.fa-trash', function (e) {
+        $(document).on('click', '[data-personid].fa-trash', function (e) {
 
             e.preventDefault();
             if (window.confirm("Remove Contact Person?")) {
@@ -1325,28 +1378,24 @@
             }
         });
 
-        $('.panel-contactpersons').on('click', '.fa-pen-to-square', function (e) {
+        $(document).on('click', '[data-personid].fa-pen-to-square', function (e) {
 
             e.preventDefault();
 
-            var name = $(this).parent().siblings('.person-name').html();
-            var email= $(this).parent().siblings('.person-email').html();
+            var $row = $(this).closest('tr');
+            var name = $row.find('.person-name').html();
+            var email = $row.find('.person-email').html();
 
-
-            $(this).parent().siblings('.person-name').html('<input type="text" id="person-name-new" value="'+name+'">');
-            $(this).parent().siblings('.person-email').html('<input type="text" id="person-email-new" value="'+email+'">');
-
-
-            //$(this).siblings('.noteContent').html('<textarea id="noteContentNew" name="noteContent" rows="4" cols="50">'+content+'</textarea>');
+            $row.find('.person-name').html('<input type="text" id="person-name-new" value="'+name+'">');
+            $row.find('.person-email').html('<input type="text" id="person-email-new" value="'+email+'">');
 
             $(this).hide();
-            $(this).siblings('.fa-check').show();
+            $row.find('.fa-check').show();
 
         });
 
-        $('.panel-contactpersons').on('click', '.fa-check', function (e) {
+        $(document).on('click', '[data-personid].fa-check', function (e) {
             e.preventDefault();
-            //if (window.confirm("Remove Note?")) {
 
             var personID = $(this).data().personid;
             var personName = $("#person-name-new").val();
@@ -1365,7 +1414,6 @@
                 }
 
             });
-            //}
         });
 
         $("#addNote .btn-submit").click(function () {
@@ -1798,7 +1846,7 @@
             `);
         });
 
-        $('.panel-body').on('click', '.saveArchiveNumber', function(){
+        $(document).on('click', '.saveArchiveNumber', function(){
 
             var fileId = $(this).data('fileid');
 
@@ -1818,7 +1866,7 @@
             });
         });
 
-        $('.panel-body').on('click', '.saveServiceDetails', function(){
+        $(document).on('click', '.saveServiceDetails', function(){
 
             if(!$("#responsible_user").val()){
                 $("#searchUser").css('border', '3px solid red');
@@ -1937,7 +1985,7 @@
             }
 
 
-            $('.panel-details .panel-body').html(`<form action="{{ route('orders.update',$order->id) }}" method="POST">@csrf @method('PUT')<table class="table">
+            $('.card-body').first().html(`<form action="{{ route('orders.update',$order->id) }}" method="POST">@csrf @method('PUT')<table class="table">
             <tbody><tr>
                      <td style="width:50%"><strong>Responsible User:</strong></td>
                     <td>
@@ -1965,7 +2013,7 @@
                 </tbody></table></form>`);
 
             if(currentPerson){
-                $('.panel-details .panel-body table tr:first').before(`
+                $('.card-body').first().find('table tbody tr:first').before(`
                 <tr>
                      <td style="width:50%"><strong>Person:</strong></td>
                     <td>`+currentPerson+`</td>
@@ -1974,7 +2022,7 @@
             }
 
             if(currentCompany){
-                $('.panel-details .panel-body table tr:first').before(`
+                $('.card-body').first().find('table tbody tr:first').before(`
                 <tr>
                      <td style="width:50%"><strong>Company:</strong></td>
                     <td>`+currentCompany+`</td>
@@ -2003,7 +2051,7 @@
                 var paidDateInput = '<input type="text" name="paid_date" id="paid_date_edit">';
             }
 
-            $('.panel-details .panel-body table tr:last').after(`
+            $('.card-body').first().find('table tbody tr:last').after(`
             <tr>
                 <td style="width:50%"><strong>Paid Date:</strong></td>
                 <td>`+paidDateInput+`
@@ -2030,7 +2078,7 @@
 
         });
 
-        $('.panel-details').on('click', '.panel-heading__button .saveDetails', function(){
+        $(document).on('click', '.saveDetails', function(){
             var responsible_user = $("#responsible_user").val();
             var status = $("#status").val();
             var payment_status = $("#payment_status").val();
@@ -2063,13 +2111,13 @@
 
             $('.saveNotes').show();
 
-            var currentNotes = $('.panel-notes .panel-body').html();
+            var currentNotes = $('.card-body').eq(1).html();
 
-            $('.panel-notes .panel-body').html('<textarea cols="60" rows="5" id="notes" name="notes">' + $.trim(currentNotes) + '</textarea>');
+            $('.card-body').eq(1).html('<textarea cols="60" rows="5" id="notes" name="notes">' + $.trim(currentNotes) + '</textarea>');
 
         });
 
-        $('.panel-notes').on('click', '.panel-heading__button .saveNotes', function(){
+        $(document).on('click', '.saveNotes', function(){
             var notesVal = $('#notes').val();
 
             var order_id = $("#orderID").val();
@@ -2128,17 +2176,6 @@
             @endif
         });
 
-            }); // end $(document).ready
-
-            } // end initOrderShowMain
-
-            // Start initialization
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initOrderShowMain);
-            } else {
-                initOrderShowMain();
-            }
-        })();
     </script>
 
 @endsection

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Settings;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class SettingsSeeder extends Seeder
 {
@@ -14,12 +14,12 @@ class SettingsSeeder extends Seeder
      */
     public function run()
     {
-        Settings::create([
+        DB::table('settings')->insert([
             'key' => 'Company Name',
-            'value' => 'CRM',
+            'value' => 'Sandis CRM',
         ]);
 
-        Settings::create([
+        DB::table('settings')->insert([
             'key' => 'Next_Invoice_no',
             'value' => '1',
         ]);

@@ -1,86 +1,114 @@
 @extends('layouts.app')
 
 @section('content')
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
-    <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12">
-            <h1><i class="fa-solid fa-user-tie"></i><input type="text" id="insertedName" placeholder="Name"></h1>
-        </div>
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
+@endif
 
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 style="font-size: 2rem; font-weight: 700; color: #1f2937; margin-bottom: 2rem;">
+            <i class="fa-solid fa-user-tie" style="color: #DC2626; margin-right: 0.5rem;"></i> Create New User
+        </h1>
+    </div>
+</div>
 
-    <div class="row">
-        <div class="col">
-            <div class="panel panel-default panel-details">
-                <div class="panel-heading">
-                    <div class="panel-heading__title">Details</div>
-                    <div class="panel-heading__button">
-
+<div class="row">
+    <div class="col-md-8">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">
+                    <i class="fa-solid fa-info-circle" style="color: #DC2626; margin-right: 0.5rem;"></i> User Details
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+                <form action="{{ route('users.store') }}" method="POST" id="userCreateForm">
+                    @csrf
+                    
+                    <div class="form-group mb-4">
+                        <label for="name" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem; display: block;">
+                            <i class="fa-solid fa-user" style="color: #DC2626; margin-right: 0.5rem;"></i> Name <span style="color: #EF4444;">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="name" 
+                               name="name" 
+                               value="{{ old('name') }}" 
+                               required
+                               placeholder="Enter user name"
+                               style="border: 1px solid #d1d5db; border-radius: 6px; padding: 0.625rem 1rem; font-size: 0.875rem; width: 100%;">
+                        @error('name')
+                            <div class="text-danger" style="font-size: 0.875rem; margin-top: 0.25rem;">{{ $message }}</div>
+                        @enderror
                     </div>
-                </div>
-                <div class="panel-body">
-                    <table class="table">
-                        <tbody><tr>
-                            <td style="width:50%"><strong>E-mail:</strong></td>
-                            <td><input type="text" id="insertedEmail" placeholder="E-mail"></td>
-                        </tr>
-                        <tr>
-                            <td style="width:50%"><strong>Password:</strong></td>
-                            <td><input type="password" id="insertedPassword" placeholder="Password"></td>
-                        </tr>
-                        <tr>
-                            <td style="width:50%"><strong>Confirm password:</strong></td>
-                            <td><input type="password" id="insertedConfirm_password" placeholder="Confirm Password"></td>
-                        </tr>
 
-                        </tbody></table>
-                </div>
+                    <div class="form-group mb-4">
+                        <label for="email" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem; display: block;">
+                            <i class="fa-solid fa-envelope" style="color: #DC2626; margin-right: 0.5rem;"></i> E-mail
+                        </label>
+                        <input type="email" 
+                               class="form-control" 
+                               id="email" 
+                               name="email" 
+                               value="{{ old('email') }}" 
+                               placeholder="Enter email address"
+                               style="border: 1px solid #d1d5db; border-radius: 6px; padding: 0.625rem 1rem; font-size: 0.875rem; width: 100%;">
+                        @error('email')
+                            <div class="text-danger" style="font-size: 0.875rem; margin-top: 0.25rem;">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="password" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem; display: block;">
+                            <i class="fa-solid fa-lock" style="color: #DC2626; margin-right: 0.5rem;"></i> Password <span style="color: #EF4444;">*</span>
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               required
+                               placeholder="Enter password"
+                               style="border: 1px solid #d1d5db; border-radius: 6px; padding: 0.625rem 1rem; font-size: 0.875rem; width: 100%;">
+                        @error('password')
+                            <div class="text-danger" style="font-size: 0.875rem; margin-top: 0.25rem;">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="confirm_password" style="font-weight: 600; color: #374151; margin-bottom: 0.5rem; display: block;">
+                            <i class="fa-solid fa-lock" style="color: #DC2626; margin-right: 0.5rem;"></i> Confirm Password <span style="color: #EF4444;">*</span>
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="confirm_password" 
+                               name="confirm_password" 
+                               required
+                               placeholder="Confirm password"
+                               style="border: 1px solid #d1d5db; border-radius: 6px; padding: 0.625rem 1rem; font-size: 0.875rem; width: 100%;">
+                        @error('confirm_password')
+                            <div class="text-danger" style="font-size: 0.875rem; margin-top: 0.25rem;">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-primary" style="background-color: #DC2626; border-color: #DC2626; padding: 0.625rem 1.5rem; font-weight: 600; border-radius: 6px;">
+                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Create User
+                        </button>
+                        <a href="{{ route('users.index') }}" class="btn btn-secondary" style="margin-left: 0.5rem; padding: 0.625rem 1.5rem; font-weight: 600; border-radius: 6px; background-color: #6B7280; border-color: #6B7280;">
+                            <i class="fa-solid fa-times" style="margin-right: 0.5rem;"></i> Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
-
     </div>
+</div>
 
-    <form id="addNewPerson" action="{{ route('users.store') }}" method="POST">
-        @csrf
-        <input type="hidden" name="name" id="name">
-        <input type="hidden" name="email" id="email">
-        <input type="hidden" name="password" id="password">
-        <input type="hidden" name="confirm_password" id="confirm_password">
-    </form>
-
-    <button type="button" class="btn saveNewUser" style="margin-top: 50px;">
-        <i class="fa-solid fa-check"></i>Add
-    </button>
-
-
-    <script type="text/javascript">
-        function printErrorMsg(msg) {
-            $(".print-error-msg").find("ul").html('');
-            $(".print-error-msg").css('display', 'block');
-            $.each(msg, function (key, value) {
-                $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
-            });
-        }
-
-        $('.saveNewUser').on('click', function(){
-
-            $('#name').val($('#insertedName').val());
-            $('#email').val($('#insertedEmail').val());
-            $('#password').val($('#insertedPassword').val());
-            $('#confirm_password').val($('#insertedConfirm_password').val());
-
-            $('#addNewPerson').submit();
-        });
-
-
-    </script>
 @endsection

@@ -10,6 +10,8 @@ use App\Models\Person;
 use App\Models\Settings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class InvoiceController extends Controller
@@ -24,29 +26,59 @@ class InvoiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $invoices = Invoice::where('is_proforma', false)->latest()->paginate(10);
-        $type = 'all';
+        $query = Invoice::where('is_proforma', false)->with(['order.company', 'order.person']);
 
-        return view('invoices.index',compact('invoices', 'type'))
+        // Text search
+        $search = $request->get('search', '');
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('number', 'LIKE', '%' . $search . '%')
+                  ->orWhere('payer_name', 'LIKE', '%' . $search . '%')
+                  ->orWhereHas('order', function($q) use ($search) {
+                      $q->where('name', 'LIKE', '%' . $search . '%')
+                        ->orWhereHas('company', function($q) use ($search) {
+                            $q->where('name', 'LIKE', '%' . $search . '%');
+                        })
+                        ->orWhereHas('person', function($q) use ($search) {
+                            $q->where('name', 'LIKE', '%' . $search . '%');
+                        });
+                  });
+            });
+        }
+
+        // Type filter (all, paid, unpaid)
+        $type = $request->get('type', 'all');
+        if ($type === 'paid') {
+            $query->whereNotNull('payment_date');
+        } elseif ($type === 'unpaid') {
+            $query->whereNull('payment_date');
+        }
+
+        $invoices = $query->latest()->paginate(10)->appends(request()->query());
+
+        // If AJAX request, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            return response()->json([
+                'html' => view('invoices.partials.table', compact('invoices'))->render(),
+                'pagination' => view('invoices.partials.pagination', compact('invoices'))->render(),
+                'total' => $invoices->total()
+            ]);
+        }
+
+        return view('invoices.index', compact('invoices', 'type'))
             ->with('i', (request()->input('page', 1) - 1) * 10);
     }
 
-    public function paidInvoices(){
-        $invoices = Invoice::where('is_proforma', false)->whereNotNull('payment_date')->latest()->paginate(10);
-        $type = 'paid';
-
-        return view('invoices.index',compact('invoices', 'type'))
-            ->with('i', (request()->input('page', 1) - 1) * 10);
+    public function paidInvoices(Request $request){
+        $request->merge(['type' => 'paid']);
+        return $this->index($request);
     }
 
-    public function unpaidInvoices(){
-        $invoices = Invoice::where('is_proforma', false)->whereNull('payment_date')->latest()->paginate(10);
-        $type = 'unpaid';
-
-        return view('invoices.index',compact('invoices', 'type'))
-            ->with('i', (request()->input('page', 1) - 1) * 10);
+    public function unpaidInvoices(Request $request){
+        $request->merge(['type' => 'unpaid']);
+        return $this->index($request);
     }
 
     /**
@@ -67,41 +99,82 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'issue_date' => 'required|date',
-            'payment_date' => 'required|date',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'issue_date' => 'required|date',
+                'payment_date' => 'required|date',
+            ]);
 
 
-        if($request->is_proforma){
-            $today = date('Ymd');
-            $count = Invoice::where('number', 'LIKE', $today . '%')->count();
+            if($request->is_proforma){
+                // Use parameterized query to prevent SQL injection
+                $datePrefix = date('Ymd');
+                $count = Invoice::where('number', 'LIKE', $datePrefix . '%')->count();
 
-            $nextInvoiceNo = '000';
-            if($count > 0){
-                $next = $count+1;
-                $nextInvoiceNo = sprintf("%03d", $next);
+                $nextInvoiceNo = '000';
+                if($count > 0){
+                    $next = $count+1;
+                    $nextInvoiceNo = sprintf("%03d", $next);
+                }
+
+                // Only allow fillable fields to prevent mass assignment vulnerability
+                $invoiceData = $request->only([
+                    'service_id', 'order_id', 'issue_date', 'payment_date', 'vat', 
+                    'vat_no', 'status', 'vat_comment', 'is_proforma', 'registry_code', 
+                    'payer_name', 'street', 'city', 'zip', 'country'
+                ]);
+                $invoiceData['number'] = date('Ymd') . $nextInvoiceNo;
+
+                $invoice = Invoice::create($invoiceData);
+
+                // Generate PDF asynchronously to avoid blocking the response
+                $this->savePDFAsync($invoice->id, $request->order_id, $invoiceData);
+            } else {
+
+                $currentOrder = Order::find($request->order_id);
+                if(!$currentOrder){
+                    throw new \Exception('Order not found');
+                }
+                $invoiceNo = $currentOrder->number;
+                // Only allow fillable fields to prevent mass assignment vulnerability
+                $invoiceData = $request->only([
+                    'service_id', 'order_id', 'issue_date', 'payment_date', 'vat', 
+                    'vat_no', 'status', 'vat_comment', 'is_proforma', 'registry_code', 
+                    'payer_name', 'street', 'city', 'zip', 'country'
+                ]);
+                $invoiceData['number'] = $invoiceNo;
+                
+                $invoice = Invoice::create($invoiceData);
+
+                // Generate PDF asynchronously to avoid blocking the response
+                $this->savePDFAsync($invoice->id, $request->order_id, $invoiceData);
             }
 
-            $newArray = array_merge($request->all(), array('number' => date('Ymd').$nextInvoiceNo));
+            // If AJAX request, return JSON response immediately (PDF generation happens in background)
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'error' => []  // Empty error object indicates success (matches frontend expectation)
+                ]);
+            }
 
-            $invoice = Invoice::create($newArray);
+            return redirect()->route('invoices.index')
+                ->with('success','Invoice created successfully.');
 
-            $this->savePDF($invoice->id, $request->order_id, $request->all());
-        } else {
+        } catch (\Exception $e) {
+            // If AJAX request, return JSON error response
+            if ($request->ajax() || $request->wantsJson()) {
+                Log::error('Invoice creation error: ' . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString()
+                ]);
+                return response()->json([
+                    'error' => ['message' => $e->getMessage()]
+                ], 500);
+            }
 
-            $currentOrder = Order::find($request->order_id);
-            $invoiceNo = $currentOrder->number;
-            $InvoiceData = array_merge($request->all(), array('number' => $invoiceNo));
-            //dd($request);
-            $invoice = Invoice::create($InvoiceData);
-
-            $this->savePDF($invoice->id, $request->order_id, $InvoiceData);
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
         }
-
-        return redirect()->route('invoices.index')
-            ->with('success','Invoice created successfully.');
-
     }
 
     /**
@@ -342,10 +415,6 @@ class InvoiceController extends Controller
 
         $servicesModel = $orderModel->services;
 
-        //dd($servicesModel);
-
-
-
         $services = array();
 
         foreach($servicesModel as $service){
@@ -385,66 +454,76 @@ class InvoiceController extends Controller
     }
 
     private function savePDF($id, $orderId, $invoiceData = array()){
-        //dd($invoiceData);
-        $invoice = Invoice::findOrFail($id)->toArray();
-        $order = Order::findOrFail($invoice['order_id'])->toArray();
-        $settings = Settings::all()->keyBy('key')->toArray();
-
-        if(isset($order['company_id'])){
-            $company = Company::findOrFail($order['company_id'])->toArray();
+        // Optimize: Fetch order once with relationships
+        $orderModel = Order::with('services')->findOrFail($orderId);
+        
+        if(!$orderModel){
+            throw new \Exception('Order not found');
         }
 
-        if(isset($order['person_id'])){
-            $company = Person::findOrFail($order['person_id'])->toArray();
+        $invoice = Invoice::findOrFail($id);
+        $invoiceArray = $invoice->toArray();
+        
+        // Cache settings to avoid repeated queries
+        $settings = Cache::remember('settings_all', 3600, function() {
+            return Settings::all()->keyBy('key')->toArray();
+        });
+
+        $company = null;
+        if($orderModel->company_id){
+            $company = Company::findOrFail($orderModel->company_id)->toArray();
+        } elseif($orderModel->person_id){
+            $company = Person::findOrFail($orderModel->person_id)->toArray();
         }
 
-        $orderModel = Order::findOrFail($invoice['order_id']);
+        if($company === null){
+            throw new \Exception('Order must have either a company_id or person_id');
+        }
 
         $servicesModel = $orderModel->services;
 
         //dd($servicesModel);
 
-        $services = array();
+        $services = [];
+        $totals = ['sum' => 0];
 
+        // Optimize: Calculate totals in single loop
         foreach($servicesModel as $service){
-            $services[] = array_merge($service->toArray());
+            $serviceArray = $service->toArray();
+            $services[] = $serviceArray;
+            
+            // Get cost from pivot if available, otherwise from service
+            $cost = $service->pivot->cost ?? $service->cost ?? 0;
+            $totals['sum'] += (float) $cost;
         }
 
-
-
-        $totals = array('sum' => 0);
-
-        foreach ($services as $service){
-            if(isset($service['pivot']) && isset($service['pivot']['cost'])){
-                $totals['sum'] += $service['pivot']['cost'];
-            } else {
-                $totals['sum'] += $service['cost'];
-            }
-        }
-
-        //dd($services);
-
-        if($invoice['vat'] == 22){
-            $totals['sumwithvat'] = $totals['sum']*1.22;
-        } else if($invoice['vat'] == 0){
+        // Calculate VAT totals
+        $vatRate = (float) ($invoiceArray['vat'] ?? 0);
+        if($vatRate == 22){
+            $totals['sumwithvat'] = $totals['sum'] * 1.22;
+        } else if($vatRate == 20){
+            $totals['sumwithvat'] = $totals['sum'] * 1.2;
+        } else if($vatRate == 24){
+            $totals['sumwithvat'] = $totals['sum'] * 1.24;
+        } else {
             $totals['sumwithvat'] = $totals['sum'];
-        } else if($invoice['vat'] == 24){
-            $totals['sumwithvat'] = $totals['sum']*1.24;
         }
 
-        $invoice['issue_date'] = date('d.m.Y', strtotime($invoice['issue_date']));
-        $invoice['payment_date'] = date('d.m.Y', strtotime($invoice['payment_date']));
+        // Format dates
+        $invoiceArray['issue_date'] = date('d.m.Y', strtotime($invoiceArray['issue_date']));
+        $invoiceArray['payment_date'] = date('d.m.Y', strtotime($invoiceArray['payment_date']));
 
         $totals['vat'] = $totals['sumwithvat'] - $totals['sum'];
 
+        // Format totals
         $totals['sumwithvat'] = sprintf("%01.2f", $totals['sumwithvat']);
         $totals['vat'] = sprintf("%01.2f", $totals['vat']);
         $totals['sum'] = sprintf("%01.2f", $totals['sum']);
 
         $data = array(
-            'invoice' => $invoice,
+            'invoice' => $invoiceArray,
             'settings' => $settings,
-            'order' => $order,
+            'order' => $orderModel->toArray(),
             'company' => $company,
             'services' => $services,
             'totals' => $totals,
@@ -453,31 +532,50 @@ class InvoiceController extends Controller
 
         view()->share('data',$data);
 
-        if($invoiceData['invoicecompany'] == 'corptailor'){
-            //dd($data);
-            $pdf = PDF::loadView('pdf.special', $data);
-        }
-        else if($invoice['is_proforma']){
-            $pdf = PDF::loadView('pdf.wisor-offer', $data);
-        } else {
-            $pdf = PDF::loadView('pdf.wisorgroup', $data);
+        // Determine PDF template
+        $template = 'pdf.wisorgroup';
+        if(isset($invoiceData['invoicecompany']) && $invoiceData['invoicecompany'] == 'corptailor'){
+            $template = 'pdf.special';
+        } else if($invoiceArray['is_proforma']){
+            $template = 'pdf.wisor-offer';
         }
 
-        $content = $pdf->download()->getOriginalContent();
+        // Generate PDF
+        $pdf = PDF::loadView($template, $data);
+        $content = $pdf->output();
+
+        // Save file record
+        $invoiceNumber = $invoiceArray['number'];
+        $fileName = ($invoiceArray['is_proforma'] ? 'priceoffer-' : 'invoice-') . $invoiceNumber . '.pdf';
+        $filePath = 'public/files/' . $fileName;
 
         $file = new File;
-        $invoiceNumber = $invoice['number'];
-        if($invoice['is_proforma']){
-            $file->name = 'priceoffer-'.$invoiceNumber.'.pdf';
-        }else {
-            $file->name = 'invoice-'.$invoiceNumber.'.pdf';
-        }
-
-        $file->path = 'public/files/'.$file->name;
+        $file->name = $fileName;
+        $file->path = $filePath;
         $file->order_id = $orderId;
         $file->save();
 
-        Storage::put('public/files/'.$file->name,$content) ;
+        // Store PDF file
+        Storage::put($filePath, $content);
+    }
+
+    /**
+     * Generate PDF asynchronously using dispatch to avoid blocking the request
+     */
+    private function savePDFAsync($id, $orderId, $invoiceData = array()){
+        // Use dispatch to run PDF generation in background
+        // This prevents blocking the HTTP response
+        dispatch(function() use ($id, $orderId, $invoiceData) {
+            try {
+                $this->savePDF($id, $orderId, $invoiceData);
+            } catch (\Exception $e) {
+                Log::error('PDF generation failed: ' . $e->getMessage(), [
+                    'invoice_id' => $id,
+                    'order_id' => $orderId,
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        })->afterResponse();
     }
 
     // Generate PDF from Invoice

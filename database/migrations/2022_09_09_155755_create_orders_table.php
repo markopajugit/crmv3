@@ -20,8 +20,8 @@ class CreateOrdersTable extends Migration
             $table->bigInteger('responsible_user_id')->unsigned();
             $table->bigInteger('person_id')->unsigned()->nullable();
             $table->bigInteger('company_id')->unsigned()->nullable();
-            $table->text('status')->default('Not Active');
-            $table->text('payment_status')->default('Not paid');
+            $table->string('status', 255)->default('Not Active');
+            $table->string('payment_status', 255)->default('Not paid');
             $table->text('awaiting_status')->nullable();
             //$table->bigInteger('order_contact')->unsigned()->nullable();
             $table->boolean('notification_sent')->default(false);
@@ -32,18 +32,15 @@ class CreateOrdersTable extends Migration
 
             $table->foreign('responsible_user_id')
                 ->references('id')
-                ->on('users')
-                ->onDelete('cascade');
+                ->on('users');
 
             $table->foreign('person_id')
                 ->references('id')
-                ->on('persons')
-                ->onDelete('cascade');
+                ->on('persons');
 
             $table->foreign('company_id')
                 ->references('id')
-                ->on('companies')
-                ->onDelete('cascade');
+                ->on('companies');
 
         });
 

@@ -23,13 +23,11 @@ class CreateOrderServicesTable extends Migration
 
             $table->foreign('order_id')
                 ->references('id')
-                ->on('orders')
-                ->onDelete('cascade');
+                ->on('orders');
 
             $table->foreign('service_id')
                 ->references('id')
-                ->on('services')
-                ->onDelete('cascade');
+                ->on('services');
         });
     }
 

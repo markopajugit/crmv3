@@ -1,60 +1,138 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="row mb-4">
-        <div class="col-6 col-sm-3"><h1>Services</h1></div>
-        <div class="col-6 col-sm-3 m-2"><a class="btn btn-success" href="{{ route('services.create') }}"> Create New Service</a></div>
-    </div>
 
-    <div class="accordion" id="dynamic-accordion">
-        @foreach($service_categories as $category)
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="heading-{{$category->id}}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{$category->id}}" aria-expanded="false" aria-controls="collapse-{{$category->id}}">
-                        {{$category->name}}
-                    </button>
-                </h2>
-                <div id="collapse-{{$category->id}}" class="accordion-collapse collapse" aria-labelledby="heading-{{$category->id}}" data-bs-parent="#dynamic-accordion">
-                    <div class="accordion-body">
-                        @foreach ($category->services as $service)
-                            <a style="margin-bottom:5px;" href="/services/{{ $service->id }}">{{ $service->name }} <span style="float:right;">{{ $service->cost }}eur</span>
-                                @if($service->type == 'Reaccuring')
-                                    Reaccuring - {{ $service->reaccuring_frequency }}mo
-                                @endif
-                            </a><br>
-                        @endforeach
+@include('partials.success-alert')
+
+<!-- Two Column Layout -->
+<div class="row">
+    <!-- Services Section - Left Column -->
+    <div class="col-md-6 mb-4">
+        @include('partials.index-header', [
+            'title' => 'Services',
+            'icon' => 'fa-cog',
+            'count' => $services->total(),
+            'countId' => 'servicesCount',
+            'singular' => 'service',
+            'plural' => 'services',
+            'createRoute' => 'services.create',
+            'createButtonText' => 'New Service'
+        ])
+
+        @include('partials.search-bar', [
+            'searchInputId' => 'serviceSearch',
+            'placeholder' => 'Search by service name, cost, type, or category...'
+        ])
+
+        <!-- Services Table -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0" style="width: 100%; margin-bottom: 0;">
+                            <thead style="background-color: #f9fafb;">
+                                <tr>
+                                    <th style="padding: 0.75rem 0.875rem; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                        <i class="fa-solid fa-tag" style="color: #DC2626; margin-right: 0.5rem;"></i> Name
+                                    </th>
+                                    <th style="padding: 0.75rem 0.875rem; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                        <i class="fa-solid fa-euro-sign" style="color: #DC2626; margin-right: 0.5rem;"></i> Cost
+                                    </th>
+                                    <th style="padding: 0.75rem 0.875rem; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                        <i class="fa-solid fa-sync" style="color: #DC2626; margin-right: 0.5rem;"></i> Type
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="servicesTableBody" style="background-color: #ffffff;">
+                                @include('services.partials.services-table')
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        @endforeach
+        </div>
+
+        @include('partials.index-pagination', [
+            'paginator' => $services,
+            'paginationId' => 'servicesPagination'
+        ])
     </div>
 
+    <!-- Service Categories Section - Right Column -->
+    <div class="col-md-6 mb-4">
+        @include('partials.index-header', [
+            'title' => 'Service Categories',
+            'icon' => 'fa-folder',
+            'count' => $service_categories->total(),
+            'countId' => 'categoriesCount',
+            'singular' => 'category',
+            'plural' => 'categories',
+            'createRoute' => 'createCategory',
+            'createButtonText' => 'New Category'
+        ])
 
-    <div class="row mb-4" style="padding-top: 20px;">
-        <div class="col-6 col-sm-3"><h1>Service Categories</h1></div>
-        <div class="col-6 col-sm-3 m-2"><a class="btn btn-success" href="{{ route('createCategory') }}"> Create New Service Category</a></div>
+        @include('partials.search-bar', [
+            'searchInputId' => 'categorySearch',
+            'placeholder' => 'Search by category name...'
+        ])
+
+        <!-- Service Categories Table -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0" style="width: 100%; margin-bottom: 0;">
+                            <thead style="background-color: #f9fafb;">
+                                <tr>
+                                    <th style="padding: 0.75rem 0.875rem; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                        <i class="fa-solid fa-folder" style="color: #DC2626; margin-right: 0.5rem;"></i> Name
+                                    </th>
+                                    <th style="padding: 0.75rem 0.875rem; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                        <i class="fa-solid fa-list" style="color: #DC2626; margin-right: 0.5rem;"></i> Count
+                                    </th>
+                                    <th style="padding: 0.75rem 0.875rem; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                        <i class="fa-solid fa-calendar" style="color: #DC2626; margin-right: 0.5rem;"></i> Created
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoriesTableBody" style="background-color: #ffffff;">
+                                @include('services.partials.categories-table')
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @include('partials.index-pagination', [
+            'paginator' => $service_categories,
+            'paginationId' => 'categoriesPagination'
+        ])
     </div>
-    <table class="table table-hover">
-        <tr>
-            <th>Name</th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-        </tr>
-        @foreach ($service_categories as $service)
-            <tr class="clickable" onclick="window.location='/services/category/{{ $service->id }}';">
-                <td>{{ $service->name }}</td>
-                <td>{{ $service->type }}</td>
-                <td>@if($service->type == 'Reaccuring')
-                        {{ $service->reaccuring_frequency }} months
-                    @endif</td>
-                <td>{{ $service->cost }}</td>
-                <td></td>
-            </tr>
-        @endforeach
-    </table>
-
-
+</div>
 
 @endsection
+
+@push('scripts')
+@include('partials.index-styles', [
+    'searchInputId' => 'serviceSearch',
+    'paginationId' => 'servicesPagination'
+])
+
+@include('partials.index-styles', [
+    'searchInputId' => 'categorySearch',
+    'paginationId' => 'categoriesPagination'
+])
+
+@include('partials.index-scripts-services', [
+    'serviceSearchInputId' => 'serviceSearch',
+    'serviceTableBodyId' => 'servicesTableBody',
+    'servicePaginationId' => 'servicesPagination',
+    'serviceCountId' => 'servicesCount',
+    'categorySearchInputId' => 'categorySearch',
+    'categoryTableBodyId' => 'categoriesTableBody',
+    'categoryPaginationId' => 'categoriesPagination',
+    'categoryCountId' => 'categoriesCount',
+    'indexRoute' => 'services.index'
+])
+@endpush

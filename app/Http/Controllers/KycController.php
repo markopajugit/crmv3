@@ -10,6 +10,11 @@ use App\Models\User;
 
 class KycController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Store a newly created KYC record.
      */

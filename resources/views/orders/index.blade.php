@@ -1,90 +1,89 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="row mb-4">
-        <div class="col-6 col-sm-3"><h1>Orders</h1></div>
-        <!--<div class="col-6 col-sm-3 m-2"><a class="btn btn-success" href="{{ route('companies.create') }}" style="color:white;"> Create New Company</a></div>-->
-    </div>
 
-    @if ($message = Session::get('success'))
-        <div class="alert alert-success">
-            <p>{{ $message }}</p>
+@include('partials.index-header', [
+    'title' => 'Orders',
+    'icon' => 'fa-shopping-cart',
+    'count' => $orders->total(),
+    'countId' => 'ordersCount',
+    'singular' => 'order',
+    'plural' => 'orders',
+    'createRoute' => 'orders.create',
+    'createButtonText' => 'New Order'
+])
+
+@include('partials.success-alert')
+
+@include('partials.search-bar-orders', [
+    'searchInputId' => 'orderSearch',
+    'placeholder' => 'Search by order number, name, company, person...',
+    'users' => $users,
+    'currentResponsible' => request('responsible', 'all'),
+    'currentStatus' => request('status', 'all'),
+    'currentPaymentStatus' => request('payment_status', 'all')
+])
+
+<!-- Orders Table -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card" style="border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0" style="width: 100%; margin-bottom: 0;">
+                    <thead style="background-color: #f9fafb;">
+                        <tr>
+                            <th style="width: 10%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-hashtag" style="color: #DC2626; margin-right: 0.5rem;"></i> No
+                            </th>
+                            <th style="width: 20%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-building" style="color: #DC2626; margin-right: 0.5rem;"></i> Company
+                            </th>
+                            <th style="width: 20%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-file-invoice" style="color: #DC2626; margin-right: 0.5rem;"></i> Name
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-info-circle" style="color: #DC2626; margin-right: 0.5rem;"></i> Status
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-credit-card" style="color: #DC2626; margin-right: 0.5rem;"></i> Payment Status
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-euro-sign" style="color: #DC2626; margin-right: 0.5rem;"></i> Services Cost
+                            </th>
+                            <th style="width: 15%; padding: 1rem 1.25rem; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6B7280; border-bottom: 2px solid #e5e7eb;">
+                                <i class="fa-solid fa-user-tie" style="color: #DC2626; margin-right: 0.5rem;"></i> Responsible
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody" style="background-color: #ffffff;">
+                        @include('orders.partials.table')
+                    </tbody>
+                </table>
+            </div>
         </div>
-    @endif
-
-    <div class="filters">
-        <h3>Filter by</h3>
-        <form action="/orders">
-            <label for="responsible">Responsible:</label>
-            <select name="responsible" id="responsible">
-                <option value="all" {{ request('responsible') == 'all' ? 'selected' : '' }}>All</option>
-                <option value="2" {{ request('responsible') == '2' ? 'selected' : '' }}>Merle</option>
-                <option value="3" {{ request('responsible') == '3' ? 'selected' : '' }}>Kristine</option>
-                <option value="4" {{ request('responsible') == '4' ? 'selected' : '' }}>Armine</option>
-                <option value="6" {{ request('responsible') == '6' ? 'selected' : '' }}>Maria</option>
-                <option value="7" {{ request('responsible') == '7' ? 'selected' : '' }}>Raili</option>
-            </select>
-
-            <label for="status">Status:</label>
-            <select name="status" id="status">
-                <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All</option>
-                <option value="Finished" {{ request('status') == 'Finished' ? 'selected' : '' }}>Finished</option>
-                <!--<option value="In progress" {{ request('status') == 'In progress' ? 'selected' : '' }}>In progress</option>-->
-                <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
-                <option value="Not Active" {{ request('status') == 'Not Active' ? 'selected' : '' }}>Not Active</option>
-                <option value="Cancelled" {{ request('status') == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                <option value="not started" {{ request('status') == 'not started' ? 'selected' : '' }}>Not Started</option>
-            </select>
-
-            <label for="payment_status">Payment status:</label>
-            <select name="payment_status" id="payment_status">
-                <option value="all" {{ request('payment_status') == 'all' ? 'selected' : '' }}>All</option>
-                <option value="Paid" {{ request('payment_status') == 'Paid' ? 'selected' : '' }}>Paid</option>
-                <option value="Partially paid" {{ request('payment_status') == 'Partially paid' ? 'selected' : '' }}>Partially paid</option>
-                <option value="Not Paid" {{ request('payment_status') == 'Not Paid' ? 'selected' : '' }}>Not paid</option>
-            </select>
-
-            <button type="submit">Show</button>
-        </form>
     </div>
+</div>
 
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th>No</th>
-            <th>Company</th>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Payment status</th>
-            <th>Services Cost</th>
-            <th>Responsible</th>
-            <!--<th>Description</th>-->
-        </tr>
-        </thead>
-        <tbody>
-        @foreach ($orders as $order)
-            @php
-                $servicesTotalCost = 0;
-            @endphp
-            @foreach ($order->orderServices as $service)
-                @php
-                    $servicesTotalCost = $servicesTotalCost + $service->cost;
-                @endphp
-            @endforeach
-            <tr class="clickable" onclick="window.location='/orders/{{ $order->id }}';">
-                <td>{{ $order->number }}</td>
-                <td>{{ $order->company->name ?? $order->person->name . ' (Person)' }}</td>
-                <td>{{ $order->name }}</td>
-                <td @if($order->status == 'Active') style="color: #ffd700; font-weight: bold;" @elseif($order->status == 'Not Active') style="color: #ffffff; font-weight: bold;" @elseif($order->status == 'Finished') style="color: #00ff88; font-weight: bold;" @endif>{{ $order->status }}</td>
-                <td @if($order->payment_status == 'Partially Paid') style="color: #ffd700; font-weight: bold;" @elseif($order->payment_status == 'Not Paid') style="color: #ffffff; font-weight: bold;" @elseif($order->payment_status == 'Paid') style="color: #00ff88; font-weight: bold;" @endif>{{ $order->payment_status }}</td>
-                <!--<td @if($order->awaiting_status == 'Waiting action from us') style="color: red" @elseif($order->awaiting_status == 'Waiting action from Client') style="color: green" @else style="color: darkgoldenrod" @endif>{{ $order->awaiting_status }}</td>-->
-                <td>{{ $servicesTotalCost }} EUR</td>
-                <td><i class="fa-solid fa-user-tie"></i>{{ $order->responsible_user->name }}</td>
-                <!--<td>{{ $order->description }}</td>-->
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
+@include('partials.index-pagination', [
+    'paginator' => $orders,
+    'paginationId' => 'ordersPagination'
+])
 
-    {{ $orders->onEachSide(5)->links() }}
 @endsection
+
+@push('scripts')
+@include('partials.index-styles', [
+    'searchInputId' => 'orderSearch',
+    'paginationId' => 'ordersPagination'
+])
+
+@include('partials.index-scripts-orders', [
+    'searchInputId' => 'orderSearch',
+    'tableBodyId' => 'ordersTableBody',
+    'paginationId' => 'ordersPagination',
+    'indexRoute' => 'orders.index',
+    'countId' => 'ordersCount',
+    'singular' => 'order',
+    'plural' => 'orders'
+])
+@endpush
