@@ -96,7 +96,7 @@
 <body>
 <div style="margin-bottom: 20px;">
     <div style="float: left; width: 50%;">
-        <img src="{{ asset('images/wisor-logo.jpg') }}" style="width:150px;" alt="logo">
+        <img src="{{ asset('images/logo.svg') }}" style="width:150px;" alt="logo">
     </div>
     <div style="float: right; width: 50%; padding-top: 50px;">
         <p style="font-size:16px; margin-bottom: 10px;"><b>Price offer {{ $data['invoice']['number'] }}</b></p>
